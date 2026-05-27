@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "accounts",
+    "accounts.apps.AccountsConfig",
     "content",
     "dashboard",
     "interactions",
@@ -93,26 +93,26 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 
-# Database
+# Database 
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
 
 DATABASES = {
     "default": {
-        "ENGINE": config("PGDB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": config("DB_NAME", default="postgres"),
-        "USER": config("PGDB_USER", default="postgres"),
-        "PASSWORD": config("PGDB_PASS", default="postgres"),
-        "HOST": config("PGDB_HOST", default="db"),
-        "PORT": config("PGDB_PORT", cast=int, default=5432),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": config("PGDB_ENGINE", default="django.db.backends.postgresql"),
+#         "NAME": config("DB_NAME", default="postgres"),
+#         "USER": config("PGDB_USER", default="postgres"),
+#         "PASSWORD": config("PGDB_PASS", default="postgres"),
+#         "HOST": config("PGDB_HOST", default="db"),
+#         "PORT": config("PGDB_PORT", cast=int, default=5432),
+#     }
+# }
 
 
 # Password validation
