@@ -9,14 +9,15 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    restart: always
+    # restart: no
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: backend_medscript
-    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    # command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - ./core:/app
     ports:
@@ -30,9 +31,9 @@ services:
       - SECRET_KEY=test
       - DEBUG=True
       - COMINGSOON=False
-      - SHOW_DEBUGGER_TOOLBAR=True
-      - ENABLE_DEBUGPY=True
-    restart: always
+      - SHOW_DEBUGGER_TOOLBAR=False
+      - ENABLE_DEBUGPY=False
+    # restart: no
 
     # depends_on:
     #   - redis

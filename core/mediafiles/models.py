@@ -17,7 +17,7 @@ class PostFile(models.Model):
         UNDEFINED = 6, _("undefined")
 
     file = models.FileField(upload_to=post_file_upload_path, blank=True, null=True)
-    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="files")
+    post = models.ForeignKey("content.Post", on_delete=models.CASCADE, related_name="files")
     title = models.CharField(max_length=250)
     description = models.CharField(max_length=255,null=True,blank=True)
     file_type = models.IntegerField(choices=FileType.choices,default=FileType.UNDEFINED)
