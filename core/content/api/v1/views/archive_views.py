@@ -3,33 +3,31 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from ....models import Post, Category
-from ..serializers import PostSerializer, RecursiveCategorySerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
+from content.models import Category,Post
+from ..serializers.archive_serializers import CategoryNavigationSerializer
 
-def get_descendant_ids(category):
-    ids = [category.id]
-    for child in category.children.all():
-        ids.extend(get_descendant_ids(child))
-    return ids
+class CategoryNavigationView(APIView):
+    def get(self, request, *args, **kwargs):
+        parent_path = request.query_params.get("parent_path")
 
-class CategoryListApiView(ListAPIView):
-    serializer_class = RecursiveCategorySerializer
+        if parent_path:
+            parent = get_object_or_404(Category, path=parent_path)
+            categories = Category.objects.filter(parent=parent).prefetch_related("children")
+            current_category = CategoryNavigationSerializer(parent, context={"request": request}).data
+        else:
+            categories = Category.objects.filter(level=1, parent__isnull=True).prefetch_related("children")
+            current_category = None
 
-    def get_queryset(self):
-        return Category.objects.filter(parent__isnull=True).prefetch_related("children__children")
-    
+        serializer = CategoryNavigationSerializer(
+            categories,
+            many=True,
+            context={"request": request},
+        )
 
-class ArchivePostListApiView(ListAPIView):
-    serializer_class = PostSerializer
-
-    def get_queryset(self):
-        queryset = Post.objects.filter(status=True).prefetch_related("category", "tag", "files")
-        category_id = self.request.query_params.get("category")
-
-        if category_id:
-            category = get_object_or_404(Category, id=category_id)
-            ids = get_descendant_ids(category)
-            queryset = queryset.filter(category__id__in=ids).distinct()
-
-        return queryset.order_by("-published_date")
+        return Response({
+            "current_category": current_category,
+            "results": serializer.data,
+        })

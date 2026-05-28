@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
-import uuid
 # Create your models here.
 
 
@@ -12,7 +11,6 @@ class Comment(models.Model):
         APPROVED = 2, _("approved")
         REJECTED = 3, _("rejected")
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     post = models.ForeignKey(
         "content.Post",
         on_delete=models.CASCADE,

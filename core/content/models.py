@@ -7,7 +7,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 from slugify import slugify
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-import uuid
 from django.utils import timezone
 # Create your models here.
 
@@ -21,7 +20,6 @@ class Post(models.Model):
         DRAFT = 1, _("draft")
         PUBLISHED = 2, _("published")
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     author = models.ForeignKey(
         "accounts.Profile",
         on_delete=models.SET_NULL,

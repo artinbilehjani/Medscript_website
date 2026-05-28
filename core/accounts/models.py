@@ -7,7 +7,6 @@ from django.contrib.auth.models import (
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import uuid
 # Create your models here.
 
 
@@ -52,8 +51,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         CUSTOMER = 1, _("customer")
         ADMIN = 2, _("admin")
 
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(verbose_name='username',max_length=50, unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -92,7 +89,6 @@ class Position(models.Model):
     
 
 class Profile(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="profile")
     display_name = models.CharField(max_length=50)
     image = models.ImageField(upload_to='images/profile_pictures/', default='images/default_images/blank_profile_picture.png')

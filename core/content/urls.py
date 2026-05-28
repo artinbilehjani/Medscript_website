@@ -1,3 +1,7 @@
-from django.urls import path
+from django.urls import path, include
 
-urlpatterns = []
+app_name = "content"
+
+urlpatterns = [
+    path("", include("content.api.v1.urls")),
+]
