@@ -17,6 +17,7 @@ django-debug-toolbar
 drf-yasg[validation]
 djoser
 django-hitcount
+python-slugify
 
 # deployment module
 gunicorn

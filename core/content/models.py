@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 from hitcount.models import HitCount,HitCountMixin
 from django.contrib.contenttypes.fields import GenericRelation
-from django.utils.text import slugify
+from slugify import slugify
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 import uuid
@@ -51,7 +51,7 @@ class Post(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     published_date = models.DateField(default=timezone.now)
-    slug = models.SlugField(editable=False, unique=True, max_length=255)
+    slug = models.SlugField(editable=False, unique=True, max_length=255,allow_unicode=True)
 
     class Meta:
         ordering = ['-published_date']
@@ -95,7 +95,7 @@ class Category(models.Model):
     """Category Hierarchy"""
 
     name = models.CharField(max_length=50, unique=True)
-    slug = models.SlugField(unique=True, max_length=60, editable=False)
+    slug = models.SlugField(unique=True, max_length=60, editable=False, allow_unicode=True)
     parent = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -142,7 +142,7 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.name)
+            base_slug = slugify(self.name,allow_unicode=True)
             slug = base_slug
             counter = 1
             while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
@@ -161,14 +161,14 @@ class Category(models.Model):
     
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    slug = models.SlugField(unique=True, max_length=60, blank=True)
+    slug = models.SlugField(unique=True, max_length=60, blank=True,allow_unicode=True)
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.name,allow_unicode=True)
         super().save(*args, **kwargs)
     
 
