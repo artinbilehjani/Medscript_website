@@ -29,7 +29,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 class PostListSerializer(serializers.ModelSerializer):
     snippet = serializers.ReadOnlyField(source="get_snippets")
-    relative_url = serializers.CharField(source="get_absolute_api_url", read_only=True)
+    relative_api_url = serializers.CharField(source="get_absolute_api_url", read_only=True)
+    relative_url = serializers.CharField(source="get_absolute_url", read_only=True)
+    absolute_api_url = serializers.SerializerMethodField()
     absolute_url = serializers.SerializerMethodField()
     hit_count = serializers.SerializerMethodField()
     author = serializers.CharField(source="author.display_name", read_only=True)
@@ -44,7 +46,9 @@ class PostListSerializer(serializers.ModelSerializer):
             "image",
             "author",
             "snippet",
+            "absolute_api_url",
             "absolute_url",
+            "relative_api_url",
             "relative_url",
             "published_date",
             "created_date",
@@ -54,9 +58,14 @@ class PostListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
-    def get_absolute_url(self, obj):
+    def get_absolute_api_url(self, obj):
         request = self.context.get("request")
         url = obj.get_absolute_api_url()
+        return request.build_absolute_uri(url) if request else url
+    
+    def get_absolute_url(self, obj):
+        request = self.context.get("request")
+        url = obj.get_absolute_url()
         return request.build_absolute_uri(url) if request else url
 
     def get_hit_count(self, obj):

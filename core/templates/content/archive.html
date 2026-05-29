@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Archive{% endblock %}
+
+{% block content %}
+<section class="skills-section" id="skills">
+    <div class="skills-container">
+        <div class="section-header">
+            <h2 class="section-title">Categories</h2>
+            <p class="section-subtitle">Browse archive categories</p>
+        </div>
+
+        <div class="skills-hexagon-grid" id="skillsGrid"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.APP_CONFIG = {
+        categoryApiUrl: "/content/api/v1/archive/"
+    };
+</script>
+<script src="{% static 'js/archive.js' %}"></script>
+{% endblock %}

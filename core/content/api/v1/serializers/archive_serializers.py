@@ -22,26 +22,3 @@ class CategoryNavigationSerializer(serializers.ModelSerializer):
         return obj.children.exists()
 
 
-class PostListSerializer(serializers.ModelSerializer):
-    snippet = serializers.SerializerMethodField()
-    image_url = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Post
-        fields = [
-            "id",
-            "title",
-            "slug",
-            "snippet",
-            "image_url",
-            "published_date",
-        ]
-
-    def get_snippet(self, obj):
-        return obj.get_snippet()
-
-    def get_image_url(self, obj):
-        request = self.context.get("request")
-        if obj.image:
-            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
-        return None

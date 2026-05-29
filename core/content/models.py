@@ -86,8 +86,10 @@ class Post(models.Model):
         return snippet
 
     def get_absolute_api_url(self):
-        return reverse("blog:api-v1:post-detail", kwargs={"pk": self.pk})
+        return reverse("content:content_api:public-post-detail", kwargs={"slug": self.slug})
 
+    def get_absolute_url(self):
+        return reverse("content:post-detail-page", kwargs={"slug": self.slug})
 
 class Category(models.Model):
     """Category Hierarchy"""

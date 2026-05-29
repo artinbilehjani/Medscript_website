@@ -8,7 +8,7 @@ from rest_framework.permissions import (
 )
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter, OrderingFilter
-
+from rest_framework import generics
 from ..serializers import PostDetailSerializer,PostListSerializer, RecursiveCategorySerializer
 from ..permissions import CustomTripleAccessPermission
 from ....models import Post, Category
@@ -40,7 +40,7 @@ class PublicPostDetailAPIView(generics.RetrieveAPIView):
             "hit_count_generic",
         )
     
-from rest_framework import generics
+
 
 class PublicPostListAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer

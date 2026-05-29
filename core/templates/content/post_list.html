@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Posts{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="page-heading">
+        <h1>Posts</h1>
+        <p>Initial API + Fetch based post listing</p>
+    </div>
+
+    <section class="filters-box">
+        <form id="filter-form" class="filters-form">
+            <div class="form-group">
+                <label for="category">Category slug</label>
+                <input type="text" id="category" name="category" placeholder="example-category">
+            </div>
+
+            <div class="form-group">
+                <label for="tag">Tag slug</label>
+                <input type="text" id="tag" name="tag" placeholder="example-tag">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Apply filters</button>
+                <button type="button" id="clear-filters">Clear</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="status-box">
+        <p id="loading-message" class="status-message">Loading posts...</p>
+        <p id="error-message" class="status-message error hidden"></p>
+    </section>
+
+    <section id="posts-container" class="posts-grid"></section>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.APP_CONFIG = {
+        postsApiUrl: "/api/v1/content/posts/"
+    };
+</script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/post-list.js' %}"></script>
+{% endblock %}

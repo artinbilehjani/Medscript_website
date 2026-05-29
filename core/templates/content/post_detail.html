@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}جزئیات پست{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div id="post-detail-page" class="post-detail-page">
+      <div id="post-loading" class="state-box">در حال بارگذاری...</div>
+      <div id="post-error" class="state-box error" hidden></div>
+
+      <article id="post-content" class="post-detail" hidden>
+        <div class="post-detail__image-wrap">
+          <img id="post-image" class="post-detail__image" src="" alt="">
+        </div>
+
+        <header class="post-detail__header">
+          <h1 id="post-title" class="post-detail__title"></h1>
+
+          <div class="post-detail__meta">
+            <span>نویسنده: <strong id="post-author">-</strong></span>
+            <span>تاریخ انتشار: <strong id="post-published-date">-</strong></span>
+            <span>بازدید: <strong id="post-hit-count">۰</strong></span>
+          </div>
+        </header>
+
+        <section class="post-detail__taxonomies">
+          <div>
+            <h3>دسته‌بندی‌ها</h3>
+            <div id="post-categories" class="tag-list"></div>
+          </div>
+
+          <div>
+            <h3>برچسب‌ها</h3>
+            <div id="post-tags" class="tag-list"></div>
+          </div>
+        </section>
+
+        <section class="post-detail__body">
+          <h3>محتوا</h3>
+          <div id="post-content-html" class="content-box"></div>
+        </section>
+
+        <section class="post-detail__links">
+          <h3>لینک‌ها</h3>
+          <div id="post-links" class="link-list"></div>
+        </section>
+
+        <section class="post-detail__files">
+          <h3>فایل‌ها</h3>
+          <div id="post-files" class="file-list"></div>
+        </section>
+      </article>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.APP_CONFIG = {
+        postDetailApiBaseUrl: "/api/v1/post/",
+        currentSlug: "{{ request.resolver_match.kwargs.slug|escapejs }}"
+    };
+</script>
+<script src="{% static 'js/post-detail.js' %}"></script>
+{% endblock %}
