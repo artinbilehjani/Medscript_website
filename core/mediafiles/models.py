@@ -47,7 +47,10 @@ class PostFile(models.Model):
         }
 
         return extension_map.get(ext, self.FileType.UNDEFINED)
-
+    @property
+    def file_url(self):
+        return self.file.url if self.file else None
+    
     def save(self, *args, **kwargs):
         self.file_type = self.detect_file_type()
         super().save(*args, **kwargs)
