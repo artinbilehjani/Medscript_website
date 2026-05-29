@@ -23,8 +23,11 @@ from rest_framework.parsers import JSONParser,FormParser,MultiPartParser
 
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
+from hitcount.views import HitCountDetailView,HitCountMixin
+from hitcount.models import HitCount
 
-class PublicPostDetailAPIView(generics.RetrieveAPIView):
+
+class PublicPostDetailAPIView(generics.RetrieveAPIView,HitCountMixin):
     serializer_class = PostDetailSerializer
     lookup_field = "slug"
 
@@ -39,7 +42,14 @@ class PublicPostDetailAPIView(generics.RetrieveAPIView):
             "files",
             "hit_count_generic",
         )
-    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        hit_count = HitCount.objects.get_for_object(instance)
+        self.hit_count(request, hit_count)
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class PublicPostListAPIView(generics.ListAPIView):
