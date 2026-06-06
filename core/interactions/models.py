@@ -50,13 +50,13 @@ class Comment(models.Model):
             snippet += "..."
         return snippet
     
-    @property
-    def like_count(self):
-        return self.reactions.filter(reaction_type=CommentReaction.ReactionType.LIKE).count()
+    # @property
+    # def like_count(self):
+    #     return self.reactions.filter(reaction_type=CommentReaction.ReactionType.LIKE).count()
 
-    @property
-    def dislike_count(self):
-        return self.reactions.filter(reaction_type=CommentReaction.ReactionType.DISLIKE).count()
+    # @property
+    # def dislike_count(self):
+    #     return self.reactions.filter(reaction_type=CommentReaction.ReactionType.DISLIKE).count()
     
 class CommentReaction(models.Model):
     class ReactionType(models.IntegerChoices):

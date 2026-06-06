@@ -1,0 +1,452 @@
+/* Basic Reset & Body Styling */
+.content-wrapper {
+    /* Adjust this value based on your header's actual height */
+    padding-top: 100px; /* Example: Set to a value like 80px, 100px, or more */
+    padding-left: 20px; /* Optional: Add some horizontal padding */
+    padding-right: 20px; /* Optional: Add some horizontal padding */
+    box-sizing: border-box; /* Include padding in the element's total width and height */
+}
+
+#pagination-controls .page-btn {
+    cursor: pointer;
+    list-style: none;  
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 3px;
+    margin-right: 3px;
+    padding: 10px 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f5f5f4;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#pagination-controls .page-btn:hover {
+  background-color:rgba(255, 255, 255, 0.1);
+  border-color: #9945ff;
+  box-shadow: 0 0 10px rgba(153, 69, 255, 0.5);
+}
+
+#pagination-controls .page-btn.is-active {
+  font-weight: 700;
+  background-color:rgba(255, 255, 255, 0.3);
+  border-color: #9945ff;
+  box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+#pagination-controls .nav-btn {
+    cursor: pointer;
+    list-style: none;  
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 3px;
+    margin-right: 3px;
+    padding: 10px 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f5f5f4;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#pagination-controls .nav-btn:hover {
+  background-color:rgba(255, 255, 255, 0.1);
+  border-color: #9945ff;
+  box-shadow: 0 0 10px rgba(153, 69, 255, 0.5);
+}
+
+#pagination-controls .ellipsis {
+     padding: 0 8px; 
+     color: white;
+}
+
+/*  filter menu content */
+.category-pocket { margin-bottom: 10px; }
+
+.category-pocket-button {
+    cursor: pointer;
+    list-style: none;            /* removes default marker in some browsers */
+    user-select: none;
+    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f5f5f4;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+.category-pocket-button:hover {
+    background-color:rgba(255, 255, 255, 0.3);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+.category-pocket[open] .category-pocket-button {
+  background-color:rgba(255, 255, 255, 0.3);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+.category-pocket-body {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+.icon{ width:24px; height:24px; display:block; }
+/* container that holds ONLY the tag checkboxes */
+#tag-filters {
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  scrollbar-gutter: stable;
+}
+
+/* optional: make each option stack nicely */
+#tag-filters .filter-option {
+  display: block;
+}
+
+
+/* Filter Menu Button */
+#filter-menu-button {
+    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f5f5f4;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#filter-menu-button:hover {
+    background-color:rgba(255, 255, 255, 0.3);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+/* Filter Menu Styles */
+.filter-menu {
+    top: 60px; /* Adjust based on header height */
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f5f5f4;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 15px;
+    z-index: 1000; /* Ensure it's above other content */
+    max-width: 80%;
+    display: none; /* Hidden by default */
+    flex-direction: row; /* Stack filter sections vertically */
+}
+
+.filter-menu.open {
+    display: flex; /* Show when open */
+}
+
+.filter-section {
+    margin-bottom: 15px;
+}
+
+.filter-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #555;
+}
+
+.filter-options label {
+    display: block; /* Each option on its own line */
+    margin-bottom: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.filter-options input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+#apply-filters-button, #clear-filters-button {
+    padding: 8px 12px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    height: 30px;
+    width: 100px;
+}
+
+#apply-filters-button {
+    background-color: #28a745;
+    color: white;
+}
+#apply-filters-button:hover {
+    background-color: #218838;
+}
+
+#clear-filters-button {
+    background-color: #ffc107;
+    color: #333;
+}
+#clear-filters-button:hover {
+    background-color: #e0a800;
+}
+
+
+/* Search Bar Styling */
+.search-container {
+    display: flex;
+    flex-grow: 1; /* Allow search bar to take available space */
+    max-width: 400px; /* Limit its width */
+}
+
+#search-input {
+    flex-grow: 1;
+    background-color: rgba(245, 245, 244, 0.7);
+    padding: 10px 15px;
+    color: #121212;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px; /* Rounded left corners */
+    font-size: 1em;
+    outline: none; /* Remove outline on focus */
+}
+
+#search-input:focus {
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+#search-button {
+    padding: 10px 15px;
+    border: none;
+    background-color:rgba(255, 255, 255, 0.3);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+    color: white;
+    border-radius: 5px 0 0 5px; /* Rounded right corners */
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#search-button:hover {
+    background-color: rgba(52, 227, 153, 0.45);
+    transition: background-color 0.3s ease;
+}
+#search-button:focus {
+    background-color: #34d399;
+    transition: background-color 0.3s ease;
+}
+
+/* Display Toggle Button */
+#display-list-button {
+    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f5f5f4;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#display-list-button:hover {
+    background-color:rgba(255, 255, 255, 0.3);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+#display-grid-button {
+    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f5f5f4;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#display-grid-button:hover {
+    background-color:rgba(255, 255, 255, 0.3);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+/* Post Container Base Styles */
+.post-container {
+    display: grid; /* Default to grid for easier switching */
+    gap: 20px;
+    padding: 0;
+    margin: 0;
+    list-style: none; /* Remove list bullets if used as ul/ol */
+}
+
+/* Grid View Styles */
+.grid-view {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive grid */
+}
+
+/* List View Styles */
+.list-view {
+    grid-template-columns: 1fr; /* Single column for list view */
+}
+
+/* Individual Post Styling (Grid Item) */
+.post-item.grid-item {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+    color:  #f5f5f4;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden; /* Ensure image doesn't overflow */
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.post-item.grid-item:hover {
+    transform: translateY(-5px);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+
+}
+
+.post-item.grid-item img {
+    width: 100%;
+    height: 180px; /* Fixed height for grid images */
+    object-fit: cover; /* Crop image to fit */
+    display: block;
+}
+
+.post-item.grid-item .post-content {
+    padding: 15px;
+    flex-grow: 1; /* Allow content to fill remaining space */
+}
+
+.post-item.grid-item h2 {
+    margin-top: 0;
+    font-size: 1.3em;
+    margin-bottom: 10px;
+}
+
+/* Individual Post Styling (List Item) */
+.post-item.list-item {
+    max-height: 200px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+    color:  #f5f5f4;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden; /* Ensure image doesn't overflow */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.post-item.list-item:hover {
+    transform: translateX(-5px);
+    border-color: #9945ff;
+	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+}
+
+.post-item.list-item img {
+    width: 180px; /* Fixed width for list view images */
+    height: 150px; /* Fixed height */
+    object-fit: cover; /* Crop image */
+    flex-shrink: 0; /* Prevent image from shrinking */
+}
+
+.post-item.list-item .post-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1; /* Content takes remaining space */
+}
+
+.post-item.list-item h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+/* Common Post Content Styles */
+.post-item .post-meta {
+    font-size: 0.85em;
+    color: #777;
+    margin-bottom: 15px;
+}
+
+.post-item .post-meta span {
+    margin-right: 10px;
+}
+
+.post-item .post-snippet {
+    font-size: 0.95em;
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.post-item .post-tags, .post-item .post-categories {
+    font-size: 0.8em;
+    margin-top: 10px;
+}
+
+.post-item .post-tags span, .post-item .post-categories span {
+    background-color: #e9ecef;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+    display: inline-block; /* For spacing */
+    margin-bottom: 5px; /* Space between tags/categories */
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column; /* Stack items vertically on small screens */
+        align-items: stretch; /* Stretch items to fill width */
+    }
+
+    .search-container {
+        width: 100%; /* Make search bar full width */
+        max-width: none; /* Remove max-width */
+    }
+    #search-input, #search-button {
+        border-radius: 5px; /* Rounded corners for all search inputs */
+    }
+    .filter-menu {
+        width: calc(100% - 20px); /* Full width minus padding */
+        left: 10px;
+        top: 55px; /* Adjust top position */
+    }
+}
+
+@media (max-width: 480px) {
+    .post-item.grid-item img, .post-item.list-item img {
+        height: 150px; /* Smaller images on very small screens */
+    }
+    .post-item.list-item {
+        flex-direction: column; /* Stack image and content vertically */
+    }
+    .post-item.list-item img {
+        width: 100%; /* Image takes full width */
+    }
+    .post-item.list-item .post-content {
+        padding: 10px;
+    }
+}

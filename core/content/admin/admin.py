@@ -37,7 +37,6 @@ class PostAdmin(admin.ModelAdmin):
     ordering = ("-published_date",)
     autocomplete_fields = ("author",)
     filter_horizontal = ("category", "tag")
-    date_hierarchy = "published_date"
     inlines = [PostFileInline,CommentInline]
     fieldsets = (
         ("Post info", {

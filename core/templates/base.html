@@ -1,14 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Blog{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/post-datail.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/archive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/post-list.css' %}">
+     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 <!-- Epic Neural Background -->
@@ -62,9 +63,9 @@
                 MEDSCRIPT
             </a>
             <ul class="nav-links">
-                <li><a href="#features">Home</a></li>
-                <li><a href="#showcase">Archive</a></li>
-                <li><a href="#timeline">Search</a></li>
+                <li><a href="/home/">Home</a></li>
+                <li><a href="/content/archive/">Archive</a></li>
+                <li><a href="/content/posts/search/">Search</a></li>
                 <li><a href="#contact">Profile</a></li>
                 <li><a href="https://example.com" target="_blank" class="external-link">External</a></li>
 </ul>

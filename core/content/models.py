@@ -48,7 +48,7 @@ class Post(models.Model):
 
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-    published_date = models.DateField(default=timezone.now)
+    published_date = models.DateTimeField(default=timezone.now)
     slug = models.SlugField(editable=False, unique=True, max_length=255,allow_unicode=True)
 
     class Meta:

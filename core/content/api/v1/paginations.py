@@ -2,7 +2,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param
 class DefaultPagination(PageNumberPagination):
-    page_size = 3
+    page_size = 10
 
     def get_paginated_response(self, data):
         current_url = self.request.build_absolute_uri()

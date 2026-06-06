@@ -11,8 +11,8 @@ function handleCategoryClick(category) {
         return;
     }
 
-    const categoryName = encodeURIComponent(category.name);
-    window.location.href = `/content/posts/?category=${categoryName}`;
+    const categorySlug = encodeURIComponent(category.slug);
+    window.location.href = `/content/posts/?category=${categorySlug}`;
 }
 
 function createElement(tag, options = {}) {

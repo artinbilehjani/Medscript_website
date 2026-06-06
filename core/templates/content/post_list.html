@@ -4,38 +4,38 @@
 {% block title %}Posts{% endblock %}
 
 {% block content %}
-<section class="page-section">
-    <div class="page-heading">
-        <h1>Posts</h1>
-        <p>Initial API + Fetch based post listing</p>
-    </div>
+<div class="content-wrapper">
 
-    <section class="filters-box">
-        <form id="filter-form" class="filters-form">
-            <div class="form-group">
-                <label for="category">Category slug</label>
-                <input type="text" id="category" name="category" placeholder="example-category">
-            </div>
 
-            <div class="form-group">
-                <label for="tag">Tag slug</label>
-                <input type="text" id="tag" name="tag" placeholder="example-tag">
-            </div>
+        <!-- Button to change display type -->
+        <button id="display-list-button" type="button" class="icon-btn" aria-label="Toggle view">
+        <img class="icon"
+            src="/media/images/system/event_list_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+            alt="">
+        </button>  
+        <button id="display-grid-button" type="button" class="icon-btn" aria-label="Toggle view">
+        <img class="icon"
+            src="/media/images/system/view_cozy_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+            alt="">
+        </button>    
+    </header>
 
-            <div class="form-actions">
-                <button type="submit">Apply filters</button>
-                <button type="button" id="clear-filters">Clear</button>
-            </div>
-        </form>
-    </section>
+    <main>
+        <!-- Post Grid View -->
+        <div id="post-grid" class="post-container grid-view">
+            <!-- Post items will be loaded here by JavaScript -->
+        </div>
 
-    <section class="status-box">
-        <p id="loading-message" class="status-message">Loading posts...</p>
-        <p id="error-message" class="status-message error hidden"></p>
-    </section>
+        <!-- Post List View -->
+        <div id="post-list" class="post-container list-view" style="display: none;">
+            <!-- Post items will be loaded here by JavaScript -->
+        </div>
+    </main>
+    <div class="pagination-controls" id="pagination-controls">
+            
+        </div>
 
-    <section id="posts-container" class="posts-grid"></section>
-</section>
+</div>
 {% endblock %}
 
 {% block scripts %}

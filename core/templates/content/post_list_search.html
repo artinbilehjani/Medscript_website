@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Posts{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+<!-- Button to open filter menu -->
+        <div class="filter-wrap">
+        <button id="filter-menu-button" type="button">
+        <img class="filter-icon"
+            src="/media/images/system/filter_list_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+            alt="">
+        </button>
+
+        <!-- Filter menu (initially hidden) -->
+        <div id="filter-menu" class="filter-menu">
+        
+            <div class="filter-section">
+                <h3>Categories</h3>
+                <!-- Categories will be loaded here by JavaScript -->
+                <div id="category-filters" class="filter-options">
+                    <!-- Example Category: <label><input type="checkbox" data-slug="technology"> Technology</label> -->
+                </div>
+            </div>
+            <div class="filter-section">
+                <h3>Tags</h3>
+                <!-- Tags will be loaded here by JavaScript -->
+                <div id="tag-filters" class="filter-options">
+                    <!-- Example Tag: <label><input type="checkbox" data-slug="python"> Python</label> -->
+                </div>
+            </div>
+            <button id="apply-filters-button">Apply</button>
+            <button id="clear-filters-button">Clear</button>
+        </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="جست و جو ..." type="text">
+            <button id="search-button" type="button">
+            <img class="icon"
+            src="/media/images/system/search_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+            alt="">
+            </button>
+        </div>
+
+        <!-- Button to change display type -->
+        <button id="display-list-button" type="button" class="icon-btn" aria-label="Toggle view">
+        <img class="icon"
+            src="/media/images/system/event_list_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+            alt="">
+        </button>  
+        <button id="display-grid-button" type="button" class="icon-btn" aria-label="Toggle view">
+        <img class="icon"
+            src="/media/images/system/view_cozy_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
+            alt="">
+        </button>    
+    </header>
+
+    <main>
+        <!-- Post Grid View -->
+        <div id="post-grid" class="post-container grid-view">
+            <!-- Post items will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Post List View -->
+        <div id="post-list" class="post-container list-view" style="display: none;">
+            <!-- Post items will be loaded here by JavaScript -->
+        </div>
+    </main>
+    <div class="pagination-controls" id="pagination-controls">
+            
+        </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.APP_CONFIG = {
+        postsApiUrl: "/api/v1/content/posts/"
+    };
+</script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/post-list-search.js' %}"></script>
+{% endblock %}

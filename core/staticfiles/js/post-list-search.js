@@ -1,9 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
+    const filterMenuButton = document.getElementById('filter-menu-button');
+    const filterMenu = document.getElementById('filter-menu');
+    const applyFiltersButton = document.getElementById('apply-filters-button');
+    const clearFiltersButton = document.getElementById('clear-filters-button');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
     const displayListButton = document.getElementById("display-list-button");
     const displayGridButton = document.getElementById("display-grid-button");
     const postGrid = document.getElementById('post-grid');
     const postList = document.getElementById('post-list');
+    const categoryFiltersContainer = document.getElementById('category-filters');
+    const tagFiltersContainer = document.getElementById('tag-filters');
 
     // --- State Variables ---
     let currentView = 'grid'; // 'grid' or 'list'
@@ -11,13 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalPages = 1;
     let currentFilters = { // Stores currently active filters
         categories: [],
+        tags: []
     };
+    let currentSearchTerm = '';
 
     // --- API Endpoint ---
     // IMPORTANT: Replace with your actual API endpoint URL
-    const API_URL = "/content/api/v1/posts/";
-    const pageParams = new URLSearchParams(window.location.search);
-    const categorySlug = pageParams.get("category"); 
+    const API_URL = "/content/api/v1/posts/search/";
 
     // --- Functions ---
 
@@ -29,10 +37,21 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = page; // Update current page
         // Build the URL with query parameters
         const url = new URL(API_URL, window.location.origin);
-        if (categorySlug) url.searchParams.set("category", categorySlug);
+        const params = url.searchParams;
 
+        if (currentSearchTerm) params.set("search", currentSearchTerm);
 
-        url.searchParams.set("page", String(page));
+        // Add category filters
+        currentFilters.categories.forEach((categorySlug) => {
+            params.append("category", categorySlug);
+        });
+
+        // Add tag filters
+        currentFilters.tags.forEach((tagSlug) => {
+            params.append("tag", tagSlug);
+        });
+
+        params.set("page", String(currentPage));
 
         // Future: Add pagination parameter: url += `&page=${currentPage}`;
 
@@ -41,9 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
+            const data = await response.json(); // Assuming API returns JSON list of posts
 
-            const posts = data.results || data; 
+            // Assuming the API returns a structure like { results: [...], count: N, ... }
+            // Adjust if your API structure is different
+            const posts = data.results || data; // Use data.results if paginated, else data directly
 
             totalPages = data.total_pages ?? 1;
             currentPage = data.current_page_number ?? currentPage;
@@ -54,6 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             displayPosts(postsData, false);
             renderPaginationControls();
+            // Future: Update totalPages based on API response if paginated
+            // totalPages = Math.ceil(data.count / postsPerPage);
             
         } catch (error) {
             console.error("Error fetching posts:", error);
@@ -231,6 +254,124 @@ function renderPaginationControls() {
         return postItem;
     }
 
+    /**
+     * Fetches available categories and tags from the API (or a dedicated endpoint)
+     * This assumes you have endpoints like '/api/categories/' and '/api/tags/'
+     * If not, you might need to adjust how you get this data.
+     */
+    async function fetchCategoryAndTagFilters() {
+  try {
+    const res = await fetch("/content/api/v1/filters/"); // <-- your FilterOptionsView
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+
+    // Tags (single pocket)
+    renderFilterOptions(data.tags || [], tagFiltersContainer, "tag", { clear: true });
+
+    // Categories (many pockets grouped by root)
+    renderCategoryBuckets(data.category_buckets || [], categoryFiltersContainer);
+  } catch (err) {
+    console.error("Error fetching filter options:", err);
+  }
+}
+   /**
+ * Renders filter checkboxes for categories or tags.
+ * @param {Array} items
+ * @param {HTMLElement} container
+ * @param {string} type - 'category' or 'tag'
+ * @param {Object} opts
+ */
+function renderFilterOptions(items, container, type, opts = {}) {
+  const { clear = true, labelKey = "name" } = opts;
+
+  if (clear) container.innerHTML = "";
+  (items || []).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+  items.forEach((item) => {
+    const label = document.createElement("label");
+    label.className = "filter-option";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.dataset.slug = item.slug;
+    checkbox.dataset.type = type;
+
+    const key = type === "category" ? "categories" : "tags";
+    if (currentFilters[key].includes(item.slug)) checkbox.checked = true;
+
+    const text = item[labelKey] || item.name || item.slug;
+    const countText = item.post_count != null ? ` (${item.post_count})` : "";
+
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(` ${text}${countText}`));
+    container.appendChild(label);
+  });
+}
+
+function renderCategoryBuckets(buckets, container) {
+  container.innerHTML = "";
+
+  (buckets || []).forEach(({ root, leaves }) => {
+    const details = document.createElement("details");
+    details.className = "category-pocket";
+    // details.open = true; // uncomment if you want them open by default
+
+    const summary = document.createElement("summary");
+    summary.className = "category-pocket-button";
+    summary.textContent = root?.name || "Category";
+
+    const body = document.createElement("div");
+    body.className = "category-pocket-body filter-options";
+
+    renderFilterOptions(leaves || [], body, "category", {
+      clear: true,
+      labelKey: "full_name", // falls back to name inside your function
+    });
+
+    details.appendChild(summary);
+    details.appendChild(body);
+    container.appendChild(details);
+  });
+}
+
+    /*
+     * Handles the opening and closing of the filter menu.
+     */
+    categoryFiltersContainer.addEventListener(
+  "toggle",
+  (e) => {
+    const details = e.target;
+    if (details.tagName !== "DETAILS" || !details.classList.contains("category-pocket")) return;
+    if (!details.open) return;
+
+    categoryFiltersContainer
+      .querySelectorAll("details.category-pocket[open]")
+      .forEach((d) => {
+        if (d !== details) d.open = false;
+      });
+  },
+  true // <-- capture
+);
+    function toggleFilterMenu() {
+        filterMenu.classList.toggle('open');
+        // Optional: Close menu if clicking outside of it
+        if (filterMenu.classList.contains('open')) {
+            document.addEventListener('click', closeFilterMenuOutside);
+        } else {
+            document.removeEventListener('click', closeFilterMenuOutside);
+        }
+    }
+
+    /**
+     * Closes the filter menu if the click target is outside the menu itself.
+     */
+    function closeFilterMenuOutside(event) {
+        if (!filterMenu.contains(event.target) && !filterMenuButton.contains(event.target)) {
+            filterMenu.classList.remove('open');
+            document.removeEventListener('click', closeFilterMenuOutside);
+        }
+    }
 
     /**
      * Applies the selected filters and reloads posts.
@@ -238,10 +379,33 @@ function renderPaginationControls() {
     function applyFilters() {
         const selectedCategories = Array.from(filterMenu.querySelectorAll('input[data-type="category"]:checked'))
                                          .map(cb => cb.dataset.slug);
+        const selectedTags = Array.from(filterMenu.querySelectorAll('input[data-type="tag"]:checked'))
+                                   .map(cb => cb.dataset.slug);
 
         currentFilters.categories = selectedCategories;
+        currentFilters.tags = selectedTags;
+
+        filterMenu.classList.remove('open'); // Close menu after applying
         document.removeEventListener('click', closeFilterMenuOutside);
         fetchPosts(); // Reload posts with new filters
+    }
+
+    /**
+     * Clears all selected filters and reloads posts.
+     */
+    function clearFilters() {
+        currentFilters = { categories: [], tags: [] };
+        // Uncheck all checkboxes
+        filterMenu.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        fetchPosts(); // Reload posts with no filters
+    }
+
+    /**
+     * Handles the search input and button click.
+     */
+    function handleSearch() {
+        currentSearchTerm = searchInput.value.trim();
+        fetchPosts(1, { append: false }); // Reload posts with the new search term
     }
 
     /**
@@ -281,10 +445,32 @@ function renderPaginationControls() {
 
     // --- Event Listeners ---
 
+    // Filter menu toggle
+    filterMenuButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent immediate closing by document listener
+        toggleFilterMenu();
+    });
+
+    // Apply filters button
+    applyFiltersButton.addEventListener('click', applyFilters);
+
+    // Clear filters button
+    clearFiltersButton.addEventListener('click', clearFilters);
+
+    // Search button / Enter key in search input
+    searchButton.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            handleSearch();
+        }
+    });
+    
+
     // Display toggle button
     displayGridButton?.addEventListener("click", () => setView("grid"));
     displayListButton?.addEventListener("click", () => setView("list"));
     setView("grid");
     // --- Initialization ---
+    fetchCategoryAndTagFilters(); // Load filter options when the page loads
     fetchPosts(); // Load initial set of posts
 });
