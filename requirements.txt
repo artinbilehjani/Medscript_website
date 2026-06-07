@@ -18,6 +18,7 @@ drf-yasg[validation]
 djoser
 django-hitcount
 python-slugify
+django-simple-captcha
 
 # deployment module
 gunicorn
