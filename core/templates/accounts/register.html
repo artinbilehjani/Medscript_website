@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+ <main id="mg-register">
+    <section class="mg-card" aria-label="Register">
+      <h1 class="mg-title">Create account</h1>
+
+      <form id="mgRegisterForm" class="mg-form" novalidate>
+        <label class="mg-field">
+          <span class="mg-label">Username</span>
+          <input class="mg-input" name="username" autocomplete="username" required />
+        </label>
+
+        <label class="mg-field">
+          <span class="mg-label">Password</span>
+          <span class="mg-password">
+            <input class="mg-input" name="password" type="password"
+                  autocomplete="new-password" required />
+            <button class="mg-btn mg-btn--ghost mgTogglePassword" type="button" aria-pressed="false">
+              Show
+            </button>
+          </span>
+        </label>
+
+        <label class="mg-field">
+          <span class="mg-label">Confirm password</span>
+          <span class="mg-password">
+            <input class="mg-input" name="password2" type="password"
+                  autocomplete="new-password" required />
+            <button class="mg-btn mg-btn--ghost mgTogglePassword" type="button" aria-pressed="false">
+              Show
+            </button>
+          </span>
+        </label>
+
+        <!-- CAPTCHA -->
+        <div class="mg-captcha" aria-label="CAPTCHA">
+  <input type="hidden" name="captcha_key" id="mgCaptchaKey" />
+
+  <div class="mg-captchaRow">
+    <div id="mgCaptchaQuestion" class="mg-captchaQuestion" aria-live="polite"></div>
+    <button id="mgCaptchaReload" class="mg-btn mg-btnGhost" type="button">Reload</button>
+  </div>
+
+  <label class="mg-field">
+    <span class="mg-label">Answer</span>
+    <input class="mg-input" name="captcha_value" autocomplete="off" required />
+  </label>
+
+  <p id="mgCaptchaMsg" class="mg-msg" aria-live="polite"></p>
+</div>
+
+        <button class="mg-btn mg-btnPrimary" type="submit">Register</button>
+
+        <p id="mgMsg" class="mg-msg" role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="mg-foot">
+        Already have an account?
+        <a class="mg-link" href="/accounts/login/">Login</a>
+      </p>
+    </section>
+  </main>
+
+  
+  {% endblock %}
+
+{% block scripts %}
+<script>
+    window.APP_CONFIG = {
+        postsApiUrl: "/api/v1/content/posts/"
+    };
+</script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/register.js' %}"></script>
+{% endblock %}

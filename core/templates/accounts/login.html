@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+   <main id="mg-login">
+    <section class="mg-card" aria-label="Login">
+      <h1 class="mg-title">Login</h1>
+
+      <form id="mgLoginForm" class="mg-form" novalidate>
+        <label class="mg-field">
+          <span class="mg-label">Username</span>
+          <input class="mg-input" name="username" autocomplete="username" required />
+        </label>
+
+        <label class="mg-field">
+          <span class="mg-label">Password</span>
+
+          <span class="mg-password">
+            <input id="mgPassword" class="mg-input" name="password" type="password"
+                  autocomplete="current-password" required />
+            <button id="mgTogglePassword" class="mg-btn mg-btn--ghost" type="button" aria-pressed="false">
+              Show
+            </button>
+          </span>
+        </label>
+
+        <!-- CAPTCHA -->
+        <div class="mg-captcha" aria-label="CAPTCHA">
+        <input type="hidden" name="captcha_key" id="mgCaptchaKey" />
+
+        <div class="mg-captchaRow">
+          <div id="mgCaptchaQuestion" class="mg-captchaQuestion" aria-live="polite"></div>
+          <button id="mgCaptchaReload" class="mg-btn mg-btnGhost" type="button">Reload</button>
+        </div>
+
+        <label class="mg-field">
+          <span class="mg-label">Answer</span>
+          <input class="mg-input" name="captcha_value" autocomplete="off" required />
+        </label>
+
+        <p id="mgCaptchaMsg" class="mg-msg" aria-live="polite"></p>
+      </div>
+
+        <button class="mg-btn mg-btnPrimary" type="submit">Login</button>
+
+        <p id="mgMsg" class="mg-msg" role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="mg-foot">
+        No account?
+        <a class="mg-link" href="/accounts/register/">Register</a>
+      </p>
+    </section>
+  </main>
+
+    {% endblock %}
+
+{% block scripts %}
+<script>
+    window.APP_CONFIG = {
+  
+    };
+</script>
+<script src="{% static 'js/api.js' %}"></script>
+  <script src="{% static 'js/login.js' %}"></script>
+{% endblock %}

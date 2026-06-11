@@ -14,6 +14,8 @@ from pathlib import Path
 from django.contrib.messages import constants as messages
 from decouple import config
 from datetime import timedelta
+from captcha.helpers import math_challenge
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -62,6 +64,17 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
 ]
 
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -92,7 +105,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
-
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "default",
+    }
+}
 
 # Database 
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

@@ -1,3 +1,5 @@
-from django.urls import path
+from django.urls import path, include
 
-urlpatterns = []
+urlpatterns = [
+    path("api/v1/", include("dashboard.api.v1.urls")),
+]
