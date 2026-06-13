@@ -6,10 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Blog{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/post-datail.css' %}">
+    <link rel="stylesheet" href="{% static 'css/post-detail.css' %}">
     <link rel="stylesheet" href="{% static 'css/archive.css' %}">
     <link rel="stylesheet" href="{% static 'css/post-list.css' %}">
-     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="shortcut icon" href="/media/images/default_images/blank_post_thumbnail.png" type="image/x-icon" />
 </head>
 <body>
 <!-- Epic Neural Background -->
@@ -66,7 +69,7 @@
                 <li><a href="/home/">Home</a></li>
                 <li><a href="/content/archive/">Archive</a></li>
                 <li><a href="/content/posts/search/">Search</a></li>
-                <li><a href="#contact">Profile</a></li>
+                <li><a href="/accounts/profile/">Profile</a></li>
                 <li><a href="https://example.com" target="_blank" class="external-link">External</a></li>
 </ul>
             </ul>
@@ -84,10 +87,36 @@
             <a href="https://example.com" target="_blank" class="external-link">External</a>
         </div>
     </header>
-
     <main class="container">
         {% block content %}{% endblock %}
     </main>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#features">Neural Networks</a>
+                <a href="#showcase">Matrix Protocols</a>
+                <a href="#timeline">Evolution</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Documentation</a>
+                <!-- Add external links -->
+    			<a href="https://github.com/yourproject" target="_blank" rel="noopener">
+                <img src="/media/images/system/GrommetIconsGithub.svg" alt="">
+                </a>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2025 NeuralGlass Interface. All quantum rights reserved across dimensions.</p>
+            </div>
+            <div class="footer-design">
+                Designed by: <a href="https://artinbilehjani.ir" target="_blank" rel="nofollow noopener">Artin Bilehjani</a> | 
+                Enhanced by Neural AI Systems | 
+                <a href="#">Quantum Framework</a>
+            </div>
+        </div>
+    </footer>
+
+    
 
     {% block scripts %}{% endblock %}
 </body>

@@ -79,14 +79,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- Show/Hide password toggle ---
   const pwInput = form.querySelector('input[name="password"]');
   const togglePwBtn = document.getElementById("mgTogglePassword");
+  const toggleIcon = document.getElementById("togglePwIcon");
+  const showIcon = `/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
+  const hideIcon = `/media/images/system/visibility_off_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
 
   if (pwInput && togglePwBtn) {
     togglePwBtn.addEventListener("click", () => {
       const show = pwInput.type === "password";
       pwInput.type = show ? "text" : "password";
-      togglePwBtn.textContent = show ? "Hide" : "Show";
+      
+      toggleIcon.src = show ? hideIcon : showIcon;
+      
       togglePwBtn.setAttribute("aria-pressed", String(show));
-    });
+      togglePwBtn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+          });
   }
 
   const refreshBtn =

@@ -1,278 +1,429 @@
-(function () {
-  const root = document.querySelector(".mgp-profile");
-  if (!root) return;
 
-  const api = {
-    profile: root.dataset.profileApi || "/accounts/api/v1/me/profile/",
-    changePassword: root.dataset.changePasswordApi || "/accounts/api/v1/me/change-password/",
-    del: root.dataset.deleteApi || "/accounts/api/v1/me/delete/",
-  };
+// Adjust these endpoints if your URLs differ
+const API_BASE = "/accounts/api/v1";
+const PROFILE_URL = `${API_BASE}/me/profile/`;
+const CHANGEPASSWORD_URL = `${API_BASE}/me/change-password/`;
+const DELETE_URL = `${API_BASE}/me/delete/`;
+const LOGOUT_URL = `${API_BASE}/me/logout/`;
+const CSRF_URL = `${API_BASE}/me/csrf/`;
 
-  const el = {
-    avatar: document.getElementById("mgpAvatar"),
-    imageInput: document.getElementById("mgpImageInput"),
-    uploadBtn: document.getElementById("mgpUploadBtn"),
+const el = (id) => document.getElementById(id);
 
-    form: document.getElementById("mgpProfileForm"),
-    reloadBtn: document.getElementById("mgpReloadBtn"),
-    status: document.getElementById("mgpStatus"),
+const ui = {
+  refreshBtn: el("mgp-refresh-btn"),
+  logoutBtn: el("mgp-logout-btn"),
+  deleteBtn: el("mgp-delete-btn"),
 
-    username: document.getElementById("mgpUsername"),
-    displayName: document.getElementById("mgpDisplayName"),
-    email: document.getElementById("mgpEmail"),
-    position: document.getElementById("mgpPosition"),
-    description: document.getElementById("mgpDescription"),
+  avatar: el("mgp-avatar"),
+  imageInput: el("mgp-image-input"),
+  statusPill: el("mgp-status-pill"),
+  fullName:el("mgp-full-name"),
+  username: el("mgp-username"),
+  emailText: el("mgp-email"),
+  position: el("mgp-position"),
 
-    pwdForm: document.getElementById("mgpPasswordForm"),
-    oldPwd: document.getElementById("mgpOldPassword"),
-    newPwd: document.getElementById("mgpNewPassword"),
-    newPwd2: document.getElementById("mgpNewPassword2"),
-    pwdStatus: document.getElementById("mgpPasswordStatus"),
+  profileForm: el("mgp-profile-form"),
+  displayName: el("mgp-display-name"),
+  firstName: el("mgp-first-name"),
+  lastName: el("mgp-last-name"),
+  bio: el("mgp-bio"),
+  saveBtn: el("mgp-save-btn"),
+  resetBtn: el("mgp-reset-btn"),
+  formStatus: el("mgp-form-status"),
 
-    deleteBtn: document.getElementById("mgpDeleteBtn"),
-    deleteStatus: document.getElementById("mgpDeleteStatus"),
-  };
+  passForm: el("mgp-password-form"),
+  oldPass: el("mgp-old-password"),
+  newPass: el("mgp-new-password"),
+  confirmPass: el("mgp-confirm-password"),
+  passStatus: el("mgp-pass-status"),
 
-  function setStatus(node, msg) {
-    if (!node) return;
-    node.textContent = msg || "";
-  }
+  toast: el("mgp-toast"),
+  toastContent: el("mgp-toast-content"),
+  toastClose: el("mgp-toast-close"),
+};
 
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(";").shift();
-    return null;
-  }
+let lastLoadedProfile = null;
 
-  async function readJsonSafe(res) {
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) return null;
-  try { return await res.json(); } catch { return null; }
-}
-
-function formatApiError(data, fallback) {
-  if (!data) return fallback;
-  if (typeof data === "string") return data;
-  if (data.detail) return String(data.detail);
-
-  // Flatten {field: ["msg"]} shapes
-  if (typeof data === "object") {
-    const parts = [];
-    for (const [k, v] of Object.entries(data)) {
-      if (Array.isArray(v)) parts.push(`${k}: ${v.join(", ")}`);
-      else if (v && typeof v === "object") parts.push(`${k}: ${JSON.stringify(v)}`);
-      else parts.push(`${k}: ${String(v)}`);
-    }
-    if (parts.length) return parts.join(" | ");
-  }
-  return fallback;
-}
-
-  async function apiFetch(url, options = {}) {
-    const method = (options.method || "GET").toUpperCase();
-    const unsafe = !["GET", "HEAD", "OPTIONS", "TRACE"].includes(method);
-
-    const headers = new Headers(options.headers || {});
-
-    const isSameOrigin = (() => {
-    try {
-      return new URL(url, window.location.href).origin === window.location.origin;
-    } catch {
-      return true; // relative URL
-    }
-    })();
-
-    if (unsafe && isSameOrigin) {
-    const csrf = getCookie("csrftoken");
-    if (csrf) headers.set("X-CSRFToken", csrf);
-  }
-
-    return fetch(url, {
-    ...options,
-    credentials: "same-origin",
-    headers,
-  });
-  }
-
-  function pick(obj, keys) {
-  if (!obj) return null;
-  for (const k of keys) {
-    const v = obj[k];
-    if (typeof v === "string" && v.trim()) return v;
-  }
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
   return null;
 }
 
-function toAbsoluteUrl(u) {
-  if (!u) return "";
-  return new URL(u, window.location.origin).toString();
+function csrfHeader() {
+  const token = getCookie("csrftoken");
+  return token ? { "X-CSRFToken": decodeURIComponent(token) } : {};
 }
 
-  function applyProfile(data) {
-  const root = data ?? {};
-  const profileObj = root.profile ?? root;
-  const userObj = root.user ?? root;
-
-  el.username.value = userObj?.username ?? "";
-  el.displayName.value = pick(profileObj, ["display_name", "displayName", "name"]) ?? "";
-  el.email.value = pick(profileObj, ["email"]) ?? "";
-  el.description.value = pick(profileObj, ["description", "about"]) ?? "";
-
-  el.position.value =
-    pick(root.user_position, ["name"]) ??
-    pick(userObj?.user_position, ["name"]) ??
-    pick(root.position, ["name"]) ??
-    "";
-
-  const rawImageUrl =
-    pick(profileObj, ["image_url", "image"]) ??
-    pick(root, ["image_url", "image"]) ??
-    "";
-
-  const imageUrl = toAbsoluteUrl(rawImageUrl);
-  if (imageUrl) el.avatar.src = imageUrl;
+async function ensureCsrfCookie() {
+  await fetch(CSRF_URL, { credentials: "include" });
 }
 
-  async function loadProfile() {
-  setStatus(el.status, "Loading...");
-  const res = await apiFetch(api.profile);
+function showToast(message, tone = "info") {
+  // tone: info | ok | warn | error
+  const prefix = {
+    info: "Info",
+    ok: "Success",
+    warn: "Warning",
+    error: "Error",
+  }[tone] || "Info";
 
-  const data = await readJsonSafe(res);
+  ui.toastContent.textContent = `${prefix}: ${message}`;
+  ui.toast.hidden = false;
 
-  if (!res.ok) {
-    const msg = formatApiError(data, `Failed to load (${res.status})`);
-    setStatus(el.status, msg);
-    return;
-  }
-
-  if (data) applyProfile(data);
-  setStatus(el.status, "Loaded");
-  setTimeout(() => setStatus(el.status, ""), 1200);
+  window.clearTimeout(showToast._t);
+  showToast._t = window.setTimeout(() => {
+    ui.toast.hidden = true;
+  }, 4000);
 }
 
-  async function saveProfile() {
-  setStatus(el.status, "Saving...");
-  const payload = {
-    display_name: el.displayName.value.trim(),
-    email: el.email.value.trim() || null,
-    description: el.description.value.trim() || null,
+function setStatus(text, tone = "info") {
+  ui.statusPill.textContent = text;
+  const map = {
+    info: "rgba(255,255,255,0.18)",
+    ok: "rgba(34,197,94,0.18)",
+    warn: "rgba(245,158,11,0.20)",
+    error: "rgba(239,68,68,0.20)",
   };
+  ui.statusPill.style.background = map[tone] || map.info;
+  ui.statusPill.style.borderColor = "rgba(255,255,255,0.12)";
+}
 
-  const res = await apiFetch(api.profile, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await readJsonSafe(res);
-
-  if (!res.ok) {
-    setStatus(el.status, formatApiError(data, `Save failed (${res.status})`));
-    return;
-  }
-
-  if (data) applyProfile(data);
-  setStatus(el.status, "Saved");
-  setTimeout(() => setStatus(el.status, ""), 1200);
+function setInlineStatus(node, text, tone = "info") {
+  node.textContent = text || "";
+  const map = {
+    info: "rgba(255,255,255,0.68)",
+    ok: "rgba(34,197,94,0.95)",
+    warn: "rgba(245,158,11,0.95)",
+    error: "rgba(239,68,68,0.95)",
+  };
+  node.style.color = map[tone] || map.info;
 }
 
 
-  async function uploadImage() {
-  const file = el.imageInput.files && el.imageInput.files[0];
-  if (!file) {
-    setStatus(el.status, "Choose an image first");
-    return;
+async function apiFetch(url, options = {}) {
+  const opts = { ...options, credentials: "include" };
+
+  const headers = new Headers(opts.headers || {});
+  headers.set("Accept", "application/json");
+
+  const method = (opts.method || "GET").toUpperCase();
+  const unsafe = !["GET", "HEAD", "OPTIONS", "TRACE"].includes(method);
+
+  if (unsafe) {
+    const token = getCookie("csrftoken");
+    if (token) headers.set("X-CSRFToken", token);
+
+    const isFormData = opts.body instanceof FormData;
+    if (isFormData) headers.delete("Content-Type");
+    else if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   }
 
-  const previewUrl = URL.createObjectURL(file);
-  el.avatar.src = previewUrl;
+  const res = await fetch(url, { ...opts, headers });
 
-  setStatus(el.status, "Uploading...");
-  const form = new FormData();
-  form.append("image", file);
-
-  const res = await apiFetch(api.profile, { method: "PATCH", body: form });
-  const data = await readJsonSafe(res);
-
-  URL.revokeObjectURL(previewUrl);
+  let data = null;
+  const ct = res.headers.get("content-type") || "";
+  if (ct.includes("application/json")) data = await res.json().catch(() => null);
+  else data = await res.text().catch(() => null);
 
   if (!res.ok) {
-    setStatus(el.status, formatApiError(data, `Upload failed (${res.status})`));
-    return;
+    const message = extractErrorMessage(data) || `Request failed (${res.status})`;
+    const err = new Error(message);
+    err.status = res.status;
+    err.data = data;
+    throw err;
   }
-
-  if (data) applyProfile(data);
-  setStatus(el.status, "Uploaded");
-  setTimeout(() => setStatus(el.status, ""), 1200);
+  setCanEditImage(!!data.can_edit_image);
+  return data;
 }
 
-  async function changePassword() {
-  const old_password = el.oldPwd.value;
-  const new_password = el.newPwd.value;
-  const new_password2 = el.newPwd2.value;
+function extractErrorMessage(data) {
+  if (!data) return null;
+  if (typeof data === "string") return data;
 
-  if (new_password !== new_password2) {
-    setStatus(el.pwdStatus, "New passwords do not match");
-    return;
-  }
+  // DRF often returns {detail: "..."} or field errors {field: ["..."]}
+  if (data.detail) return data.detail;
 
-  setStatus(el.pwdStatus, "Updating...");
-  const res = await apiFetch(api.changePassword, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify({ old_password, new_password, new_password2 }),
-  });
+  const firstKey = Object.keys(data)[0];
+  if (!firstKey) return null;
 
-  const data = await readJsonSafe(res);
-
-  if (!res.ok) {
-    setStatus(el.pwdStatus, formatApiError(data, `Failed (${res.status})`));
-    return;
-  }
-
-  el.oldPwd.value = "";
-  el.newPwd.value = "";
-  el.newPwd2.value = "";
-  setStatus(el.pwdStatus, "Password updated");
-  setTimeout(() => setStatus(el.pwdStatus, ""), 1500);
+  const v = data[firstKey];
+  if (Array.isArray(v)) return `${firstKey}: ${v[0]}`;
+  if (typeof v === "string") return `${firstKey}: ${v}`;
+  return null;
 }
 
-  async function deleteAccount() {
-  const ok = confirm("Delete your account permanently?");
-  if (!ok) return;
+function hydrateProfile(profile) {
+  // Adjust these mappings to your actual serializer fields
+  const first = profile.first_name ?? "";
+  const last = profile.last_name ?? "";
+  const fullName = (first || last) ? `${first} ${last}`.trim() : (profile.username ?? "—");
 
-  el.deleteBtn.disabled = true;
+  const canEditImage = !!profile.can_edit_image;
+  ui.imageInput.disabled = !canEditImage;          // or hide it
+
+  ui.fullName.textContent = fullName;
+  ui.username.textContent = profile.username ?? "—";
+  ui.emailText.textContent = profile.email ?? "—";
+  ui.position.textContent = profile.user_position.name ?? "—";
+
+  ui.displayName.value = profile.display_name ?? "";
+  ui.firstName.value = first;
+  ui.lastName.value = last;
+  ui.bio.value = profile.description ?? "";
+
+  if (profile.image) ui.avatar.src = profile.image;
+
+  lastLoadedProfile = {
+    image: ui.avatar.src,
+    display_name: ui.displayName.value, 
+    first_name: ui.firstName.value,
+    last_name: ui.lastName.value,
+    description: ui.bio.value,
+  };
+}
+
+function collectProfilePayload() {
+  // Send only the fields you support server-side
+  return {
+    image: ui.avatar.src,
+    display_name: ui.displayName.value.trim(),
+    first_name: ui.firstName.value.trim(),
+    last_name: ui.lastName.value.trim(),
+    description: ui.bio.value.trim(),
+  };
+}
+
+function resetFormToLastLoaded() {
+  if (!lastLoadedProfile) return;
+  ui.avatar.src = lastLoadedProfile.image ?? "/media/images/system/blank_profile_picture.svg";
+  ui.displayName.value = lastLoadedProfile.display_name ?? "";
+  ui.firstName.value = lastLoadedProfile.first_name ?? "";
+  ui.lastName.value = lastLoadedProfile.last_name ?? "";
+  ui.bio.value = lastLoadedProfile.description ?? "";
+}
+
+function setCanEditImage(canEdit) {
+  document.getElementById("image-edit-controls").hidden = !canEdit;
+  document.getElementById("mgp-position-div").hidden = !canEdit;
+}
+
+async function loadProfile() {
+  setStatus("Loading…", "info");
+  setInlineStatus(ui.formStatus, "", "info");
+
   try {
-    setStatus(el.deleteStatus, "Deleting...");
-    const res = await apiFetch(api.del, { method: "DELETE" });
-    const data = await readJsonSafe(res);
+    await ensureCsrfCookie();
+    const profile = await apiFetch(PROFILE_URL, { method: "GET" });
+    hydrateProfile(profile);
+    setStatus("Signed in", "ok");
+  } catch (e) {
+    setStatus("Not available", "error");
+    showToast(e.message || "Failed to load profile.", "error");
+  }
+}
 
-    if (!res.ok) {
-      setStatus(el.deleteStatus, formatApiError(data, `Failed (${res.status})`));
-      return;
+async function saveProfile(e) {
+  e.preventDefault();
+  setInlineStatus(ui.formStatus, "Saving…", "info");
+  ui.saveBtn.disabled = true;
+
+  try {
+    await ensureCsrfCookie();
+
+    const canEditImage = !ui.imageInput.disabled;
+    const file = ui.imageInput.files?.[0] ?? null;
+
+    let body;
+    let headers = {}; // let apiFetch merge csrf header etc.
+
+    if (canEditImage && file) {
+      const fd = new FormData();
+      fd.append("first_name", ui.firstName.value.trim());
+      fd.append("last_name", ui.lastName.value.trim());
+      fd.append("display_name", ui.displayName.value.trim());
+      fd.append("description", ui.bio.value); // <-- NOT "bio"
+      fd.append("image", file);
+      body = fd; // do NOT JSON.stringify
+      // do NOT set Content-Type manually for FormData
+    } else {
+      body = JSON.stringify({
+        first_name: ui.firstName.value.trim(),
+        last_name: ui.lastName.value.trim(),
+        display_name: ui.displayName.value.trim(),
+        description: ui.bio.value, // <-- NOT "bio"
+      });
+      headers["Content-Type"] = "application/json";
     }
 
-    window.location.href = "/";
+    const updated = await apiFetch(PROFILE_URL, {
+      method: "PATCH",
+      headers,
+      body,
+    });
+
+    hydrateProfile(updated);
+    setInlineStatus(ui.formStatus, "Saved.", "ok");
+    showToast("Profile updated successfully.", "ok");
+  } catch (err) {
+    setInlineStatus(ui.formStatus, err.message || "Save failed.", "error");
+    showToast(err.message || "Save failed.", "error");
   } finally {
-    el.deleteBtn.disabled = false;
+    ui.saveBtn.disabled = false;
+    window.setTimeout(() => setInlineStatus(ui.formStatus, "", "info"), 1000);
   }
 }
 
-  el.form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    saveProfile();
+async function changePassword(e) {
+  e.preventDefault();
+  setInlineStatus(ui.passStatus, "Updating…", "info");
+
+  const oldPassword = ui.oldPass.value;
+  const newPassword = ui.newPass.value;
+  const confirm = ui.confirmPass.value;
+
+  if (!newPassword || newPassword.length < 8) {
+    setInlineStatus(ui.passStatus, "New password must be at least 8 characters.", "warn");
+    return;
+  }
+  if (newPassword !== confirm) {
+    setInlineStatus(ui.passStatus, "Passwords do not match.", "warn");
+    return;
+  }
+
+  try {
+    await ensureCsrfCookie();
+    await apiFetch(CHANGEPASSWORD_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        old_password: oldPassword,
+        new_password1: newPassword,
+        new_password2: confirm,
+      }),
+    });
+
+    ui.oldPass.value = "";
+    ui.newPass.value = "";
+    ui.confirmPass.value = "";
+
+    setInlineStatus(ui.passStatus, "Password updated.", "ok");
+    showToast("Password changed successfully.", "ok");
+  } catch (err) {
+    setInlineStatus(ui.passStatus, err.message || "Password update failed.", "error");
+    showToast(err.message || "Password update failed.", "error");
+  } finally {
+    window.setTimeout(() => setInlineStatus(ui.passStatus, "", "info"), 2500);
+  }
+}
+
+async function deleteAccount() {
+  const ok = window.confirm("This will permanently delete your account. Continue?");
+  if (!ok) return;
+
+  ui.deleteBtn.disabled = true;
+
+  try {
+    await ensureCsrfCookie();
+    await apiFetch(DELETE_URL, { method: "DELETE" });
+    showToast("Account deleted.", "ok");
+
+    // You may want to redirect to login/landing after deletion
+    window.setTimeout(() => {
+      window.location.href = "/accounts/login/";
+    }, 700);
+  } catch (err) {
+    showToast(err.message || "Delete failed.", "error");
+  } finally {
+    ui.deleteBtn.disabled = false;
+  }
+}
+
+async function logoutAccount() {
+  const ok = window.confirm("Logout from your account, Continue?");
+  if (!ok) return;
+
+  ui.logoutBtn.disabled = true;
+
+  try {
+    await ensureCsrfCookie();
+    await apiFetch(LOGOUT_URL, { method: "POST" });
+    showToast("Account deleted.", "ok");
+
+    // You may want to redirect to login/landing after deletion
+    window.setTimeout(() => {
+      window.location.href = "/accounts/login/";
+    }, 700);
+  } catch (err) {
+    showToast(err.message || "Logout failed.", "error");
+  } finally {
+    ui.logoutBtn.disabled = false;
+  }
+}
+
+  // --- Show/Hide password toggle (works for both password + confirm) ---
+const form = document.getElementById("mgp-password-form");
+form.addEventListener("click", (e) => {
+  const showIcon = `/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
+  const hideIcon = `/media/images/system/visibility_off_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
+  const togglePwBtn = e.target.closest(".mgTogglePassword");
+  if (!togglePwBtn) return;
+
+  const wrapper = togglePwBtn.closest(".mg-password");
+  const input = wrapper?.querySelector("input");
+  if (!input) return;
+
+  const img = togglePwBtn.querySelector("img.mg-show-btn");
+  if (!img) return;
+
+  const isHidden = input.type === "password";
+  input.type = isHidden ? "text" : "password";
+
+  img.src = isHidden ? hideIcon : showIcon;
+  img.alt = isHidden ? "Hide password" : "Show password";
+
+  togglePwBtn.setAttribute("aria-pressed", String(isHidden));
+  togglePwBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+});
+
+function wireEvents() {
+  ui.profileForm.addEventListener("submit", saveProfile);
+  ui.resetBtn.addEventListener("click", () => {
+    resetFormToLastLoaded();
+    setInlineStatus(ui.formStatus, "Reset.", "info");
+    window.setTimeout(() => setInlineStatus(ui.formStatus, "", "info"), 1500);
   });
 
-  el.reloadBtn.addEventListener("click", () => loadProfile());
-  el.uploadBtn.addEventListener("click", () => uploadImage());
+  ui.passForm.addEventListener("submit", changePassword);
 
-  el.pwdForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    changePassword();
+  ui.refreshBtn.addEventListener("click", loadProfile);
+  ui.deleteBtn.addEventListener("click", deleteAccount);
+  ui.logoutBtn.addEventListener("click", logoutAccount);
+  ui.toastClose.addEventListener("click", () => {
+    ui.toast.hidden = true;
+  });
+}
+
+document.getElementById("btn-delete-image").addEventListener("click", async () => {
+  const ok = window.confirm("Are you sure you want to remove your profile image?");
+  if (!ok) return;
+
+  const res = await fetch(PROFILE_URL, {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({ remove_image: true }),
   });
 
-  el.deleteBtn.addEventListener("click", () => deleteAccount());
+  if (!res.ok) throw new Error(await res.text());
+   window.location.reload();
+});
 
-  loadProfile().catch(() => setStatus(el.status, "Failed to load"));
-})();
+// Init
+wireEvents();
+loadProfile();
+;

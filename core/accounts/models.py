@@ -52,6 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ADMIN = 2, _("admin")
 
     username = models.CharField(verbose_name='username',max_length=50, unique=True)
+    email = models.EmailField(unique=True,null=True,blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     type = models.IntegerField(choices=UserType.choices, default=UserType.CUSTOMER)
@@ -91,11 +92,12 @@ class Position(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="profile")
     display_name = models.CharField(max_length=50)
-    image = models.ImageField(upload_to='images/profile_pictures/', default='images/default_images/blank_profile_picture.png')
-    email = models.EmailField(unique=True,null=True,blank=True)
+    image = models.ImageField(upload_to='images/profile_pictures/', null=True,blank=True)
     description = models.TextField(null=True,blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
+    first_name = models.CharField(max_length=100,null=True,blank=True)
+    last_name = models.CharField(max_length=100,null=True,blank=True)
 
     def __str__(self):
         return self.user.username

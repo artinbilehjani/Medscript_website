@@ -1,249 +1,598 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const config = window.APP_CONFIG || {};
-  const slug = config.currentSlug;
-  const apiBaseUrl = config.postDetailApiBaseUrl;
+/* =========================================================
+   CONFIGURATION
+   ---------------------------------------------------------
+   Replace these API endpoints with the real endpoints
+   from your backend.
+========================================================= */
+const config = window.API_CONFIG || {};
+const postSlug = (config.currentSlug || "").trim();
+const postApiBaseUrl = (config.postDetailApiBaseUrl || "/content/api/v1/post/").trim();
+const commentsApiBaseUrl = (config.postCommentsApiBaseUrl || "/interactions/api/v1/post/").trim();
+const commentsDetailApiBaseUrl = (config.commentsDetailApiBaseUrl || "/interactions/api/v1/comments/").trim();
 
-  const loadingEl = document.getElementById("post-loading");
-  const errorEl = document.getElementById("post-error");
-  const contentEl = document.getElementById("post-content");
+if (!postSlug) {
+  throw new Error("Post slug is missing.");
+}
 
-  const imageEl = document.getElementById("post-image");
-  const titleEl = document.getElementById("post-title");
-  const authorEl = document.getElementById("post-author");
-  const publishedDateEl = document.getElementById("post-published-date");
-  const hitCountEl = document.getElementById("post-hit-count");
-  const categoriesEl = document.getElementById("post-categories");
-  const tagsEl = document.getElementById("post-tags");
-  const contentHtmlEl = document.getElementById("post-content-html");
-  const linksEl = document.getElementById("post-links");
-  const filesEl = document.getElementById("post-files");
+const POST_DETAIL_URL = `${postApiBaseUrl}${encodeURIComponent(postSlug)}/`;
+const POST_COMMENTS_URL = `${commentsApiBaseUrl}${encodeURIComponent(postSlug)}/comments/`;
+const POST_LATEST_COMMENT_URL = `${commentsApiBaseUrl}${encodeURIComponent(postSlug)}/latest-comments/`;
+const POST_COMMENTS_URL = `${commentsApiBaseUrl}${encodeURIComponent(postSlug)}/comments/`;
+
+/* =========================
+   CSRF helper
+   Reads Django CSRF token from cookies for POST requests
+========================= */
+function getCSRFToken() {
+  const cookies = document.cookie.split(";").map(c => c.trim());
+  for (const cookie of cookies) {
+    if (cookie.startsWith("csrftoken=")) {
+      return cookie.split("=")[1];
+    }
+  }
+  return "";
+}
 
 
-  if (!slug || !apiBaseUrl) {
-    showError("تنظیمات صفحه کامل نیست.");
+/* =========================
+   Auth redirect helper
+   Sends anonymous users to login page and preserves return URL
+========================= */
+function redirectToLogin() {
+  const next = encodeURIComponent(window.location.pathname + window.location.search + "#comments");
+  window.location.href = `${commentsState.loginUrl}?next=${next}`;
+}
+
+/* =========================
+   Auth guard
+   Prevents protected actions for guests
+========================= */
+function requireAuth() {
+  if (!commentsState.isLoggedIn) {
+    redirectToLogin();
+    return false;
+  }
+  return true;
+}
+/* =========================================================
+   DOM REFERENCES
+========================================================= */
+
+// Post section elements
+const postLoadingEl = document.getElementById("post-loading");
+const postErrorEl = document.getElementById("post-error");
+const postContentEl = document.getElementById("post-content");
+
+// Comments section elements
+const commentsLoadingEl = document.getElementById("comments-loading");
+const commentsErrorEl = document.getElementById("comments-error");
+const commentsListEl = document.getElementById("comments-list");
+
+// Comment form elements
+const commentFormEl = document.getElementById("comment-form");
+const commentBodyEl = document.getElementById("comment-body");
+const parentIdEl = document.getElementById("parent-id");
+const replyIndicatorEl = document.getElementById("reply-indicator");
+const replyToIdEl = document.getElementById("reply-to-id");
+const cancelReplyEl = document.getElementById("cancel-reply");
+const commentFormMessageEl = document.getElementById("comment-form-message");
+
+/* =========================================================
+   STATE
+========================================================= */
+
+// Store post data if needed later
+let currentPost = null;
+
+// Store comments data in memory for rerendering after actions
+let currentComments = [];
+
+const commentsState = {
+  post: null,
+  postId: null,
+  latestComment: null,
+  comments: [],
+  currentPage: 1,
+  totalPages: 1,
+  isExpanded: false,
+  isLoading: false,
+  isLoggedIn: false,
+  loginUrl: "/login/",
+};
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!postSlug) {
+    showPostError("Post slug is missing in URL.");
+    showCommentsError("Post slug is missing in URL.");
+    return;
+  }
+  commentsState.postId = postSlug;
+
+  try {
+    await Promise.all([
+      loadPostDetails(),
+      fetchLatestComment()
+    ]);
+  } catch (error) {
+    console.error(error);
+  }
+
+  bindCommentsEvents();
+});
+
+async function apiFetch(url, options = {}) {
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken(),
+      ...(options.headers || {}),
+    },
+    credentials: "include",
+    ...options,
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    redirectToLogin();
+    throw new Error("Authentication required");
+  }
+
+  if (!response.ok) {
+    let errorText = "Request failed";
+    try {
+      const data = await response.json();
+      errorText = data.detail || JSON.stringify(data);
+    } catch (_) {}
+    throw new Error(errorText);
+  }
+
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+// Handle comment form submit
+commentFormEl.addEventListener("submit", handleCommentSubmit);
+
+// Cancel reply mode and return to top-level comment mode
+cancelReplyEl.addEventListener("click", resetReplyMode);
+
+/* =========================================================
+   API CALLS
+========================================================= */
+
+// Fetch post details from backend
+async function loadPostDetails() {
+  showElement(postLoadingEl);
+  hideElement(postErrorEl);
+  hideElement(postContentEl);
+
+  try {
+    const data = await apiFetch(POST_DETAIL_URL);
+
+    commentsState.post = data;
+    renderPost(data);
+
+    hideElement(postLoadingEl);
+    showElement(postContentEl);
+  } catch (error) {
+    hideElement(postLoadingEl);
+    showPostError(error.message || "Failed to load post details.");
+  }
+}
+
+// Fetch all comments for current post
+async function fetchLatestComment() {
+  showElement(commentsLoadingEl);
+  hideElement(commentsErrorEl);
+
+  try {
+    const data = await apiFetch(POST_LATEST_COMMENT_URL);
+
+    commentsState.latestComment = data;
+    renderLatestCommentPreview(data);
+
+    hideElement(commentsLoadingEl);
+  } catch (error) {
+    hideElement(commentsLoadingEl);
+    showCommentsError(error.message || "Failed to load latest comment.");
+  }
+}
+//Fetch root Comments// 
+async function fetchComments(page = 1) {
+  showElement(commentsLoadingEl);
+  hideElement(commentsErrorEl);
+  hideElement(commentsListEl);
+
+  try {
+    const data = await apiFetch(`${POST_COMMENTS_URL}?page=${page}`);
+
+    commentsState.comments = Array.isArray(data) ? data : (data.results || []);
+    commentsState.currentPage = data.page || page;
+    commentsState.totalPages = data.total_pages || 1;
+
+    renderComments(commentsState.comments);
+    renderCommentsPagination(commentsState.currentPage, commentsState.totalPages);
+
+    hideElement(commentsLoadingEl);
+    showElement(commentsListEl);
+  } catch (error) {
+    hideElement(commentsLoadingEl);
+    showCommentsError(error.message || "Failed to load comments.");
+  }
+}
+// Create a new comment or reply
+async function createComment(payload) {
+  const url = payload.parent
+    ? API_CONFIG.commentReplies.replace("{commentId}", payload.parent)
+    : API_CONFIG.comments;
+
+  if (!response.ok) {
+    throw new Error(data.detail || data.body?.[0] || "Failed to submit comment.");
+  }
+
+  return apiFetch(url, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// Send like/dislike reaction for a specific comment
+async function reactToComment(commentId, reactionType) {
+  const url = API_CONFIG.commentReaction.replace("{commentId}", commentId);
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCSRFToken(),
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      reaction_type: reactionType, // expected: "like" or "dislike"
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.detail || "Failed to react to comment.");
+  }
+
+  return data;
+}
+
+/* =========================================================
+   RENDER: POST
+========================================================= */
+
+// Render post details into the page
+function renderPost(post) {
+  const authorName = post.author?.display_name || "Unknown author";
+  const authorImage = post.author?.image || "core\media\images\default_images\blank_profile_picture.png";
+  const imageHtml = post.image
+    ? `<img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title || "Post image")}" class="post-image" />`
+    : "";
+
+  const categoriesHtml = Array.isArray(post.categories) && post.categories.length
+    ? `
+      <div class="meta-block">
+        <h4>Categories</h4>
+        <div class="category-list">
+          ${post.categories.map(category => `<span class="category">${escapeHtml(String(category))}</span>`).join("")}
+        </div>
+      </div>
+    `
+    : "";
+
+  const tagsHtml = Array.isArray(post.tags) && post.tags.length
+    ? `
+      <div class="meta-block">
+        <h4>Tags</h4>
+        <div class="tag-list">
+          ${post.tags.map(tag => `<span class="tag">${escapeHtml(String(tag))}</span>`).join("")}
+        </div>
+      </div>
+    `
+    : "";
+
+  const filesHtml = Array.isArray(post.files) && post.files.length
+    ? `
+      <div class="meta-block">
+        <h4>Files</h4>
+        <div class="file-list">
+          ${post.files.map(file => {
+            const fileUrl = typeof file === "string" ? file : file.file || file.url || "#";
+            return `<a class="file-item" href="${escapeHtml(fileUrl)}" target="_blank" rel="noopener noreferrer">Download file</a>`;
+          }).join("")}
+        </div>
+      </div>
+    `
+    : "";
+
+  const videoLinksHtml = Array.isArray(post.video_links) && post.video_links.length
+    ? `
+      <div class="meta-block">
+        <h4>Video Links</h4>
+        <div class="video-list">
+          ${post.video_links.map(link => `
+            <a class="video-item" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
+              ${escapeHtml(link)}
+            </a>
+          `).join("")}
+        </div>
+      </div>
+    `
+    : "";
+
+  postContentEl.innerHTML = `
+    <h1 class="post-title">${escapeHtml(post.title || "")}</h1>
+
+    <div class="post-meta">
+    <strong>Author image:</strong><img src="${escapeHtml(authorImage)}" alt="" class="post-image" />
+      <span><strong>Author:</strong> ${escapeHtml(authorName)}</span>
+      <span><strong>Published:</strong> ${escapeHtml(post.display_date || post.published_date || "")}</span>
+      <span><strong>Views:</strong> ${escapeHtml(String(post.hit_count ?? 0))}</span>
+    </div>
+
+    ${imageHtml}
+
+    <div class="post-content">
+      ${post.content || ""}
+    </div>
+
+    ${categoriesHtml}
+    ${tagsHtml}
+    ${filesHtml}
+    ${videoLinksHtml}
+  `;
+}
+
+/* =========================================================
+   RENDER: COMMENTS
+========================================================= */
+
+// Render full comments tree
+function renderComments(comments) {
+  if (!comments.length) {
+    commentsListEl.innerHTML = `<div class="state">No comments yet.</div>`;
     return;
   }
 
-  fetchPostDetail();
+  commentsListEl.innerHTML = comments.map(comment => renderCommentItem(comment, false)).join("");
 
-  function fetchPostDetail() {
-    const url = buildDetailUrl(apiBaseUrl, slug);
+  // After HTML is injected, bind all interactive buttons
+  bindCommentActionEvents();
+}
 
-    fetch(url, {
-      method: "GET",
-      headers: {
-        "Accept": "application/json"
-      }
-    })
-      .then(handleResponse)
-      .then(function (data) {
-        renderPost(data);
-      })
-      .catch(function (error) {
-        showError(error.message || "خطا در دریافت اطلاعات پست.");
-      });
-  }
+// Render one comment item recursively.
+// isReply controls indentation/styling for nested comments.
+function renderCommentItem(comment, isReply = false) {
+  const authorName = comment.author?.display_name || "Unknown user";
+  const createdDate = comment.display_date || comment.created_date || "";
+  const isLiked = comment.user_reaction === "like";
+  const isDisliked = comment.user_reaction === "dislike";
 
-  function buildDetailUrl(baseUrl, slugValue) {
-    let normalizedBase = baseUrl;
-    if (!normalizedBase.endsWith("/")) {
-      normalizedBase += "/";
-    }
-    return normalizedBase + encodeURIComponent(slugValue) + "/";
-  }
+  const repliesHtml = Array.isArray(comment.replies) && comment.replies.length
+    ? `
+      <div class="comment-children">
+        ${comment.replies.map(reply => renderCommentItem(reply, true)).join("")}
+      </div>
+    `
+    : "";
 
-  function handleResponse(response) {
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error("پست پیدا نشد.");
-      }
-      throw new Error("خطا در دریافت اطلاعات از سرور.");
-    }
-    return response.json();
-  }
+  return `
+    <div class="comment ${isReply ? "reply" : ""}" data-comment-id="${comment.id}">
+      <div class="comment-header">
+        <div>
+          <div class="comment-author">${escapeHtml(authorName)}</div>
+          <div class="comment-date">${escapeHtml(createdDate)}${comment.is_edited ? " • edited" : ""}</div>
+        </div>
+      </div>
 
-  function renderPost(post) {
-    loadingEl.hidden = true;
-    errorEl.hidden = true;
-    contentEl.hidden = false;
+      <div class="comment-body">${escapeHtml(comment.body || "")}</div>
 
-    titleEl.textContent = post.title || "-";
-    authorEl.textContent = post.author || "-";
-    publishedDateEl.textContent = formatDate(post.published_date);
-    hitCountEl.textContent = formatNumber(post.hit_count);
+      <div class="comment-actions">
+        <!-- Reply button only for top-level comments,
+             because backend allows one reply level only -->
+        ${!isReply ? `<button class="btn secondary reply-btn" data-comment-id="${comment.id}">Reply</button>` : ""}
 
-    renderImage(post.image, post.title);
-    renderCategories(post.category || []);
-    renderTags(post.tag || []);
-    renderContent(post.content);
-    renderLinks(post.links);
-    renderFiles(post.files || []);
+        <!-- Like button -->
+        <button
+          class="reaction-btn ${isLiked ? "active-like" : ""}"
+          data-reaction-btn="like"
+          data-comment-id="${comment.id}"
+        >
+          👍 Like (${comment.like_count ?? 0})
+        </button>
 
-    document.title = post.title ? post.title : "جزئیات پست";
-  }
+        <!-- Dislike button -->
+        <button
+          class="reaction-btn ${isDisliked ? "active-dislike" : ""}"
+          data-reaction-btn="dislike"
+          data-comment-id="${comment.id}"
+        >
+          👎 Dislike (${comment.dislike_count ?? 0})
+        </button>
+      </div>
 
-  function renderImage(imageUrl, title) {
-    if (imageUrl) {
-      imageEl.src = imageUrl;
-      imageEl.alt = title || "";
-      imageEl.style.display = "block";
-    } else {
-      imageEl.style.display = "none";
-    }
-  }
+      ${repliesHtml}
+    </div>
+  `;
+}
 
-  function renderCategories(categories) {
-    categoriesEl.innerHTML = "";
+/* =========================================================
+   EVENTS
+========================================================= */
 
-    if (!categories.length) {
-      categoriesEl.innerHTML = '<span class="empty-text">دسته‌بندی ندارد.</span>';
-      return;
-    }
-
-    categories.forEach(function (category) {
-      const item = document.createElement("span");
-      item.className = "tag-item";
-      item.textContent = category.title || category.name || "بدون عنوان";
-      categoriesEl.appendChild(item);
+// Attach click handlers to reply / reaction buttons after comments render
+function bindCommentActionEvents() {
+  // Reply buttons
+  document.querySelectorAll(".reply-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      const commentId = button.dataset.commentId;
+      setReplyMode(commentId);
     });
-  }
+  });
 
-  function renderTags(tags) {
-    tagsEl.innerHTML = "";
+  // Reaction buttons
+  document.querySelectorAll("[data-reaction-btn]").forEach(button => {
+    button.addEventListener("click", async () => {
+      const commentId = button.dataset.commentId;
+      const reactionType = button.dataset.reactionBtn;
 
-    if (!tags.length) {
-      tagsEl.innerHTML = '<span class="empty-text">برچسب ندارد.</span>';
-      return;
-    }
+      try {
+        await reactToComment(commentId, reactionType);
 
-    tags.forEach(function (tag) {
-      const item = document.createElement("span");
-      item.className = "tag-item";
-      item.textContent = tag.title || tag.name || "بدون عنوان";
-      tagsEl.appendChild(item);
-    });
-  }
-
-  function renderContent(content) {
-    contentHtmlEl.innerHTML = content || "<p>محتوایی ثبت نشده است.</p>";
-  }
-
-  function renderLinks(links) {
-    linksEl.innerHTML = "";
-
-    if (!links) {
-      linksEl.innerHTML = '<span class="empty-text">لینکی وجود ندارد.</span>';
-      return;
-    }
-
-    if (Array.isArray(links)) {
-      if (!links.length) {
-        linksEl.innerHTML = '<span class="empty-text">لینکی وجود ندارد.</span>';
-        return;
+        // Reload comments to get exact updated counts and user_reaction
+        await loadComments();
+      } catch (error) {
+        alert(error.message || "Could not update reaction.");
       }
-
-      links.forEach(function (linkItem) {
-        const linkEl = createLinkElementFromUnknown(linkItem);
-        if (linkEl) {
-          linksEl.appendChild(linkEl);
-        }
-      });
-      return;
-    }
-
-    if (typeof links === "string") {
-      const a = document.createElement("a");
-      a.href = links;
-      a.textContent = links;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.className = "link-item";
-      linksEl.appendChild(a);
-      return;
-    }
-
-    if (typeof links === "object") {
-      const linkEl = createLinkElementFromUnknown(links);
-      if (linkEl) {
-        linksEl.appendChild(linkEl);
-        return;
-      }
-    }
-
-    linksEl.innerHTML = '<span class="empty-text">لینکی وجود ندارد.</span>';
-  }
-
-  function createLinkElementFromUnknown(item) {
-    if (!item) return null;
-
-    let url = "";
-    let text = "";
-
-    if (typeof item === "string") {
-      url = item;
-      text = item;
-    } else if (typeof item === "object") {
-      url = item.url || item.link || item.href || "";
-      text = item.title || item.name || item.label || url;
-    }
-
-    if (!url) return null;
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.textContent = text || url;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.className = "link-item";
-
-    return a;
-  }
-
-  function renderFiles(files) {
-    filesEl.innerHTML = "";
-
-    if (!files.length) {
-      filesEl.innerHTML = '<span class="empty-text">فایلی وجود ندارد.</span>';
-      return;
-    }
-
-    files.forEach(function (file) {
-      const fileUrl = file.file || file.url || "";
-      const fileName = file.title || file.name || extractFileName(fileUrl) || "دانلود فایل";
-
-      if (!fileUrl) return;
-
-      const a = document.createElement("a");
-      a.href = fileUrl;
-      a.textContent = fileName;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.className = "file-item";
-
-      filesEl.appendChild(a);
     });
+  });
+}
+
+// Submit top-level comment or reply
+async function handleCommentSubmit(event) {
+  event.preventDefault();
+
+  const body = commentBodyEl.value.trim();
+  const parent = parentIdEl.value ? Number(parentIdEl.value) : null;
+
+  if (!body) {
+    showCommentFormMessage("Comment body cannot be empty.", true);
+    return;
   }
 
-  function extractFileName(url) {
-    if (!url) return "";
-    const parts = url.split("/");
-    return parts[parts.length - 1];
+  const payload = { body };
+
+  // Include parent only when replying
+  if (parent) {
+    payload.parent = parent;
   }
 
-  function formatDate(value) {
-    if (!value) return "-";
-    return value;
-  }
+  try {
+    setCommentFormDisabled(true);
+    hideCommentFormMessage();
 
-  function formatNumber(value) {
-    if (value === null || value === undefined) return "۰";
-    return String(value);
-  }
+    await createComment(payload);
 
-  function showError(message) {
-    loadingEl.hidden = true;
-    contentEl.hidden = true;
-    errorEl.hidden = false;
-    errorEl.textContent = message || "خطایی رخ داده است.";
+    commentBodyEl.value = "";
+    resetReplyMode();
+    showCommentFormMessage("Comment submitted successfully.", false);
+
+    // Reload comments so new item appears in exact backend format
+    await loadComments();
+  } catch (error) {
+    showCommentFormMessage(error.message || "Failed to submit comment.", true);
+  } finally {
+    setCommentFormDisabled(false);
   }
-});
+}
+
+/* =========================================================
+   REPLY MODE HELPERS
+========================================================= */
+
+// Enable reply mode for a specific top-level comment
+function setReplyMode(commentId) {
+  // Store selected parent comment id in hidden input
+  parentIdEl.value = String(commentId);
+
+  // Show small UI indicator so user knows they are replying
+  replyToIdEl.textContent = String(commentId);
+  showElement(replyIndicatorEl);
+
+  // Move cursor to textarea for better UX
+  commentBodyEl.focus();
+}
+
+// Disable reply mode and return form to normal comment mode
+function resetReplyMode() {
+  // Clear hidden parent field so next submit becomes top-level comment
+  parentIdEl.value = "";
+
+  // Clear visible reply target text
+  replyToIdEl.textContent = "";
+
+  // Hide reply indicator block
+  hideElement(replyIndicatorEl);
+}
+
+/* =========================================================
+   FORM HELPERS
+========================================================= */
+
+// Disable/enable form controls during async submit
+function setCommentFormDisabled(disabled) {
+  commentBodyEl.disabled = disabled;
+
+  // Disable all buttons inside the form while request is in progress
+  const buttons = commentFormEl.querySelectorAll("button");
+  buttons.forEach(button => {
+    button.disabled = disabled;
+  });
+}
+
+// Show success/error message under comment form
+function showCommentFormMessage(message, isError = false) {
+  commentFormMessageEl.textContent = message;
+  commentFormMessageEl.classList.remove("hidden", "error");
+
+  if (isError) {
+    commentFormMessageEl.classList.add("error");
+  }
+}
+
+// Hide comment form message box
+function hideCommentFormMessage() {
+  commentFormMessageEl.textContent = "";
+  commentFormMessageEl.classList.add("hidden");
+  commentFormMessageEl.classList.remove("error");
+}
+
+/* =========================================================
+   ERROR HELPERS
+========================================================= */
+
+// Show error message for post section
+function showPostError(message) {
+  postErrorEl.textContent = message;
+  showElement(postErrorEl);
+  hideElement(postContentEl);
+}
+
+// Show error message for comments section
+function showCommentsError(message) {
+  commentsErrorEl.textContent = message;
+  showElement(commentsErrorEl);
+  hideElement(commentsListEl);
+}
+
+/* =========================================================
+   GENERIC UI HELPERS
+========================================================= */
+
+// Show any DOM element by removing hidden utility class
+function showElement(element) {
+  element.classList.remove("hidden");
+}
+
+// Hide any DOM element by adding hidden utility class
+function hideElement(element) {
+  element.classList.add("hidden");
+}
+
+/* =========================================================
+   SECURITY / OUTPUT HELPERS
+========================================================= */
+
+// Escape raw text before injecting into HTML
+// Prevents accidental HTML injection in text-based fields
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = value == null ? "" : String(value);
+  return div.innerHTML;
+}

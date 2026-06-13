@@ -13,6 +13,10 @@ from django.views.decorators.csrf import csrf_protect
 from .utils.captcha import new_math_captcha
 from django.contrib.auth import update_session_auth_hash
 from rest_framework.generics import DestroyAPIView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework.authentication import SessionAuthentication
+from django.contrib.auth.password_validation import validate_password, password_changed
 
 
 
@@ -37,6 +41,9 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["post"]
+
     def post(self, request):
         logout(request)
         return Response({"detail": "ok"}, status=status.HTTP_200_OK)
@@ -50,7 +57,6 @@ class CaptchaView(APIView):
         return Response({"captcha_key": key, "captcha_question": question})
     
 
-
 class MeProfileView(RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -60,25 +66,29 @@ class MeProfileView(RetrieveUpdateAPIView):
         return self.request.user.profile
     
 
-
 class ChangePasswordView(APIView):
+    authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
+    http_method_names = ["post"]
 
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
         user = request.user
-        user.set_password(serializer.validated_data["new_password1"])
-        user.save()
+        new_pw = serializer.validated_data["new_password1"]
+
+        user.set_password(new_pw)
+        user.save(update_fields=["password"])
 
         update_session_auth_hash(request, user)  # keeps session valid
+        password_changed(new_pw, user=user)
 
         return Response({"detail": "Password updated."}, status=status.HTTP_200_OK)
     
-
 class DeleteMeView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
+    http_method_names = ["delete"]
 
     def get_object(self):
         return self.request.user
@@ -86,3 +96,10 @@ class DeleteMeView(DestroyAPIView):
     def perform_destroy(self, instance):
         logout(self.request)
         instance.delete()
+
+@method_decorator(ensure_csrf_cookie, name="dispatch")
+class CsrfView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({"detail": "CSRF cookie set"})

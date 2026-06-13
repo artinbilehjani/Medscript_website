@@ -10,7 +10,7 @@ class UserInline(admin.TabularInline):
     model = User
     fk_name = "user_position"
     extra = 0
-    fields = ("username", "type", "is_staff", "is_active")
+    fields = ("username", "email", "type", "is_staff", "is_active")
     readonly_fields = ("username", "type", "is_staff", "is_active")
     can_delete = False
     show_change_link = True
@@ -27,6 +27,7 @@ class PositionAdmin(admin.ModelAdmin):
 class UserAdmin(BaseUserAdmin):
     list_display = (
         "username",
+        "email",
         "type",
         "user_position",
         "is_staff",
@@ -34,14 +35,14 @@ class UserAdmin(BaseUserAdmin):
         "created_date",
     )
     list_filter = ("type", "is_staff", "is_active", "user_position", "created_date")
-    search_fields = ("username",)
+    search_fields = ("username","email")
     ordering = ("username",)
     readonly_fields = ("created_date", "updated_date")
 
 
 
     fieldsets = (
-        (None, {"fields": ("username", "password")}),
+        (None, {"fields": ("username","email", "password")}),
         ("Personal info", {"fields": ("type", "user_position")}),
         ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
         ("Important dates", {"fields": ("last_login", "created_date", "updated_date")}),
@@ -50,7 +51,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
-            "fields": ("username", "password1", "password2", "type", "user_position", "is_staff", "is_active"),
+            "fields": ("username", "email", "password1", "password2", "type", "user_position", "is_staff", "is_active"),
         }),
     )
 
@@ -61,14 +62,12 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         "display_name",
         "user",
-        "email",
         "created_date",
         "updated_date",
     )
     search_fields = (
         "display_name",
         "user__username",
-        "email",
     )
     list_filter = (
         "created_date",

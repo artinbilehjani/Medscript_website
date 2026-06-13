@@ -109,17 +109,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // --- Show/Hide password toggle (works for both password + confirm) ---
 form.addEventListener("click", (e) => {
-  const btn = e.target.closest(".mgTogglePassword");
-  if (!btn) return;
+  const showIcon = `/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
+  const hideIcon = `/media/images/system/visibility_off_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
+  const togglePwBtn = e.target.closest(".mgTogglePassword");
+  if (!togglePwBtn) return;
 
-  const wrapper = btn.closest(".mg-password");
+  const wrapper = togglePwBtn.closest(".mg-password");
   const input = wrapper?.querySelector("input");
   if (!input) return;
 
-  const show = input.type === "password";
-  input.type = show ? "text" : "password";
-  btn.textContent = show ? "Hide" : "Show";
-  btn.setAttribute("aria-pressed", String(show));
+  const img = togglePwBtn.querySelector("img.mg-show-btn");
+  if (!img) return;
+
+  const isHidden = input.type === "password";
+  input.type = isHidden ? "text" : "password";
+
+  img.src = isHidden ? hideIcon : showIcon;
+  img.alt = isHidden ? "Hide password" : "Show password";
+
+  togglePwBtn.setAttribute("aria-pressed", String(isHidden));
+  togglePwBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
 });
 
   const refreshBtn =

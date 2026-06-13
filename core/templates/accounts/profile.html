@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<section id="mgp-profile-page" class="mgp-profile" aria-labelledby="mgp-profile-title">
+  <h1 class="mgp-profile__header">
+    <div class="mgp-profile__title-wrap">
+      <h1 id="mgp-profile-title" class="mgp-profile__title">My Profile</h1>
+      <p class="mgp-profile__subtitle">View and update your account information.</p>
+    </div>
+
+    <div class="mgp-profile__header-actions">
+      <button type="button" class="mgp-btn mgp-btn--ghost" id="mgp-refresh-btn">
+        Refresh
+      </button>
+      <button type="button" class="mgp-btn mgp-btn--ghost" id="mgp-logout-btn">
+        Logout
+      </button>
+    </div>
+  </h1>
+
+  <div class="mgp-profile__grid">
+    <!-- Left: Identity card -->
+    <aside class="mgp-card mgp-card--sticky">
+      <div class="mgp-card__body mgp-id">
+        <div class="mgp-id__avatar-wrap">
+          <img
+            id="mgp-avatar"
+            class="mgp-id__avatar"
+            alt="Profile avatar"
+            src="/media/images/system/blank_profile_picture.svg"
+          />
+          <div id="image-edit-controls" hidden>
+            <input type="file" id="mgp-image-input" accept="image/*" />
+            <button type="button" id="btn-delete-image">Delete</button>
+          </div>
+          <span class="mgp-id__status" id="mgp-status-pill" aria-live="polite">Loading…</span>
+        </div>
+
+        <div class="mgp-id__meta">
+          <div class="mgp-id__name" id="mgp-full-name">—</div>
+          <div class="mgp-id__line">
+            <span class="mgp-id__label">Username</span>
+            <span class="mgp-id__value" id="mgp-username">—</span>
+          </div>
+          <div class="mgp-id__line" hidden>
+            <span class="mgp-id__label">Email</span>
+            <span class="mgp-id__value" id="mgp-email">—</span>
+          </div>
+          <div class="mgp-id__line" id="mgp-position-div" hidden>
+            <span class="mgp-id__label">Position</span>
+            <span class="mgp-id__value" id="mgp-position">—</span>
+          </div>
+        </div>
+
+        <div class="mgp-id__quick-actions">
+          <button type="button" class="mgp-btn mgp-btn--danger mgp-btn--block" id="mgp-delete-btn">
+            Delete account
+          </button>
+          <p class="mgp-help">
+            Deleting your account is permanent. You will be signed out.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right: Forms -->
+    <main class="mgp-stack">
+      <!-- Profile form -->
+      <section class="mgp-card">
+        <h1 class="mgp-card__header">
+          <h2 class="mgp-card__title">Profile details</h2>
+          <p class="mgp-card__desc">Update your personal information.</p>
+        </h1>
+
+        <div class="mgp-card__body">
+          <form id="mgp-profile-form" class="mgp-form" autocomplete="on">
+            <label class="mgp-field">
+              <span class="mgp-field__label">Display Name</span>
+              <input class="mgp-input" type="text" name="displayـname" id="mgp-display-name" />
+            </label>
+            <div class="mgp-form__row">
+              <label class="mgp-field">
+                <span class="mgp-field__label">First name</span>
+                <input class="mgp-input" type="text" name="first_name" id="mgp-first-name" />
+              </label>
+
+              <label class="mgp-field">
+                <span class="mgp-field__label">Last name</span>
+                <input class="mgp-input" type="text" name="last_name" id="mgp-last-name" />
+              </label>
+            </div>
+
+            <label class="mgp-field">
+              <span class="mgp-field__label">Bio</span>
+              <textarea class="mgp-textarea" name="bio" id="mgp-bio" rows="4" placeholder="A short bio..."></textarea>
+            </label>
+
+            <div class="mgp-form__actions">
+              <button type="submit" class="mgp-btn mgp-btn--primary" id="mgp-save-btn">
+                Save changes
+              </button>
+              <button type="button" class="mgp-btn mgp-btn--ghost" id="mgp-reset-btn">
+                Reset
+              </button>
+              <span class="mgp-inline-status" id="mgp-form-status" aria-live="polite"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Change password -->
+      <section class="mgp-card">
+        <h1 class="mgp-card__header">
+          <h2 class="mgp-card__title">Security</h2>
+          <p class="mgp-card__desc">Change your password.</p>
+        </h1>
+
+        <div class="mgp-card__body">
+          <form id="mgp-password-form" class="mgp-form" autocomplete="off">
+            <div class="mgp-form__row">
+              <label class="mgp-field">
+                <span class="mgp-field__label">Current password</span>
+                <span class="mg-password">
+                  <input class="mgp-input" type="password" name="old_password" id="mgp-old-password" />
+                  <button class="mg-btn mg-btn--ghost mgTogglePassword" type="button" aria-pressed="false">
+                    <img class="mg-show-btn" src="/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+                  </button>
+                </span>
+                
+                
+              </label>
+
+              <label class="mgp-field">
+                <span class="mgp-field__label">New password</span>
+                <span class="mg-password">
+                  <input class="mgp-input" type="password" name="new_password" id="mgp-new-password" />
+                  <button class="mg-btn mg-btn--ghost mgTogglePassword" type="button" aria-pressed="false">
+                    <img class="mg-show-btn" src="/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+                  </button>
+                </span>
+              </label>
+            </div>
+
+            <label class="mgp-field">
+              <span class="mgp-field__label">Confirm new password</span>
+              <span class="mg-password">
+                <input class="mgp-input" type="password" id="mgp-confirm-password" />
+                <button class="mg-btn mg-btn--ghost mgTogglePassword" type="button" aria-pressed="false">
+                  <img class="mg-show-btn" src="/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+                </button>
+              </span>
+              
+            </label>
+
+            <div class="mgp-form__actions">
+              <button type="submit" class="mgp-btn mgp-btn--primary" id="mgp-change-pass-btn">
+                Update password
+              </button>
+              <span class="mgp-inline-status" id="mgp-pass-status" aria-live="polite"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast / alerts -->
+  <div class="mgp-toast" id="mgp-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <div class="mgp-toast__content" id="mgp-toast-content"></div>
+    <button type="button" class="mgp-toast__close" id="mgp-toast-close" aria-label="Close">×</button>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.APP_CONFIG = {
+       
+    };
+</script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}

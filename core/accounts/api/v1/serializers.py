@@ -79,19 +79,25 @@ class PositionSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", read_only=True)
     user_type = serializers.IntegerField(source="user.type", read_only=True)
-
+    email = serializers.CharField(source="user.email", read_only=True)
     user_position = PositionSerializer(source="user.user_position", read_only=True)
+    can_edit_image = serializers.SerializerMethodField()
+    remove_image = serializers.BooleanField(write_only=True, required=False, default=False)
 
     class Meta:
         model = Profile
         fields = [
             "id",
             "username",
+            "first_name",
+            "last_name",
             "user_type",
             "display_name",
             "email",
             "description",
             "image",
+            "can_edit_image",
+            "remove_image",
             "user_position",
             "created_date",
             "updated_date",
@@ -103,6 +109,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and request.user and not request.user.is_staff:
             self.fields["image"].read_only = True
+            self.fields["remove_image"].read_only = True
+    
+    def get_can_edit_image(self, obj):
+        request = self.context.get("request")
+        return bool(request and request.user and request.user.is_staff)
 
     def update(self, instance, validated_data):
         # Handle nested user updates (email / position)
@@ -112,6 +123,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             for attr, value in user_data.items():
                 setattr(user, attr, value)
             user.save(update_fields=list(user_data.keys()))
+
+        remove_image = validated_data.pop("remove_image", False)
+        if remove_image:
+            if instance.image:
+                instance.image.delete(save=False)  # remove file from storage
+            instance.image = None                # set DB to NULL
+            instance.save(update_fields=["image"])
 
         return super().update(instance, validated_data)
 
