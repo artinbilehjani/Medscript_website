@@ -45,7 +45,7 @@ urlpatterns = [
     path("content/", include("content.urls")),
     path("interactions/", include("interactions.urls")),
     path("mediafiles/", include("mediafiles.urls")),
-    path("dashboard/", include("dashboard.urls")),
+    path("", include("dashboard.urls")),
 ]
 
 if settings.COMINGSOON:
@@ -79,3 +79,6 @@ handler400 = "core.error_views.error_400"  # bad_request
 handler403 = "core.error_views.error_403"  # permission_denied
 handler404 = "core.error_views.error_404"  # page_not_found
 handler500 = "core.error_views.error_500"  # server_error
+handler429 = "core.error_views.error_429"  # too_many_requests
+handler503 = "core.error_views.error_503"  # service_unavailable
+

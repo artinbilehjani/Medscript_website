@@ -1,0 +1,840 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medscript — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/admin/home_admin.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/admin/home_admin_mobile_fixes.css' %}" />
+  <link rel="shortcut icon" href="/media/images/system/medscript_logo_svg.svg" type="image/x-icon" />
+</head>
+<body>
+
+  <div class="bg-canvas"></div>
+  <div class="orb orb-teal"></div>
+  <div class="orb orb-blue"></div>
+  <div class="orb orb-slate"></div>
+
+  <div class="layout">
+
+    <!-- ══════════════════ SIDEBAR ══════════════════ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12h6m-3-3v6M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"/>
+          </svg>
+        </div>
+        <span class="brand-name">Medscript</span>
+        <span class="brand-tag">Admin</span>
+        <!-- Close button — visible on mobile only via CSS -->
+        <button class="sidebar-close-btn" id="sidebar-close" aria-label="Close menu">✕</button>
+      </div>
+
+      <nav class="sidebar-nav">
+
+        <!-- Overview -->
+        <div class="nav-group">
+          <span class="nav-group-label">Overview</span>
+          <a href="#" class="nav-link active" data-section="dashboard">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+            Dashboard
+          </a>
+        </div>
+
+        <!-- Home Page -->
+        <div class="nav-group">
+          <span class="nav-group-label">Home Page</span>
+          <a href="#" class="nav-link" data-section="homepage">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Home Page
+          </a>
+        </div>
+
+        <!-- Content -->
+        <div class="nav-group">
+          <span class="nav-group-label">Content</span>
+          <a href="#" class="nav-link" data-section="posts">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Medical Posts
+            <span class="nav-count" id="nav-posts-count">—</span>
+          </a>
+          <a href="#" class="nav-link" data-section="announcements">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Announcements
+            <span class="nav-count" id="nav-ann-count">—</span>
+          </a>
+          <a href="#" class="nav-link" data-section="sections">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/>
+            </svg>
+            Homepage Sections
+          </a>
+        </div>
+
+        <!-- Moderation -->
+        <div class="nav-group">
+          <span class="nav-group-label">Moderation</span>
+          <a href="#" class="nav-link" data-section="comments">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Comments
+            <span class="nav-count" id="nav-comments-count">—</span>
+          </a>
+        </div>
+
+        <!-- Taxonomy -->
+        <div class="nav-group">
+          <span class="nav-group-label">Taxonomy</span>
+          <a href="#" class="nav-link" data-section="tags">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            Tags
+            <span class="nav-count" id="nav-tags-count">—</span>
+          </a>
+          <a href="#" class="nav-link" data-section="categories">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            Categories
+          </a>
+        </div>
+
+        <!-- People -->
+        <div class="nav-group">
+          <span class="nav-group-label">People</span>
+          <a href="#" class="nav-link" data-section="users">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Users
+            <span class="nav-count" id="nav-users-count">—</span>
+          </a>
+          <a href="#" class="nav-link" data-section="positions">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+              <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+            </svg>
+            Positions
+          </a>
+        </div>
+
+        <!-- Site -->
+        <div class="nav-group">
+          <span class="nav-group-label">Site</span>
+          <a href="#" class="nav-link" data-section="settings">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Site Settings
+          </a>
+        </div>
+
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="theme-btn" id="theme-toggle" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+
+        {% if request.user.is_authenticated %}
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar-wrap">
+              {% if request.user.profile.image %}
+                <img class="sidebar-user-avatar-img" src="{{ request.user.profile.image.url }}" alt="{{ request.user.profile.display_name }}" />
+              {% else %}
+                <div class="user-avatar">
+                  {{ request.user.profile.display_name|first|upper }}{{ request.user.profile.display_name|slice:"1:2"|upper }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="user-meta">
+              <span class="user-name">{{ request.user.profile.display_name }}</span>
+              <span class="user-role">
+                {% if request.user.user_position %}{{ request.user.user_position.name }}
+                {% elif request.user.is_superuser %}Superuser
+                {% elif request.user.is_staff %}Staff
+                {% else %}Member{% endif %}
+              </span>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'accounts:login_page' %}?next={{ request.path }}" class="sidebar-login-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            Login
+          </a>
+        {% endif %}
+      </div>
+    </aside>
+
+    <!-- ══════════════════ MAIN ══════════════════ -->
+    <main class="main">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="hamburger" id="hamburger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <h1 class="page-title" id="page-title">Dashboard</h1>
+        <div class="topbar-right">
+          <div class="api-status" id="api-status">
+            <span class="status-dot"></span>
+            <span class="status-text">API</span>
+          </div>
+          <button class="topbar-btn" id="refresh-btn" title="Refresh data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="toast" id="toast"></div>
+
+      <!-- ── SECTION: Dashboard ── -->
+      <section class="section active" id="section-dashboard">
+        <div class="stats-row">
+          <div class="stat-card glass tilt">
+            <div class="stat-icon icon-teal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-label">Published Posts</span>
+              <span class="stat-value" id="stat-published">—</span>
+            </div>
+          </div>
+          <div class="stat-card glass tilt">
+            <div class="stat-icon icon-amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-label">Active Announcement</span>
+              <span class="stat-value" id="stat-ann">—</span>
+            </div>
+          </div>
+          <div class="stat-card glass tilt">
+            <div class="stat-icon icon-blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-label">Active Sections</span>
+              <span class="stat-value" id="stat-sections">—</span>
+            </div>
+          </div>
+          <div class="stat-card glass tilt">
+            <div class="stat-icon icon-rose">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-label">Draft Posts</span>
+              <span class="stat-value" id="stat-drafts">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="glass panel">
+            <div class="panel-head">
+              <h2>Recent Posts</h2>
+              <button class="text-btn" data-goto="posts">View all →</button>
+            </div>
+            <div class="panel-body" id="dash-recent-posts">
+              <div class="skeleton-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+            </div>
+          </div>
+          <div class="glass panel">
+            <div class="panel-head">
+              <h2>Site Settings</h2>
+              <button class="text-btn" data-goto="homepage">Edit →</button>
+            </div>
+            <div class="panel-body" id="dash-settings-snap">
+              <div class="skeleton-list"><div class="skeleton"></div><div class="skeleton"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Home Page ── -->
+      <section class="section" id="section-homepage">
+        <div class="section-toolbar">
+          <h2 class="section-sub">Home Page Management</h2>
+          <button class="btn btn-primary" id="hp-save-all-btn" type="button">Save All Changes</button>
+        </div>
+
+        <!-- Hero -->
+        <div class="glass panel" style="margin-bottom:16px">
+          <div class="panel-head">
+            <h2>Hero Section</h2>
+            <span class="hint-text">Displayed at the top of the home page</span>
+          </div>
+          <div class="panel-body">
+            <div class="hp-hero-card">
+              <div class="hp-preview" id="hp-hero-preview">
+                <span class="hp-preview-label">Preview</span>
+                <span class="hp-preview-badge">Medical University Posts</span>
+                <div class="hp-preview-title" id="hp-preview-title">MEDSCRIPT</div>
+                <div class="hp-preview-sub" id="hp-preview-sub">Your complete medical university note archive.</div>
+              </div>
+              <form id="hp-hero-form" class="settings-form">
+                <div class="field-group">
+                  <label class="field-label" for="hp-site-title">Site Title</label>
+                  <input type="text" id="hp-site-title" class="field-input" placeholder="e.g. MEDSCRIPT" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="hp-hero-text">Hero Subtitle</label>
+                  <textarea id="hp-hero-text" class="field-input field-textarea" rows="3" placeholder="Short tagline shown under the title…"></textarea>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="hp-footer-text">Footer Text</label>
+                  <input type="text" id="hp-footer-text" class="field-input" placeholder="© 2025 MedScript…" />
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Announcements -->
+        <div class="glass panel" style="margin-bottom:16px">
+          <div class="panel-head">
+            <h2>Announcement Banner</h2>
+            <button class="btn btn-primary" id="hp-new-ann-btn" type="button" style="padding:6px 12px;font-size:12px">+ New</button>
+          </div>
+          <div class="panel-body">
+            <p class="hint-text" style="margin-bottom:12px">The active announcement appears as a banner below the hero.</p>
+            <div class="hp-ann-list" id="hp-ann-list"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Coverflow stats -->
+        <div class="glass panel" style="margin-bottom:16px">
+          <div class="panel-head">
+            <h2>Coverflow Carousels</h2>
+            <span class="hint-text">Auto-populated from latest &amp; most-viewed published posts</span>
+          </div>
+          <div class="panel-body">
+            <div class="hp-cf-stats">
+              <div class="hp-cf-stat"><span class="hp-cf-stat-val" id="hp-cf-latest">—</span><span class="hp-cf-stat-label">Latest shown</span></div>
+              <div class="hp-cf-stat"><span class="hp-cf-stat-val" id="hp-cf-popular">—</span><span class="hp-cf-stat-label">Popular shown</span></div>
+              <div class="hp-cf-stat"><span class="hp-cf-stat-val" id="hp-cf-published">—</span><span class="hp-cf-stat-label">Total published</span></div>
+              <div class="hp-cf-stat"><span class="hp-cf-stat-val" id="hp-cf-draft">—</span><span class="hp-cf-stat-label">Drafts pending</span></div>
+            </div>
+            <p class="hint-text" style="margin-top:12px">To change which posts appear → <button class="text-btn" data-goto="posts">Medical Posts →</button></p>
+          </div>
+        </div>
+
+        <!-- Page sections order -->
+        <div class="glass panel">
+          <div class="panel-head">
+            <h2>Page Sections</h2>
+            <span class="hint-text">Drag to reorder · Toggle to show/hide</span>
+          </div>
+          <div class="panel-body" id="hp-sections-list"><div class="spinner"></div></div>
+          <div class="panel-foot">
+            <button class="btn btn-ghost" id="hp-save-order-btn" type="button">Save Section Order</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Posts ── -->
+      <section class="section" id="section-posts">
+        <div class="section-toolbar">
+          <div class="toolbar-left">
+            <input type="text" class="search-input" id="posts-search" placeholder="Search notes…" />
+            <select class="filter-select" id="posts-filter">
+              <option value="">All statuses</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="new-post-btn">+ New Note</button>
+        </div>
+        <div class="glass table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Title</th><th>Status</th><th>Date</th><th>Views</th><th>Actions</th></tr></thead>
+            <tbody id="posts-tbody"><tr><td colspan="5" class="loading-row"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Announcements ── -->
+      <section class="section" id="section-announcements">
+        <div class="section-toolbar">
+          <h2 class="section-sub">Manage Announcements</h2>
+          <button class="btn btn-primary" id="new-ann-btn">+ New Announcement</button>
+        </div>
+        <div class="ann-grid" id="ann-grid"><div class="glass panel loading-panel"><div class="spinner"></div></div></div>
+      </section>
+
+      <!-- ── SECTION: Homepage Sections ── -->
+      <section class="section" id="section-sections">
+        <div class="section-toolbar">
+          <h2 class="section-sub">Homepage Sections</h2>
+          <span class="hint-text">Drag to reorder · Toggle to show/hide</span>
+        </div>
+        <div class="glass panel">
+          <div class="panel-body" id="sections-list"><div class="spinner"></div></div>
+          <div class="panel-foot"><button class="btn btn-primary" id="save-order-btn">Save Order</button></div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Site Settings ── -->
+      <section class="section" id="section-settings">
+        <div class="glass panel settings-panel">
+          <div class="panel-head"><h2>Site Settings</h2><span class="hint-text">Changes save to your Django API</span></div>
+          <div class="panel-body">
+            <form id="settings-form" class="settings-form">
+              <div class="field-group"><label class="field-label" for="s-title">Site Title</label><input type="text" id="s-title" name="site_title" class="field-input" placeholder="e.g. MedNotes Portal" /></div>
+              <div class="field-group"><label class="field-label" for="s-hero">Homepage Hero Text</label><textarea id="s-hero" name="homepage_hero_text" class="field-input field-textarea" rows="3" placeholder="Your hero tagline…"></textarea></div>
+              <div class="field-group"><label class="field-label" for="s-contact">Contact Info</label><textarea id="s-contact" name="contact_info" class="field-input field-textarea" rows="3" placeholder="Email, phone, address…"></textarea></div>
+              <div class="field-group"><label class="field-label" for="s-footer">Footer Text</label><input type="text" id="s-footer" name="footer_text" class="field-input" placeholder="© 2026 MedNotes." /></div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="settings-save-btn">Save Settings</button>
+                <button type="button" class="btn btn-ghost" id="settings-reset-btn">Reset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Comments ── -->
+      <section class="section" id="section-comments">
+        <div class="section-toolbar">
+          <div class="toolbar-left">
+            <select class="filter-select" id="comments-filter">
+              <option value="">All comments</option><option value="1">Pending</option><option value="2">Approved</option><option value="3">Rejected</option>
+            </select>
+          </div>
+          <span class="hint-text" id="comments-count-label"></span>
+        </div>
+        <div class="glass table-wrap">
+          <table class="data-table">
+            <thead><tr><th style="width:36px"></th><th>Comment</th><th>Author</th><th>Post</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="comments-tbody"><tr><td colspan="7" class="loading-row"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Tags ── -->
+      <section class="section" id="section-tags">
+        <div class="section-toolbar">
+          <div class="toolbar-left"><input type="text" class="search-input" id="tags-search" placeholder="Search tags…" /></div>
+          <button class="btn btn-primary" id="new-tag-btn">+ New Tag</button>
+        </div>
+        <div class="glass table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Slug</th><th>Posts</th><th>Actions</th></tr></thead>
+            <tbody id="tags-tbody"><tr><td colspan="4" class="loading-row"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Categories ── -->
+      <section class="section" id="section-categories">
+        <div class="section-toolbar">
+          <h2 class="section-sub">Categories</h2>
+          <button class="btn btn-primary" id="new-cat-btn">+ New Category</button>
+        </div>
+        <div class="cat-layout">
+          <div class="glass panel cat-tree-panel">
+            <div class="panel-head"><h2>Category Tree</h2></div>
+            <div class="panel-body" id="cat-tree"><div class="spinner"></div></div>
+          </div>
+          <div class="glass panel cat-detail-panel" id="cat-detail-panel" style="display:none">
+            <div class="panel-head">
+              <h2 id="cat-detail-title">Edit Category</h2>
+              <button class="modal-close" id="cat-detail-close">✕</button>
+            </div>
+            <div class="panel-body">
+              <form id="cat-edit-form" class="settings-form">
+                <input type="hidden" id="cat-edit-id" />
+                <div class="field-group"><label class="field-label">Name</label><input type="text" id="cat-edit-name" class="field-input" placeholder="Category name" required /></div>
+                <div class="field-group"><label class="field-label">Parent Category</label><select id="cat-edit-parent" class="field-input field-select"><option value="">— Root (no parent) —</option></select></div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save Category</button>
+                  <button type="button" class="btn btn-danger" id="cat-delete-btn" style="display:none">Delete</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Users ── -->
+      <section class="section" id="section-users">
+        <div class="section-toolbar">
+          <div class="toolbar-left">
+            <input type="text" class="search-input" id="users-search" placeholder="Search users…" />
+            <select class="filter-select" id="users-type-filter">
+              <option value="">All types</option><option value="1">Customer</option><option value="2">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="glass table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Username</th><th>Display Name</th><th>Position</th><th>Type</th><th>Staff</th><th>Active</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"><tr><td colspan="8" class="loading-row"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── SECTION: Positions ── -->
+      <section class="section" id="section-positions">
+        <div class="section-toolbar">
+          <h2 class="section-sub">Staff Positions</h2>
+          <button class="btn btn-primary" id="new-pos-btn">+ New Position</button>
+        </div>
+        <div class="glass table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Position</th><th>Description</th><th>Members</th><th>Actions</th></tr></thead>
+            <tbody id="positions-tbody"><tr><td colspan="4" class="loading-row"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ══════════════════ MODALS ══════════════════ -->
+
+  <!-- Announcement Modal -->
+  <div class="modal-overlay" id="ann-modal">
+    <div class="modal glass">
+      <div class="modal-head"><h3 id="ann-modal-title">New Announcement</h3><button class="modal-close" data-modal="ann-modal">✕</button></div>
+      <form id="ann-form" class="modal-body">
+        <input type="hidden" id="ann-id" />
+        <div class="field-group"><label class="field-label" for="ann-title-inp">Title</label><input type="text" id="ann-title-inp" name="title" class="field-input" placeholder="Announcement title" required /></div>
+        <div class="field-group"><label class="field-label" for="ann-body-inp">Body</label><textarea id="ann-body-inp" name="body" class="field-input field-textarea" rows="4" placeholder="Announcement body text…"></textarea></div>
+        <div class="field-group field-row">
+          <div class="field-group" style="flex:1"><label class="field-label" for="ann-date-inp">Publish Date</label><input type="date" id="ann-date-inp" name="published_date" class="field-input" /></div>
+          <div class="field-group toggle-group"><label class="field-label">Active</label><label class="toggle"><input type="checkbox" id="ann-active-inp" name="is_active" /><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-modal="ann-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- POST EDITOR (full-screen) -->
+  <div class="modal-overlay pe-overlay" id="post-modal">
+    <div class="pe-editor glass">
+      <header class="pe-header">
+        <div class="pe-header-left">
+          <button class="pe-back-btn" data-modal="post-modal" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="pe-header-title">
+            <span id="pe-modal-label">New Medical Note</span>
+            <span class="pe-autosave-status" id="pe-autosave-status"></span>
+          </div>
+        </div>
+        <div class="pe-header-actions">
+          <button class="btn btn-ghost pe-preview-btn" id="pe-preview-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Preview
+          </button>
+          <button class="btn btn-ghost" id="pe-save-draft-btn" type="button">Save Draft</button>
+          <button class="btn btn-primary" id="pe-publish-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+            Publish
+          </button>
+        </div>
+      </header>
+
+      <div class="pe-body">
+        <!-- Main content -->
+        <div class="pe-main">
+          <div class="pe-cover-zone" id="pe-cover-zone">
+            <img class="pe-cover-preview" id="pe-cover-preview" src="" alt="" hidden />
+            <div class="pe-cover-placeholder" id="pe-cover-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Click or drag to add cover image</span>
+            </div>
+            <div class="pe-cover-actions" id="pe-cover-actions" hidden>
+              <label class="pe-cover-btn" for="pe-image-inp">Change</label>
+              <button class="pe-cover-btn pe-cover-btn-danger" id="pe-cover-remove-btn" type="button">Remove</button>
+            </div>
+            <input type="file" id="pe-image-inp" name="image" accept="image/*" hidden />
+          </div>
+
+          <textarea class="pe-title-input" id="pe-title-inp" name="title" placeholder="Note title…" rows="1" maxlength="250"></textarea>
+
+          <!-- Rich text toolbar -->
+          <div class="pe-toolbar" id="pe-toolbar">
+            <!-- Text style -->
+            <button type="button" class="pe-tb-btn" data-cmd="bold" title="Bold (Ctrl+B)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="italic" title="Italic (Ctrl+I)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="underline" title="Underline (Ctrl+U)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="strikeThrough" title="Strikethrough">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="4" y1="12" x2="20" y2="12"/><path d="M17.5 5H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H6.5"/></svg>
+            </button>
+            <div class="pe-tb-sep"></div>
+            <!-- Headings -->
+            <select class="pe-tb-select" id="pe-heading-sel" title="Heading level">
+              <option value="">Paragraph</option>
+              <option value="h1">Heading 1</option>
+              <option value="h2">Heading 2</option>
+              <option value="h3">Heading 3</option>
+              <option value="h4">Heading 4</option>
+            </select>
+            <div class="pe-tb-sep"></div>
+            <!-- Alignment -->
+            <button type="button" class="pe-tb-btn" data-cmd="justifyLeft" title="Align left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="justifyCenter" title="Center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="justifyRight" title="Align right">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="pe-tb-sep"></div>
+            <!-- Lists -->
+            <button type="button" class="pe-tb-btn" data-cmd="insertUnorderedList" title="Bullet list">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="insertOrderedList" title="Numbered list">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="indent" title="Indent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="3" y1="6" x2="21" y2="6"/><polyline points="3 12 8 12"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><polyline points="8 9 13 12 8 15"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn" data-cmd="outdent" title="Outdent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><polyline points="13 9 8 12 13 15"/></svg>
+            </button>
+            <div class="pe-tb-sep"></div>
+            <!-- Quote / HR / Link -->
+            <button type="button" class="pe-tb-btn pe-tb-blockquote" title="Blockquote">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn pe-tb-hr" title="Horizontal rule">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="8" y2="6"/><line x1="3" y1="18" x2="8" y2="18"/></svg>
+            </button>
+            <button type="button" class="pe-tb-btn pe-tb-link" title="Insert link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </button>
+            <div class="pe-tb-sep"></div>
+            <!-- Clear -->
+            <button type="button" class="pe-tb-btn" data-cmd="removeFormat" title="Clear formatting">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+            </button>
+          </div>
+
+          <div class="pe-content-editor" id="pe-content-editor" contenteditable="true" data-placeholder="Write your medical note here…"></div>
+          <div class="pe-word-count" id="pe-word-count">0 words</div>
+        </div>
+
+        <!-- Accordion sidebar -->
+        <aside class="pe-sidebar">
+          <input type="hidden" id="pe-post-id" />
+
+          <!-- Publishing -->
+          <div class="pe-acc">
+            <button type="button" class="pe-acc-trigger pe-acc-open" data-acc="publishing">
+              <span class="pe-acc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+              <span class="pe-acc-label">Publishing</span>
+              <span class="pe-acc-badge" id="pe-pub-badge"></span>
+              <svg class="pe-acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pe-acc-body" id="pe-acc-publishing">
+              <div class="pe-field-group">
+                <label class="pe-label">Status</label>
+                <select class="pe-select" id="pe-status-inp" name="status"><option value="draft">Draft</option><option value="published">Published</option></select>
+              </div>
+              <div class="pe-field-group">
+                <label class="pe-label">Publish Date</label>
+                <input type="datetime-local" class="pe-input" id="pe-date-inp" name="published_date" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="pe-acc">
+            <button type="button" class="pe-acc-trigger" data-acc="tags">
+              <span class="pe-acc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+              <span class="pe-acc-label">Tags</span>
+              <span class="pe-acc-badge" id="pe-tags-badge"></span>
+              <svg class="pe-acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pe-acc-body pe-acc-body-hidden" id="pe-acc-tags">
+              <div class="pe-tags-selected" id="pe-tags-selected"></div>
+              <div class="pe-field-group">
+                <input type="text" class="pe-input" id="pe-tags-search" placeholder="Search or create tag…" autocomplete="off" />
+                <div class="pe-dropdown" id="pe-tags-dropdown" hidden></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories -->
+          <div class="pe-acc">
+            <button type="button" class="pe-acc-trigger" data-acc="categories">
+              <span class="pe-acc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+              <span class="pe-acc-label">Categories</span>
+              <span class="pe-acc-badge" id="pe-cats-badge"></span>
+              <svg class="pe-acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pe-acc-body pe-acc-body-hidden" id="pe-acc-categories">
+              <div class="pe-cats-list" id="pe-cats-list"></div>
+            </div>
+          </div>
+
+          <!-- Recording Links -->
+          <div class="pe-acc">
+            <button type="button" class="pe-acc-trigger" data-acc="links">
+              <span class="pe-acc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span>
+              <span class="pe-acc-label">Recording Links</span>
+              <span class="pe-acc-badge" id="pe-links-badge"></span>
+              <svg class="pe-acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pe-acc-body pe-acc-body-hidden" id="pe-acc-links">
+              <p class="pe-hint">One per line: <code>Title | URL</code></p>
+              <textarea class="pe-textarea" id="pe-links-inp" name="links" rows="6" placeholder="Anatomy Lecture 1 | https://aparat.com/v/abc&#10;Anatomy Lecture 2 | https://aparat.com/v/xyz"></textarea>
+            </div>
+          </div>
+
+          <!-- Session Files -->
+          <div class="pe-acc">
+            <button type="button" class="pe-acc-trigger" data-acc="files">
+              <span class="pe-acc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+              <span class="pe-acc-label">Session Files</span>
+              <span class="pe-acc-badge" id="pe-files-badge"></span>
+              <svg class="pe-acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="pe-acc-body pe-acc-body-hidden" id="pe-acc-files">
+              <div class="pe-files-list" id="pe-files-list"></div>
+              <div class="pe-upload-zone" id="pe-upload-zone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Drop files or <label for="pe-file-inp" class="pe-upload-link">browse</label></span>
+                <input type="file" id="pe-file-inp" multiple hidden />
+              </div>
+              <div class="pe-upload-queue" id="pe-upload-queue"></div>
+            </div>
+          </div>
+
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm delete -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal glass modal-sm">
+      <div class="modal-head"><h3>Confirm Delete</h3><button class="modal-close" data-modal="confirm-modal">✕</button></div>
+      <div class="modal-body">
+        <p id="confirm-text" class="confirm-text">Are you sure you want to delete this item?</p>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" data-modal="confirm-modal">Cancel</button>
+          <button class="btn btn-danger" id="confirm-ok">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Modal -->
+  <div class="modal-overlay" id="tag-modal">
+    <div class="modal glass modal-sm">
+      <div class="modal-head"><h3 id="tag-modal-title">New Tag</h3><button class="modal-close" data-modal="tag-modal">✕</button></div>
+      <form id="tag-form" class="modal-body">
+        <input type="hidden" id="tag-id" />
+        <div class="field-group"><label class="field-label">Tag Name</label><input type="text" id="tag-name-inp" class="field-input" placeholder="e.g. Cardiology" required /></div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-modal="tag-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Tag</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Position Modal -->
+  <div class="modal-overlay" id="pos-modal">
+    <div class="modal glass">
+      <div class="modal-head"><h3 id="pos-modal-title">New Position</h3><button class="modal-close" data-modal="pos-modal">✕</button></div>
+      <form id="pos-form" class="modal-body">
+        <input type="hidden" id="pos-id" />
+        <div class="field-group"><label class="field-label">Position Name</label><input type="text" id="pos-name-inp" class="field-input" placeholder="e.g. Senior Radiologist" required /></div>
+        <div class="field-group"><label class="field-label">Description</label><textarea id="pos-desc-inp" class="field-input field-textarea" rows="3" placeholder="Role description…"></textarea></div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-modal="pos-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Position</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Edit Modal -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal glass modal-wide">
+      <div class="modal-head"><h3 id="user-modal-title">Edit User</h3><button class="modal-close" data-modal="user-modal">✕</button></div>
+      <form id="user-form" class="modal-body">
+        <input type="hidden" id="user-id" />
+        <div class="user-modal-info" id="user-modal-info"></div>
+        <div class="field-group"><label class="field-label">Position</label><select id="user-pos-inp" class="field-input field-select"><option value="">— No position —</option></select></div>
+        <div class="field-group"><label class="field-label">User Type</label><select id="user-type-inp" class="field-input field-select"><option value="1">Customer</option><option value="2">Admin</option></select></div>
+        <div class="field-group field-row" style="gap:24px">
+          <div class="toggle-group field-group"><label class="field-label">Staff Access</label><label class="toggle"><input type="checkbox" id="user-staff-inp" /><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div>
+          <div class="toggle-group field-group"><label class="field-label">Active Account</label><label class="toggle"><input type="checkbox" id="user-active-inp" /><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-modal="user-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Comment Detail Modal -->
+  <div class="modal-overlay" id="comment-view-modal">
+    <div class="modal glass modal-wide">
+      <div class="modal-head"><h3>Comment Detail</h3><button class="modal-close" data-modal="comment-view-modal">✕</button></div>
+      <div class="modal-body" id="comment-view-body" style="gap:10px"></div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/admin/home_admin.js' %}"></script>
+  <script src="{% static 'js/admin/admin_post.js' %}"></script>
+  <script src="{% static 'js/admin/admin_home_page.js' %}"></script>
+  <script src="{% static 'js/admin/home_admin_section_renderer.js' %}"></script>
+  <script src="{% static 'js/admin/admin_post_mobile_patch.js' %}"></script>
+  <script src="{% static 'js/admin/admin_api_fix.js' %}"></script> 
+  <script src="{% static 'js/admin/admin_list_sync_hooks.js' %}"></script>
+</body>
+</html>

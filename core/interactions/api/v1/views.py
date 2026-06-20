@@ -31,10 +31,13 @@ class PostCommentListCreateAPIView(generics.ListCreateAPIView):
     pagination_class = CommentPagination
 
     def get_post(self):
-        return get_object_or_404(
-            Post.objects.filter(status=Post.Status.PUBLISHED),
-            slug=self.kwargs["slug"],
-        )
+        # Cache on the view instance — avoids two identical DB queries per request
+        if not hasattr(self, "_post"):
+            self._post = get_object_or_404(
+                Post.objects.filter(status=Post.Status.PUBLISHED),
+                slug=self.kwargs["slug"],
+            )
+        return self._post
 
     def get_serializer_class(self):
         if self.request.method == "POST":

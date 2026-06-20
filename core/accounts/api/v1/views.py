@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,21 +5,18 @@ from .serializers import RegisterSerializer, LoginSerializer,ProfileSerializer,C
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django.contrib.auth import logout
-from django.contrib.auth import login
+from django.contrib.auth import logout,login
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect
 from .utils.captcha import new_math_captcha
 from django.contrib.auth import update_session_auth_hash
 from rest_framework.generics import DestroyAPIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.authentication import SessionAuthentication
-from django.contrib.auth.password_validation import validate_password, password_changed
+from django.contrib.auth.password_validation import password_changed
 
 
 
-# @method_decorator(csrf_protect, name="dispatch")
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 

@@ -1,452 +1,718 @@
-/* Basic Reset & Body Styling */
+/* ═══════════════════════════════════════════════
+   Post List & Search — iOS/Apple inspired
+   Neural purple palette from base.css
+═══════════════════════════════════════════════ */
+
+/* ── Page wrapper ── */
 .content-wrapper {
-    /* Adjust this value based on your header's actual height */
-    padding-top: 100px; /* Example: Set to a value like 80px, 100px, or more */
-    padding-left: 20px; /* Optional: Add some horizontal padding */
-    padding-right: 20px; /* Optional: Add some horizontal padding */
-    box-sizing: border-box; /* Include padding in the element's total width and height */
+  padding-top: 110px;
+  padding-bottom: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
 }
 
-#pagination-controls .page-btn {
-    cursor: pointer;
-    list-style: none;  
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-left: 3px;
-    margin-right: 3px;
-    padding: 10px 12px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f5f5f4;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
+/* ═══════════════════════════════════════════════
+   TOOLBAR  (search + filter + view toggle)
+═══════════════════════════════════════════════ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
-#pagination-controls .page-btn:hover {
-  background-color:rgba(255, 255, 255, 0.1);
-  border-color: #9945ff;
-  box-shadow: 0 0 10px rgba(153, 69, 255, 0.5);
-}
-
-#pagination-controls .page-btn.is-active {
-  font-weight: 700;
-  background-color:rgba(255, 255, 255, 0.3);
-  border-color: #9945ff;
-  box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
-}
-
-#pagination-controls .nav-btn {
-    cursor: pointer;
-    list-style: none;  
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-left: 3px;
-    margin-right: 3px;
-    padding: 10px 12px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f5f5f4;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-
-#pagination-controls .nav-btn:hover {
-  background-color:rgba(255, 255, 255, 0.1);
-  border-color: #9945ff;
-  box-shadow: 0 0 10px rgba(153, 69, 255, 0.5);
-}
-
-#pagination-controls .ellipsis {
-     padding: 0 8px; 
-     color: white;
-}
-
-/*  filter menu content */
-.category-pocket { margin-bottom: 10px; }
-
-.category-pocket-button {
-    cursor: pointer;
-    list-style: none;            /* removes default marker in some browsers */
-    user-select: none;
-    padding: 10px 15px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f5f5f4;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-.category-pocket-button:hover {
-    background-color:rgba(255, 255, 255, 0.3);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
-}
-
-.category-pocket[open] .category-pocket-button {
-  background-color:rgba(255, 255, 255, 0.3);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
-}
-
-.category-pocket-body {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-top: 0;
-  border-radius: 0 0 8px 8px;
-}
-.icon{ width:24px; height:24px; display:block; }
-/* container that holds ONLY the tag checkboxes */
-#tag-filters {
-  max-height: 200px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 8px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  scrollbar-gutter: stable;
-}
-
-/* optional: make each option stack nicely */
-#tag-filters .filter-option {
-  display: block;
-}
-
-
-/* Filter Menu Button */
-#filter-menu-button {
-    padding: 10px 15px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f5f5f4;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-
-#filter-menu-button:hover {
-    background-color:rgba(255, 255, 255, 0.3);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
-}
-
-/* Filter Menu Styles */
-.filter-menu {
-    top: 60px; /* Adjust based on header height */
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f5f5f4;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    padding: 15px;
-    z-index: 1000; /* Ensure it's above other content */
-    max-width: 80%;
-    display: none; /* Hidden by default */
-    flex-direction: row; /* Stack filter sections vertically */
-}
-
-.filter-menu.open {
-    display: flex; /* Show when open */
-}
-
-.filter-section {
-    margin-bottom: 15px;
-}
-
-.filter-section h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.1em;
-    color: #555;
-}
-
-.filter-options label {
-    display: block; /* Each option on its own line */
-    margin-bottom: 5px;
-    cursor: pointer;
-    font-size: 0.95em;
-}
-
-.filter-options input[type="checkbox"] {
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-#apply-filters-button, #clear-filters-button {
-    padding: 8px 12px;
-    margin-right: 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-    height: 30px;
-    width: 100px;
-}
-
-#apply-filters-button {
-    background-color: #28a745;
-    color: white;
-}
-#apply-filters-button:hover {
-    background-color: #218838;
-}
-
-#clear-filters-button {
-    background-color: #ffc107;
-    color: #333;
-}
-#clear-filters-button:hover {
-    background-color: #e0a800;
-}
-
-
-/* Search Bar Styling */
+/* ── Search bar ── */
 .search-container {
-    display: flex;
-    flex-grow: 1; /* Allow search bar to take available space */
-    max-width: 400px; /* Limit its width */
+  display: flex;
+  flex: 1;
+  min-width: 200px;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-container:focus-within {
+  border-color: rgba(224, 163, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(224, 163, 255, 0.12),
+              0 0 20px rgba(224, 163, 255, 0.15);
 }
 
 #search-input {
-    flex-grow: 1;
-    background-color: rgba(245, 245, 244, 0.7);
-    padding: 10px 15px;
-    color: #121212;
-    border: 1px solid #ccc;
-    border-radius: 5px 0 0 5px; /* Rounded left corners */
-    font-size: 1em;
-    outline: none; /* Remove outline on focus */
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #fff;
+  min-width: 0;
 }
-
-#search-input:focus {
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
-}
+#search-input::placeholder { color: rgba(255,255,255,0.35); }
 
 #search-button {
-    padding: 10px 15px;
-    border: none;
-    background-color:rgba(255, 255, 255, 0.3);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
-    color: white;
-    border-radius: 5px 0 0 5px; /* Rounded right corners */
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: rgba(224, 163, 255, 0.7);
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+#search-button:hover { color: #e0a3ff; }
+#search-button .icon { width: 20px; height: 20px; display: block; }
+
+/* ── Icon buttons (filter, grid, list) ── */
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+.icon-btn:hover {
+  background: rgba(224, 163, 255, 0.12);
+  border-color: rgba(224, 163, 255, 0.3);
+  box-shadow: 0 0 16px rgba(224, 163, 255, 0.2);
+}
+.icon-btn.active {
+  background: rgba(224, 163, 255, 0.18);
+  border-color: rgba(224, 163, 255, 0.5);
+  box-shadow: 0 0 20px rgba(224, 163, 255, 0.25);
+}
+.icon-btn .icon { width: 22px; height: 22px; display: block; }
+
+/* filter button wrapper */
+.filter-wrap { position: relative; }
+
+#filter-menu-button {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+#filter-menu-button:hover,
+#filter-menu-button.active {
+  background: rgba(224, 163, 255, 0.15);
+  border-color: rgba(224, 163, 255, 0.4);
+  box-shadow: 0 0 20px rgba(224, 163, 255, 0.2);
+}
+.filter-icon { width: 22px; height: 22px; display: block; }
+
+/* ═══════════════════════════════════════════════
+   FILTER PANEL  (iOS sheet style)
+═══════════════════════════════════════════════ */
+.filter-menu {
+  display: none;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  width: min(340px, calc(100vw - 28px));
+  max-height: min(480px, calc(100dvh - 150px));
+  overflow: hidden;
+  background: rgba(18, 10, 28, 0.95);
+  backdrop-filter: blur(32px) saturate(1.6);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6);
+  border: 1px solid rgba(224, 163, 255, 0.18);
+  border-radius: 20px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+  padding: 0;
+  flex-direction: column;
+  gap: 0;
+  animation: panelSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.filter-menu.open { display: flex; }
+
+@keyframes panelSlideIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);    }
 }
 
-#search-button:hover {
-    background-color: rgba(52, 227, 153, 0.45);
-    transition: background-color 0.3s ease;
+/* scrollable content area */
+.filter-menu-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-#search-button:focus {
-    background-color: #34d399;
-    transition: background-color 0.3s ease;
-}
-
-/* Display Toggle Button */
-#display-list-button {
-    padding: 10px 15px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f5f5f4;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
+.filter-menu-scroll::-webkit-scrollbar { width: 3px; }
+.filter-menu-scroll::-webkit-scrollbar-thumb {
+  background: rgba(224,163,255,0.2);
+  border-radius: 2px;
 }
 
-#display-list-button:hover {
-    background-color:rgba(255, 255, 255, 0.3);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+.filter-section { display: flex; flex-direction: column; gap: 8px; }
+
+.filter-section h3 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(224, 163, 255, 0.55);
+  margin: 0;
+  padding: 0 2px;
 }
 
-#display-grid-button {
-    padding: 10px 15px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f5f5f4;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
+/* ── Category accordion pockets ── */
+.category-pocket {
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-#display-grid-button:hover {
-    background-color:rgba(255, 255, 255, 0.3);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+.category-pocket-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  border: none;
+  user-select: none;
+  transition: background 0.18s;
+  gap: 8px;
+}
+.category-pocket-button::after {
+  content: '›';
+  margin-left: auto;
+  font-size: 16px;
+  color: rgba(224,163,255,0.5);
+  transition: transform 0.2s;
+}
+.category-pocket[open] .category-pocket-button {
+  background: rgba(224, 163, 255, 0.10);
+  color: #e0a3ff;
+}
+.category-pocket[open] .category-pocket-button::after {
+  transform: rotate(90deg);
+  color: #e0a3ff;
+}
+.category-pocket-button:hover { background: rgba(255,255,255,0.08); }
+
+.category-pocket-body {
+  padding: 8px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 
-/* Post Container Base Styles */
-.post-container {
-    display: grid; /* Default to grid for easier switching */
-    gap: 20px;
-    padding: 0;
-    margin: 0;
-    list-style: none; /* Remove list bullets if used as ul/ol */
+/* ── Tag filters scroll area ── */
+#tag-filters {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 4px;
+}
+#tag-filters::-webkit-scrollbar { width: 3px; }
+#tag-filters::-webkit-scrollbar-thumb {
+  background: rgba(224,163,255,0.2);
+  border-radius: 2px;
 }
 
-/* Grid View Styles */
-.grid-view {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive grid */
+/* ── Checkbox rows ── */
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.75);
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+}
+.filter-option:hover {
+  background: rgba(224,163,255,0.08);
+  color: #fff;
+}
+.filter-option input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(224,163,255,0.3);
+  background: transparent;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+.filter-option input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, #9370db, #e0a3ff);
+  border-color: #e0a3ff;
+}
+.filter-option input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 7px;
+  height: 11px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(40deg);
 }
 
-/* List View Styles */
-.list-view {
-    grid-template-columns: 1fr; /* Single column for list view */
+/* ── Filter action buttons — always visible at bottom ── */
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(18, 10, 28, 0.98);
+  flex-shrink: 0;
 }
 
-/* Individual Post Styling (Grid Item) */
+#apply-filters-button,
+#clear-filters-button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+#apply-filters-button {
+  background: linear-gradient(135deg, #9370db, #e0a3ff);
+  color: #fff;
+}
+#clear-filters-button {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+#apply-filters-button:hover,
+#clear-filters-button:hover { opacity: 0.85; transform: translateY(-1px); }
+#apply-filters-button:active,
+#clear-filters-button:active { transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════════
+   POST GRIDS
+═══════════════════════════════════════════════ */
+.post-container { padding: 0; margin: 0; list-style: none; }
+
+/* Grid */
+#post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* List */
+#post-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+/* ── No results ── */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 0;
+  color: rgba(224, 163, 255, 0.45);
+  font-size: 15px;
+}
+
+/* ═══════════════════════════════════════════════
+   POST CARD  — Grid
+═══════════════════════════════════════════════ */
 .post-item.grid-item {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-    color:  #f5f5f4;
-    border-radius: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden; /* Ensure image doesn't overflow */
-    display: flex;
-    flex-direction: column;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 22px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition:
+    transform 0.28s cubic-bezier(0.16,1,0.3,1),
+    border-color 0.25s,
+    box-shadow 0.25s;
+  /* top-edge highlight */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  text-decoration: none;
 }
-
 .post-item.grid-item:hover {
-    transform: translateY(-5px);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
-
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(224, 163, 255, 0.38);
+  box-shadow:
+    0 0 28px rgba(153, 69, 255, 0.22),
+    0 20px 48px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
-.post-item.grid-item img {
-    width: 100%;
-    height: 180px; /* Fixed height for grid images */
-    object-fit: cover; /* Crop image to fit */
-    display: block;
+/* cover image */
+.post-item.grid-item > img,
+.post-item.grid-item > .post-image-placeholder {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+.post-image-placeholder {
+  background: linear-gradient(135deg, rgba(153,69,255,0.15), rgba(224,163,255,0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(224,163,255,0.3);
+  font-size: 13px;
+  letter-spacing: 0.5px;
 }
 
 .post-item.grid-item .post-content {
-    padding: 15px;
-    flex-grow: 1; /* Allow content to fill remaining space */
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
 }
 
 .post-item.grid-item h2 {
-    margin-top: 0;
-    font-size: 1.3em;
-    margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.35;
+  color: #fff;
 }
+.post-item.grid-item h2 a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.18s;
+}
+.post-item.grid-item h2 a:hover { color: #e0a3ff; }
 
-/* Individual Post Styling (List Item) */
+/* ═══════════════════════════════════════════════
+   POST CARD  — List
+═══════════════════════════════════════════════ */
+/* ── LIST ITEM — compact notes style ── */
 .post-item.list-item {
-    max-height: 200px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-    color:  #f5f5f4;
-    border-radius: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden; /* Ensure image doesn't overflow */
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  min-height: 72px;
+  transition:
+    background      0.2s ease,
+    border-color    0.2s ease,
+    box-shadow      0.2s ease;
 }
-
 .post-item.list-item:hover {
-    transform: translateX(-5px);
-    border-color: #9945ff;
-	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
+  background: rgba(224,163,255,0.06);
+  border-color: rgba(224,163,255,0.22);
+  box-shadow: 0 0 18px rgba(153,69,255,0.12);
+}
+/* subtle separator between rows — feels like iOS Notes */
+#post-list .post-item.list-item + .post-item.list-item {
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
 }
 
-.post-item.list-item img {
-    width: 180px; /* Fixed width for list view images */
-    height: 150px; /* Fixed height */
-    object-fit: cover; /* Crop image */
-    flex-shrink: 0; /* Prevent image from shrinking */
+/* ── Tiny thumbnail ── */
+.post-item.list-item > img,
+.post-item.list-item .post-image-placeholder {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin: 10px 0 10px 12px;
+  display: block;
 }
+.post-item.list-item .post-image-placeholder {
+  background: linear-gradient(135deg, rgba(153,69,255,0.2), rgba(224,163,255,0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: rgba(224,163,255,0.4);
+}
+/* if no image at all, hide placeholder space */
+.post-item.list-item .post-image-placeholder:empty { display: none; }
 
+/* ── Content area ── */
 .post-item.list-item .post-content {
-    padding: 15px;
-    display: flex;
-    flex-direction: row;
-    flex-grow: 1; /* Content takes remaining space */
+  padding: 12px 14px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
+/* ── Title — single line, bold ── */
 .post-item.list-item h2 {
-    margin-top: 0;
-    font-size: 1.5em;
-    margin-bottom: 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.post-item.list-item h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.post-item.list-item h2 a:hover { color: #e0a3ff; }
+
+/* snippet — 1 line only in notes style */
+.list-item .post-snippet {
+  -webkit-line-clamp: 1;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.38);
 }
 
-/* Common Post Content Styles */
-.post-item .post-meta {
-    font-size: 0.85em;
-    color: #777;
-    margin-bottom: 15px;
+/* meta — very compact, inline */
+.list-item .post-meta {
+  font-size: 11px;
+  color: rgba(255,255,255,0.28);
+  gap: 4px 10px;
 }
 
-.post-item .post-meta span {
-    margin-right: 10px;
+/* tags/cats — hide in list view to keep it clean */
+.list-item .post-tags,
+.list-item .post-categories { display: none; }
+
+/* views — right-aligned chevron area */
+.list-item .post-views {
+  display: none; /* too noisy in compact view */
 }
 
-.post-item .post-snippet {
-    font-size: 0.95em;
-    color: #555;
-    margin-bottom: 15px;
-    line-height: 1.5;
+/* ── Right chevron ── */
+.post-item.list-item::after {
+  content: '›';
+  font-size: 20px;
+  color: rgba(224,163,255,0.25);
+  padding-right: 14px;
+  flex-shrink: 0;
+  transition: color 0.18s;
+}
+.post-item.list-item:hover::after {
+  color: rgba(224,163,255,0.6);
 }
 
-.post-item .post-tags, .post-item .post-categories {
-    font-size: 0.8em;
-    margin-top: 10px;
+/* ── Shared post content parts ── */
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.38);
+}
+.post-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.post-item .post-tags span, .post-item .post-categories span {
-    background-color: #e9ecef;
-    padding: 3px 8px;
-    border-radius: 4px;
-    margin-right: 5px;
-    display: inline-block; /* For spacing */
-    margin-bottom: 5px; /* Space between tags/categories */
+.post-snippet {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.55;
+  margin: 0;
+  /* clamp to 2 lines in grid */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column; /* Stack items vertically on small screens */
-        align-items: stretch; /* Stretch items to fill width */
-    }
+.list-item .post-snippet { -webkit-line-clamp: 3; }
 
-    .search-container {
-        width: 100%; /* Make search bar full width */
-        max-width: none; /* Remove max-width */
-    }
-    #search-input, #search-button {
-        border-radius: 5px; /* Rounded corners for all search inputs */
-    }
-    .filter-menu {
-        width: calc(100% - 20px); /* Full width minus padding */
-        left: 10px;
-        top: 55px; /* Adjust top position */
-    }
+/* tags + categories */
+.post-tags,
+.post-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: auto;
 }
 
-@media (max-width: 480px) {
-    .post-item.grid-item img, .post-item.list-item img {
-        height: 150px; /* Smaller images on very small screens */
-    }
-    .post-item.list-item {
-        flex-direction: column; /* Stack image and content vertically */
-    }
-    .post-item.list-item img {
-        width: 100%; /* Image takes full width */
-    }
-    .post-item.list-item .post-content {
-        padding: 10px;
-    }
+.post-tags span,
+.post-categories span {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+.post-tags span {
+  background: rgba(153, 69, 255, 0.15);
+  color: #c4a0ff;
+  border: 1px solid rgba(153, 69, 255, 0.25);
+}
+.post-categories span {
+  background: rgba(224, 163, 255, 0.10);
+  color: #e0a3ff;
+  border: 1px solid rgba(224, 163, 255, 0.2);
+}
+
+/* views count */
+.post-views {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+}
+
+/* ═══════════════════════════════════════════════
+   PAGINATION
+═══════════════════════════════════════════════ */
+#pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 40px;
+}
+
+#pagination-controls button {
+  height: 38px;
+  min-width: 38px;
+  padding: 0 13px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s, color 0.18s;
+}
+#pagination-controls button:hover:not(:disabled) {
+  background: rgba(224,163,255,0.12);
+  border-color: rgba(224,163,255,0.3);
+  color: #e0a3ff;
+  box-shadow: 0 0 14px rgba(224,163,255,0.15);
+}
+#pagination-controls .page-btn.is-active {
+  background: linear-gradient(135deg, rgba(147,112,219,0.4), rgba(224,163,255,0.25));
+  border-color: rgba(224,163,255,0.5);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(224,163,255,0.2);
+  cursor: default;
+}
+#pagination-controls .nav-btn {
+  padding: 0 16px;
+  color: rgba(224,163,255,0.8);
+}
+#pagination-controls .ellipsis {
+  color: rgba(255,255,255,0.25);
+  font-size: 14px;
+  padding: 0 4px;
+  cursor: default;
+  user-select: none;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+
+/* Tablet */
+@media (max-width: 860px) {
+  #post-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Large phone */
+@media (max-width: 640px) {
+  .content-wrapper { padding-top: 96px; padding-left: 14px; padding-right: 14px; }
+
+  .toolbar { gap: 8px; margin-bottom: 20px; }
+  .search-container { max-width: none; }
+
+  /* 2-column grid on phone */
+  #post-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .post-item.grid-item > img,
+  .post-item.grid-item > .post-image-placeholder { height: 140px; }
+  .post-item.grid-item .post-content { padding: 13px 13px 15px; gap: 7px; }
+  .post-item.grid-item h2 { font-size: 13.5px; }
+  .post-snippet { -webkit-line-clamp: 2; font-size: 12px; }
+
+  /* List stays horizontal on phone — notes style */
+  .post-item.list-item { min-height: 64px; }
+  .post-item.list-item > img,
+  .post-item.list-item .post-image-placeholder {
+    width: 46px; height: 46px; min-width: 46px;
+  }
+  .post-item.list-item h2 { font-size: 13.5px; }
+
+  /* filter panel — handled by fixed positioning + JS */
+}
+
+/* Small phone */
+@media (max-width: 400px) {
+  #post-grid { grid-template-columns: 1fr; }
+  .post-item.grid-item > img,
+  .post-item.grid-item > .post-image-placeholder { height: 180px; }
 }

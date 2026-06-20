@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}MedScript — Home{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ── -->
+<section class="home-hero" id="hero">
+  <div class="hero-inner">
+    <span class="hero-badge">Medical University Notes</span>
+
+    <h1 class="hero-title" id="heroTitle">MEDSCRIPT</h1>
+
+    <p class="hero-sub" id="heroSub">
+      Your complete medical university note archive — organized, searchable, and always accessible.
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-number" id="statNotes">—</span>
+        <span class="hero-stat-label">Notes</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">24/7</span>
+        <span class="hero-stat-label">Access</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">∞</span>
+        <span class="hero-stat-label">Subjects</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">Free</span>
+        <span class="hero-stat-label">Always</span>
+      </div>
+    </div>
+
+    <div class="hero-actions" id="hero-actions">
+      <a href="/content/archive/"       class="hero-btn hero-btn--primary">Browse Archive</a>
+      <a href="/content/posts/search/"  class="hero-btn hero-btn--ghost">Search Notes</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Announcement ── -->
+<div class="announce-bar" id="announceBar" hidden>
+  <span class="announce-icon">📢</span>
+  <span class="announce-text" id="announceText"></span>
+  <button class="announce-close" id="announceClose" aria-label="Dismiss">✕</button>
+</div>
+
+<!-- ── Latest Posts ── -->
+<section class="home-section" id="latest">
+  <div class="home-section-head">
+    <h2 class="home-section-title">Latest Notes</h2>
+    <a href="/content/posts/" class="home-see-all">See all →</a>
+  </div>
+  <div class="coverflow-wrapper">
+    <div class="coverflow-container" id="latestContainer">
+      <div class="cf-loading"><div class="cf-spinner"></div> Loading…</div>
+    </div>
+    <div class="coverflow-controls">
+      <button class="control-btn" id="latestPrev">‹</button>
+      <button class="control-btn" id="latestPlay">⏸</button>
+      <button class="control-btn" id="latestNext">›</button>
+    </div>
+    <div class="cf-indicators" id="latestDots"></div>
+  </div>
+</section>
+
+<!-- ── Feature rows ── rendered from DB by home_section_renderer.js ── -->
+<div class="home-features" id="home-features-block">
+  <h2 class="home-features-title" id="home-features-title">Why MedScript?</h2>
+  <!-- rows injected by JS from sections API; fallback rows below
+       are replaced if DB has active feature sections -->
+  <div class="feature-row" data-fallback>
+    <div class="feature-content">
+      <span class="feature-icon">🧠</span>
+      <h3>Organized by Subject</h3>
+      <p>Every note is categorized into a deep subject tree — find exactly what you need in seconds, from basic anatomy to advanced pathology.</p>
+    </div>
+    <div class="feature-visual">🗂️</div>
+  </div>
+  <div class="feature-row" data-fallback>
+    <div class="feature-content">
+      <span class="feature-icon">⚡</span>
+      <h3>Session Files & Recordings</h3>
+      <p>Download PDFs, PowerPoints, and lecture recordings directly from each note — everything from a single session in one place.</p>
+    </div>
+    <div class="feature-visual">📥</div>
+  </div>
+  <div class="feature-row" data-fallback>
+    <div class="feature-content">
+      <span class="feature-icon">💬</span>
+      <h3>Community Comments</h3>
+      <p>Ask questions, share insights, and discuss session content with your peers directly on each note page.</p>
+    </div>
+    <div class="feature-visual">🌐</div>
+  </div>
+</div>
+
+<!-- ── Most Viewed ── -->
+<section class="home-section" id="popular">
+  <div class="home-section-head">
+    <h2 class="home-section-title">Most Viewed</h2>
+    <a href="/content/posts/" class="home-see-all">See all →</a>
+  </div>
+  <div class="coverflow-wrapper">
+    <div class="coverflow-container" id="popularContainer">
+      <div class="cf-loading"><div class="cf-spinner"></div> Loading…</div>
+    </div>
+    <div class="coverflow-controls">
+      <button class="control-btn" id="popularPrev">‹</button>
+      <button class="control-btn" id="popularPlay">⏸</button>
+      <button class="control-btn" id="popularNext">›</button>
+    </div>
+    <div class="cf-indicators" id="popularDots"></div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.APP_CONFIG = { homeApiUrl: "/dashboard/api/v1/home/" };
+</script>
+<script src="{% static 'js/home.js' %}"></script>
+<script src="{% static 'js/home_section_renderer.js' %}"></script>
+{% endblock %}

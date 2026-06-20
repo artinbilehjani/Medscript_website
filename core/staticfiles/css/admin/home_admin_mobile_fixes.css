@@ -1,0 +1,349 @@
+/* ═══════════════════════════════════════════════════════════════
+   home_admin_mobile_fixes.css
+   Append this AFTER home_admin.css (same <link> order, just add
+   a second <link> tag, or paste this block at the end of the
+   existing file). Every rule here either overrides a specific
+   broken rule above, or adds a missing mobile breakpoint.
+═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────
+   FIX 3c — heading/paragraph dropdown was white-on-white
+   ROOT CAUSE: .pe-tb-select has no `option` styling and no
+   `color-scheme`, so the popup list falls back to the OS/browser
+   default (often white bg + inherited light text from a dark
+   page = unreadable). Same issue likely affects ALL <select>
+   elements in this dashboard (filter-select, field-select, etc.)
+   since none of them set color-scheme.
+   ────────────────────────────────────────────────────────────── */
+select {
+  color-scheme: dark;
+}
+[data-theme="light"] select {
+  color-scheme: light;
+}
+
+.pe-tb-select option,
+.filter-select option,
+.field-select option,
+.pe-select option,
+#user-pos-inp option,
+#user-type-inp option,
+#cat-edit-parent option,
+#posts-filter option,
+#comments-filter option,
+#users-type-filter option,
+#pe-status-inp option {
+  background: var(--bg-2);
+  color: var(--text);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   FIX 3a — cover image crop
+   ROOT CAUSE: fixed 160px height + object-fit:cover gives no
+   indication of what will be cropped, and the SAME uploaded file
+   is reused everywhere at different aspect ratios. We can't fix
+   "everywhere" from CSS alone (needs a thumbnail pipeline on the
+   backend — flag this to your team), but we CAN: 
+     1) use a much more forgiving, realistic aspect ratio (16:9
+        instead of an arbitrary 160px crop)
+     2) show the FULL image via object-fit:contain with a blurred
+        cover backdrop, so nothing is ever invisibly cut off
+     3) let the user reposition via object-position drag (basic
+        version: object-position defaults to center, documented
+        below for a future enhancement)
+   ────────────────────────────────────────────────────────────── */
+.pe-cover-zone {
+  height: 0;
+  padding-bottom: 42%;       /* ~21:9 wide preview, never feels "tiny" */
+  position: relative;
+  background: var(--bg-1);
+}
+.pe-cover-zone::before {
+  /* blurred backdrop fills any letterboxed space so it never looks broken */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--pe-cover-bg, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(24px) brightness(.5) saturate(1.3);
+  transform: scale(1.15);
+  z-index: 0;
+}
+.pe-cover-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;       /* show the WHOLE image, never invisibly cropped */
+  object-position: center;
+  z-index: 1;
+}
+.pe-cover-placeholder { z-index: 2; }
+.pe-cover-actions { z-index: 3; }
+
+@media (max-width: 640px) {
+  .pe-cover-zone { padding-bottom: 56%; } /* taller ratio on small screens */
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   GENERAL MOBILE OVERHAUL
+   Breakpoints used: 900px (sidebar/layout), 760px (toolbars/tables),
+   640px (forms/stacking), 480px (tight phones)
+══════════════════════════════════════════════════════════════ */
+
+/* ── Topbar: title truncation room + smaller controls ── */
+@media (max-width: 640px) {
+  .topbar { height: 50px; padding: 0 10px; gap: 8px; }
+  .page-title { font-size: 15px; }
+  .topbar-btn { width: 30px; height: 30px; }
+}
+
+/* ── Stats row: never less than readable ── */
+@media (max-width: 380px) {
+  .stats-row { grid-template-columns: 1fr; }
+}
+
+/* ── Section toolbars: full-width stacked controls, real tap targets ── */
+@media (max-width: 760px) {
+  .section-toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
+  .toolbar-left { flex-direction: column; max-width: none; width: 100%; }
+  .search-input, .filter-select { width: 100%; min-width: 0; padding: 10px 12px; font-size: 14px; }
+  .section-toolbar .btn { width: 100%; }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   TABLES — the single biggest mobile blocker.
+   ROOT CAUSE: .data-table has min-width:500px and relies on
+   horizontal scroll inside .table-wrap. On a 360-390px phone
+   that means almost the whole table is scrolled off-screen with
+   no visual hint, and every row's actions are buried far right.
+   FIX: below 760px, convert each <tr> into a stacked "card" using
+   CSS only (no JS/markup changes needed) via display:block + 
+   data-label attributes IF present, otherwise a generic stacked
+   fallback that keeps the table semantically intact but visually
+   readable. Since markup doesn't carry data-label attributes
+   currently, we use the safer generic approach: keep table layout
+   but make columns wrap and prioritize the action column.
+   ────────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .table-wrap {
+    margin: 0 -12px;          /* bleed to screen edge for max width */
+    width: calc(100% + 24px);
+    border-radius: 0;
+  }
+  .data-table { min-width: 0; width: 100%; }
+  .data-table th,
+  .data-table td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+  /* Hide lowest-priority columns on narrow screens instead of
+     forcing horizontal scroll. nth-child targets are based on the
+     actual column order in each table in home_admin.html. */
+
+  /* Posts table: Title, Status, Date, Views, Actions → drop Date+Views */
+  #section-posts .data-table th:nth-child(3),
+  #section-posts .data-table td:nth-child(3),
+  #section-posts .data-table th:nth-child(4),
+  #section-posts .data-table td:nth-child(4) { display: none; }
+
+  /* Comments table: drop Post column + reply indicator column */
+  #section-comments .data-table th:nth-child(1),
+  #section-comments .data-table td:nth-child(1),
+  #section-comments .data-table th:nth-child(4),
+  #section-comments .data-table td:nth-child(4) { display: none; }
+  #section-comments .comment-snippet { max-width: 140px; }
+
+  /* Tags table: drop Slug column */
+  #section-tags .data-table th:nth-child(2),
+  #section-tags .data-table td:nth-child(2) { display: none; }
+
+  /* Users table: drop Position, Joined columns */
+  #section-users .data-table th:nth-child(3),
+  #section-users .data-table td:nth-child(3),
+  #section-users .data-table th:nth-child(7),
+  #section-users .data-table td:nth-child(7) { display: none; }
+
+  /* Positions table: drop Description on very narrow only (see 480px block) */
+  .action-btns { gap: 4px; }
+  .action-btn { width: 32px; height: 32px; } /* bigger tap target than 28px */
+}
+
+@media (max-width: 480px) {
+  #section-positions .data-table th:nth-child(2),
+  #section-positions .data-table td:nth-child(2) { display: none; }
+}
+
+/* ── Sidebar: ensure overlay actually blocks interaction + body scroll lock ── */
+@media (max-width: 900px) {
+  .sidebar { width: min(280px, 84vw); }
+  body.sidebar-open { overflow: hidden; }   /* requires 1-line JS hook, see note below */
+}
+
+/* ── Modals: edge-to-edge on phones, no awkward side gaps ── */
+@media (max-width: 640px) {
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    max-width: 100%;
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 16px 16px 0 0;
+  }
+  .modal-wide, .modal-sm { max-width: 100%; }
+  .modal-head { padding: 14px 16px; }
+  .modal-body { padding: 14px 16px; gap: 12px; }
+  .field-row { flex-direction: column; gap: 12px; }
+  .modal-foot { flex-direction: column-reverse; gap: 8px; }
+  .modal-foot .btn { width: 100%; }
+}
+
+/* ── Category tree layout: stack panel below tree, not beside ── */
+@media (max-width: 860px) {
+  .cat-detail-panel { position: static; margin-top: 14px; }
+}
+
+/* ── Announcement grid: single column sooner ── */
+@media (max-width: 560px) {
+  .ann-grid { grid-template-columns: 1fr; }
+  .ann-card-actions { gap: 8px; }
+  .ann-card-actions .action-btn { width: 32px; height: 32px; }
+}
+
+/* ── Homepage management hero card already stacks at 700px — extend gap fix ── */
+@media (max-width: 480px) {
+  .hp-hero-card { gap: 12px; }
+  .hp-cf-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   POST EDITOR — MOBILE (fixes 3b, 3d, 3e)
+══════════════════════════════════════════════════════════════ */
+
+/* ── 3b: full-screen editor must actually fit small viewports ──
+   ROOT CAUSE: .pe-body switches to 1 column + auto rows at 860px,
+   which is fine structurally, but the TOOLBAR, HEADER, and ACCORDION
+   were never tuned for touch — buttons too small, header crowds,
+   and the content editor min-height (240px) plus a 290px sidebar
+   stacked below it makes saving/publishing buttons require huge
+   scroll distance. */
+@media (max-width: 860px) {
+  .pe-header { height: 50px; padding: 0 10px; gap: 6px; }
+  .pe-header-title { font-size: 12.5px; }
+  .pe-autosave-status { display: none; } /* reclaim space, status still shows via toast */
+  .pe-header-actions { gap: 5px; }
+  .pe-header-actions .btn {
+    padding: 8px 10px;
+    font-size: 0;             /* icon-only on phone... */
+  }
+  .pe-header-actions .btn svg { width: 16px; height: 16px; margin: 0; }
+  .pe-header-actions #pe-save-draft-btn,
+  .pe-header-actions #pe-publish-btn {
+    font-size: 12px;          /* ...except these two, keep short text */
+    padding: 8px 12px;
+  }
+  .pe-back-btn { width: 36px; height: 36px; } /* bigger tap target */
+
+  .pe-title-input { padding: 16px 16px 6px; font-size: 19px; }
+  .pe-content-editor { padding: 14px 16px; min-height: 200px; }
+  .pe-word-count { padding: 5px 16px 8px; }
+}
+
+/* ── 3d: toolbar usability on touch ──
+   ROOT CAUSE: .pe-tb-btn is 26x26px — well under the ~44px
+   minimum recommended touch target, buttons sit edge-to-edge with
+   2px gap (easy mis-taps), and the toolbar doesn't scroll/wrap
+   cleanly when it overflows a narrow screen. */
+@media (max-width: 860px) {
+  .pe-toolbar {
+    padding: 8px 10px;
+    gap: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;          /* scroll horizontally instead of wrapping messily */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-1);    /* opaque while sticky so content doesn't show through */
+  }
+  .pe-tb-btn {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+  .pe-tb-sep { flex-shrink: 0; height: 22px; }
+  .pe-tb-select {
+    flex-shrink: 0;
+    font-size: 13px;
+    padding: 6px 8px;
+    min-width: 110px;
+  }
+}
+
+/* ── Accordion sidebar on mobile: bigger trigger targets, clearer active state ── */
+@media (max-width: 860px) {
+  .pe-sidebar { border-top: 1px solid var(--glass-bd); }
+  .pe-acc-trigger { padding: 15px 14px; font-size: 13.5px; }
+  .pe-acc-icon svg, .pe-acc-arrow { width: 16px; height: 16px; }
+  .pe-input, .pe-select, .pe-textarea {
+    font-size: 16px;   /* prevents iOS Safari auto-zoom-on-focus */
+    padding: 10px 11px;
+  }
+  .pe-cats-list { max-height: 260px; }
+  .pe-cat-item { padding: 10px 8px; font-size: 13.5px; }
+  .pe-cat-check { width: 18px; height: 18px; }
+  .pe-tag-chip { font-size: 12.5px; padding: 5px 9px 5px 11px; }
+  .pe-upload-zone { padding: 18px 12px; }
+}
+
+/* ── 3e: text selection on mobile contenteditable ──
+   ROOT CAUSE: no explicit user-select / -webkit-user-select rule
+   exists for .pe-content-editor. Some mobile browsers (particularly
+   iOS Safari inside certain webview/PWA contexts, or when a parent
+   element sets user-select:none for drag-prevention elsewhere in
+   the page) can inherit restrictive selection behavior. We make
+   the editable region's selection behavior explicit and generous,
+   and increase touch-action tolerance so press-and-hold-to-select
+   isn't fighting page-level touch gestures (e.g. pull-to-refresh,
+   sidebar swipe). */
+.pe-content-editor {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;   /* allow iOS press-and-hold menu */
+  touch-action: pan-y;              /* vertical scroll ok, but don't eat selection gestures */
+  cursor: text;
+}
+.pe-title-input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Also widen line-height slightly on touch so tap-to-place-cursor
+   has more vertical room per line (easier accurate caret placement) */
+@media (max-width: 860px) {
+  .pe-content-editor { line-height: 2; font-size: 15px; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   FORMS — global mobile readability (settings, position, user modals)
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .field-input, .field-textarea, .field-select {
+    font-size: 16px;   /* iOS zoom prevention, applies site-wide */
+    padding: 11px 12px;
+  }
+  .form-actions { flex-direction: column-reverse; }
+  .form-actions .btn { width: 100%; }
+  .settings-panel { max-width: none; }
+}
+
+/* ── Section row (homepage sections drag list): touch-friendly drag handle ── */
+@media (max-width: 640px) {
+  .section-row { padding: 14px 0; gap: 10px; }
+  .drag-handle svg { width: 18px; height: 18px; }
+  .section-title-text { display: none; } /* reclaim space, title still in form on tap */
+}

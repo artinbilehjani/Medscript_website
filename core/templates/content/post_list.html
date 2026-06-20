@@ -1,49 +1,35 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}Posts{% endblock %}
 
 {% block content %}
 <div class="content-wrapper">
 
+  <!-- ── Toolbar ── -->
+  <div class="toolbar">
+    <button id="display-grid-button" type="button" class="icon-btn" aria-label="Grid view">
+      <img class="icon"
+        src="/media/images/system/view_cozy_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+    </button>
+    <button id="display-list-button" type="button" class="icon-btn" aria-label="List view">
+      <img class="icon"
+        src="/media/images/system/event_list_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+    </button>
+  </div>
 
-        <!-- Button to change display type -->
-        <button id="display-list-button" type="button" class="icon-btn" aria-label="Toggle view">
-        <img class="icon"
-            src="/media/images/system/event_list_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
-            alt="">
-        </button>  
-        <button id="display-grid-button" type="button" class="icon-btn" aria-label="Toggle view">
-        <img class="icon"
-            src="/media/images/system/view_cozy_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg"
-            alt="">
-        </button>    
-    </header>
+  <!-- ── Post containers ── -->
+  <div id="post-grid"  class="post-container grid-view"></div>
+  <div id="post-list"  class="post-container list-view" style="display:none"></div>
 
-    <main>
-        <!-- Post Grid View -->
-        <div id="post-grid" class="post-container grid-view">
-            <!-- Post items will be loaded here by JavaScript -->
-        </div>
-
-        <!-- Post List View -->
-        <div id="post-list" class="post-container list-view" style="display: none;">
-            <!-- Post items will be loaded here by JavaScript -->
-        </div>
-    </main>
-    <div class="pagination-controls" id="pagination-controls">
-            
-        </div>
+  <!-- ── Pagination ── -->
+  <div id="pagination-controls"></div>
 
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    window.APP_CONFIG = {
-        postsApiUrl: "/api/v1/content/posts/"
-    };
+  window.APP_CONFIG = { postsApiUrl: "/content/api/v1/posts/" };
 </script>
-<script src="{% static 'js/api.js' %}"></script>
 <script src="{% static 'js/post-list.js' %}"></script>
 {% endblock %}

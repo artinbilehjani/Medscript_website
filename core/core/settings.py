@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'hitcount',
     "drf_yasg",
     "rest_framework_simplejwt",
+    # "bleach",
 ]
 
 

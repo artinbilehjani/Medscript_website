@@ -35,3 +35,21 @@ def error_500(request):
     response = render(request, "errors/500.html")
     response.status_code = 500
     return response
+
+
+# function for error 503
+
+
+def error_503(request):
+    response = render(request, "errors/503.html")
+    response.status_code = 503
+    return response
+
+
+# function for error 429
+
+
+def error_429(request):
+    response = render(request, "errors/429.html")
+    response.status_code = 429
+    return response

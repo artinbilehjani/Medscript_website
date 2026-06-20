@@ -2,122 +2,132 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Blog{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/post-detail.css' %}">
-    <link rel="stylesheet" href="{% static 'css/archive.css' %}">
-    <link rel="stylesheet" href="{% static 'css/post-list.css' %}">
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <link rel="stylesheet" href="{% static 'css/register.css' %}">
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-    <link rel="shortcut icon" href="/media/images/default_images/blank_post_thumbnail.png" type="image/x-icon" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MedScript{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/post-detail.css' %}">
+  <link rel="stylesheet" href="{% static 'css/archive.css' %}">
+  <link rel="stylesheet" href="{% static 'css/post-list.css' %}">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/register.css' %}">
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <link rel="icon" href="/media/images/system/medscript_logo_svg.svg" type="image/svg+xml">
 </head>
 <body>
-<!-- Epic Neural Background -->
-    <div class="neural-background"></div>
-    
-    <!-- Floating Geometric Shapes -->
-    <div class="geometric-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
+
+  <!-- Neural background -->
+  <div class="neural-background"></div>
+  <div class="geometric-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+  <div class="neural-lines">
+    <div class="neural-line"></div>
+    <div class="neural-line"></div>
+    <div class="neural-line"></div>
+  </div>
+
+  <!-- Side panel — left (scroll progress) -->
+  <nav class="side-panel side-panel--left" aria-label="Scroll indicators">
+    <span class="side-label">Scroll</span>
+    <div class="side-track">
+      <div class="side-track-fill" id="leftTrack"></div>
     </div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-readout" id="scrollPct">00</div>
+  </nav>
 
-    <!-- Neural Network Lines -->
-    <div class="neural-lines">
-        <div class="neural-line"></div>
-        <div class="neural-line"></div>
-        <div class="neural-line"></div>
+  <!-- Side panel — right (status) -->
+  <nav class="side-panel side-panel--right" aria-label="Status">
+    <span class="side-label">Status</span>
+    <div class="side-track">
+      <div class="side-track-fill" id="rightTrack"></div>
     </div>
-    <!-- Header -->
-    <header class="glass">
-        <nav>
-            <a href="/home/" class="logo">
-                <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#e0a3ff"/>
-                            <stop offset="50%" style="stop-color:#ff69b4"/>
-                            <stop offset="100%" style="stop-color:#9370db"/>
-                        </linearGradient>
-                    </defs>
-                    <circle cx="50" cy="30" r="8" fill="url(#logoGradient)" opacity="0.8">
-                        <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="30" cy="60" r="6" fill="url(#logoGradient)" opacity="0.6">
-                        <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="70" cy="65" r="7" fill="url(#logoGradient)" opacity="0.7">
-                        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
-                    </circle>
-                    <line x1="50" y1="30" x2="30" y2="60" stroke="url(#logoGradient)" stroke-width="2" opacity="0.6">
-                        <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
-                    </line>
-                    <line x1="50" y1="30" x2="70" y2="65" stroke="url(#logoGradient)" stroke-width="2" opacity="0.6">
-                        <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite"/>
-                    </line>
-                    <line x1="30" y1="60" x2="70" y2="65" stroke="url(#logoGradient)" stroke-width="2" opacity="0.6">
-                        <animate attributeName="opacity" values="0.6;1;0.6" dur="2.8s" repeatCount="indefinite"/>
-                    </line>
-                </svg>
-                MEDSCRIPT
-            </a>
-            <ul class="nav-links">
-                <li><a href="/home/">Home</a></li>
-                <li><a href="/content/archive/">Archive</a></li>
-                <li><a href="/content/posts/search/">Search</a></li>
-                <li><a href="/accounts/profile/">Profile</a></li>
-                <li><a href="https://example.com" target="_blank" class="external-link">External</a></li>
-</ul>
-            </ul>
-            <div class="mobile-menu-toggle">
-                <div class="hamburger-line"></div>
-                <div class="hamburger-line"></div>
-                <div class="hamburger-line"></div>
-            </div>
-        </nav>
-        <div class="mobile-nav">
-            <a href="#features">Home</a>
-            <a href="#showcase">Archive</a>
-            <a href="#timeline">Search</a>
-            <a href="#contact">Profile</a>
-            <a href="https://example.com" target="_blank" class="external-link">External</a>
-        </div>
-    </header>
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="#features">Neural Networks</a>
-                <a href="#showcase">Matrix Protocols</a>
-                <a href="#timeline">Evolution</a>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Documentation</a>
-                <!-- Add external links -->
-    			<a href="https://github.com/yourproject" target="_blank" rel="noopener">
-                <img src="/media/images/system/GrommetIconsGithub.svg" alt="">
-                </a>
-            </div>
-            <div class="footer-copyright">
-                <p>&copy; 2025 NeuralGlass Interface. All quantum rights reserved across dimensions.</p>
-            </div>
-            <div class="footer-design">
-                Designed by: <a href="https://artinbilehjani.ir" target="_blank" rel="nofollow noopener">Artin Bilehjani</a> | 
-                Enhanced by Neural AI Systems | 
-                <a href="#">Quantum Framework</a>
-            </div>
-        </div>
-    </footer>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-readout">MED</div>
+  </nav>
 
-    
+  <!-- Header -->
+  <header class="glass" id="site-header">
+    <nav class="nav-inner">
 
-    {% block scripts %}{% endblock %}
+      <!-- Logo -->
+      <a href="/home/" class="logo" aria-label="MedScript home">
+        <img class="logo-icon"
+             src="/media/images/system/medscript_logo_svg.svg"
+             alt="MedScript logo">
+        <span class="logo-text">MEDSCRIPT</span>
+      </a>
+
+      <!-- Desktop nav links -->
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/home/"                data-page="home">Home</a></li>
+        <li><a href="/content/archive/"     data-page="archive">Archive</a></li>
+        <li><a href="/content/posts/search/" data-page="search">Search</a></li>
+        <li><a href="/accounts/profile/"    data-page="profile">Profile</a></li>
+      </ul>
+
+      <!-- Mobile hamburger -->
+      <button class="mobile-menu-toggle" id="hamburger"
+              aria-label="Toggle menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+    </nav>
+  </header>
+
+  <!-- Mobile nav drawer -->
+  <div class="mobile-nav" id="mobileNav" aria-hidden="true">
+    <a href="/home/"                 data-page="home">Home</a>
+    <a href="/content/archive/"      data-page="archive">Archive</a>
+    <a href="/content/posts/search/" data-page="search">Search</a>
+    <a href="/accounts/profile/"     data-page="profile">Profile</a>
+  </div>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="#">Neural Networks</a>
+        <a href="#">Matrix Protocols</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Documentation</a>
+        <a href="https://github.com/yourproject" target="_blank" rel="noopener">
+          <img src="/media/images/system/GrommetIconsGithub.svg" alt="GitHub" style="width:18px;height:18px;vertical-align:middle;opacity:.6">
+        </a>
+      </div>
+      <div class="footer-copyright">
+        <p>&copy; 2025 MedScript. All rights reserved.</p>
+      </div>
+      <div class="footer-design">
+        Designed by <a href="https://artinbilehjani.ir" target="_blank" rel="nofollow noopener">Artin Bilehjani</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/base.js' %}"></script>
+  {% block scripts %}{% endblock %}
+
 </body>
 </html>

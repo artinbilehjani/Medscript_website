@@ -1,32 +1,44 @@
-/* Everything is scoped under #mg-register to avoid CSS collisions */
+/* ═══════════════════════════════════════════════
+   Register — Neural purple theme
+   Scoped to #mg-register
+═══════════════════════════════════════════════ */
+
 #mg-register {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 24px;
-  background: #0b1220;
   color: #e8eefc;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 #mg-register .mg-card {
-  width: min(480px, 100%);
-  background: #0f1a33;
-  border: 1px solid rgba(232, 238, 252, 0.12);
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  width: min(460px, 100%);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(224, 163, 255, 0.15);
+  border-radius: 22px;
+  padding: 32px 28px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 #mg-register .mg-title {
-  margin: 0 0 14px;
-  font-size: 22px;
-  line-height: 1.2;
+  margin: 0 0 24px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #e0a3ff, #ff69b4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 #mg-register .mg-form {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 #mg-register .mg-field {
@@ -35,97 +47,144 @@
 }
 
 #mg-register .mg-label {
-  font-size: 13px;
-  color: rgba(232, 238, 252, 0.78);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(224, 163, 255, 0.6);
 }
 
 #mg-register .mg-input {
   width: 100%;
   box-sizing: border-box;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(232, 238, 252, 0.16);
-  background: #0b142a;
-  color: #e8eefc;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-size: 15px;
+  font-family: inherit;
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-font-smoothing: antialiased;
 }
-
+#mg-register .mg-input::placeholder { color: rgba(255,255,255,0.25); }
 #mg-register .mg-input:focus {
-  border-color: rgba(120, 160, 255, 0.7);
-  box-shadow: 0 0 0 3px rgba(120, 160, 255, 0.15);
+  border-color: rgba(224, 163, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(224, 163, 255, 0.12),
+              0 0 16px rgba(224, 163, 255, 0.1);
 }
 
+/* ── Password wrapper ── */
+#mg-register .mg-password {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#mg-register .mg-password:focus-within {
+  border-color: rgba(224, 163, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(224, 163, 255, 0.12);
+}
+#mg-register .mg-password .mg-input {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  flex: 1;
+}
+#mg-register .mg-password .mg-input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* ── Show/hide button ── */
+#mg-register .mgTogglePassword {
+  width: 42px;
+  height: 42px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.18s;
+  border-radius: 0;
+}
+#mg-register .mgTogglePassword:hover {
+  background: rgba(224, 163, 255, 0.1);
+}
+#mg-register .mg-show-btn {
+  width: 20px;
+  height: 20px;
+  display: block;
+  opacity: 0.45;
+  transition: opacity 0.18s;
+  filter: hue-rotate(260deg) saturate(1.5);
+}
+#mg-register .mgTogglePassword:hover .mg-show-btn { opacity: 0.85; }
+
+/* ── Buttons ── */
 #mg-register .mg-btn {
-  padding: 11px 12px;
-  border-radius: 10px;
+  padding: 13px 16px;
+  border-radius: 12px;
   border: 1px solid transparent;
   cursor: pointer;
+  font-size: 15px;
   font-weight: 600;
+  font-family: inherit;
+  transition: transform 0.18s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.18s,
+              opacity 0.15s;
 }
+#mg-register .mg-btn:active { transform: scale(0.97); }
 
 #mg-register .mg-btnPrimary {
-  background: #4f7cff;
-  color: #08102a;
+  background: linear-gradient(135deg, #9370db, #e0a3ff);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(147, 112, 219, 0.35);
+  border: none;
+  width: 100%;
 }
-
+#mg-register .mg-btnPrimary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(147, 112, 219, 0.45);
+}
 #mg-register .mg-btnPrimary:disabled {
-  opacity: 0.7;
+  opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 #mg-register .mg-btnGhost {
-  background: transparent;
-  color: #e8eefc;
-  border-color: rgba(232, 238, 252, 0.18);
-}
-
-#mg-register .mg-msg {
-  margin: 6px 0 0;
-  min-height: 1.2em;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(224,163,255,0.2);
+  color: rgba(224,163,255,0.8);
+  padding: 10px 14px;
   font-size: 13px;
-  color: rgba(232, 238, 252, 0.85);
+}
+#mg-register .mg-btnGhost:hover {
+  background: rgba(224,163,255,0.1);
+  border-color: rgba(224,163,255,0.4);
+  transform: translateY(-1px);
 }
 
-#mg-register .mg-msg.mg-error {
-  color: #ffb4b4;
-}
-
-#mg-register .mg-msg.mg-ok {
-  color: #b8ffcc;
-}
-
-#mg-register .mg-foot {
-  margin: 14px 0 0;
-  font-size: 13px;
-  color: rgba(232, 238, 252, 0.72);
-}
-
-#mg-register .mg-link {
-  color: #a8c1ff;
-  text-decoration: none;
-}
-
-#mg-register .mg-link:hover {
-  text-decoration: underline;
-}
-
-.mg-password{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-.mg-password .mg-input{
-  flex:1;
-}
-
-/* CAPTCHA (text question) */
+/* ── CAPTCHA ── */
 #mg-register .mg-captcha {
   display: grid;
   gap: 10px;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px dashed rgba(232, 238, 252, 0.2);
-  background: rgba(11, 20, 42, 0.6);
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px dashed rgba(224, 163, 255, 0.22);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 #mg-register .mg-captchaRow {
@@ -134,29 +193,49 @@
   gap: 10px;
 }
 
-/* Replaces the old image */
-#mg-register #mgCaptchaQuestion,
+/* FIX 1 — force LTR for math equation in RTL pages */
 #mg-register .mg-captchaQuestion {
   flex: 1;
   min-height: 44px;
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  justify-content: center;
+  padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(232, 238, 252, 0.16);
-  background: #0b142a;
-  color: rgba(232, 238, 252, 0.92);
-  font-size: 14px;
-  line-height: 1.2;
+  border: 1px solid rgba(224, 163, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+  color: #e0a3ff;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
   user-select: none;
+  direction: ltr;        /* ← fixes RTL reversal */
+  text-align: center;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
 }
 
-/* Optional: keep a consistent button size next to the question */
-#mg-register .mg-captchaRow button,
-#mg-register .mg-captchaRow .mg-btn {
-  height: 44px;
+/* ── Messages ── */
+#mg-register .mg-msg {
+  margin: 2px 0 0;
+  min-height: 1.3em;
+  font-size: 13px;
+  color: rgba(232, 238, 252, 0.7);
+  white-space: pre-line;
 }
+#mg-register .mg-msg.mg-error { color: #ffb4b4; }
+#mg-register .mg-msg.mg-ok    { color: #b8ffcc; }
 
-#mg-register .mg-hidden {
-  display: none;
+/* ── Footer ── */
+#mg-register .mg-foot {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: rgba(224, 163, 255, 0.55);
+  text-align: center;
 }
+#mg-register .mg-link {
+  color: #e0a3ff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.18s;
+}
+#mg-register .mg-link:hover { color: #ff69b4; }

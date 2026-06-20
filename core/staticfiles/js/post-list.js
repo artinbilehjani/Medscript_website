@@ -1,290 +1,177 @@
+/* ═══════════════════════════════════════════════
+   post-list.js — Category post list page
+═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Elements ---
-    const displayListButton = document.getElementById("display-list-button");
-    const displayGridButton = document.getElementById("display-grid-button");
-    const postGrid = document.getElementById('post-grid');
-    const postList = document.getElementById('post-list');
 
-    // --- State Variables ---
-    let currentView = 'grid'; // 'grid' or 'list'
-    let currentPage = 1; // For potential future pagination
-    let totalPages = 1;
-    let currentFilters = { // Stores currently active filters
-        categories: [],
+  const gridBtn  = document.getElementById('display-grid-button');
+  const listBtn  = document.getElementById('display-list-button');
+  const postGrid = document.getElementById('post-grid');
+  const postList = document.getElementById('post-list');
+
+  const API_URL     = '/content/api/v1/posts/';
+  const categorySlug = new URLSearchParams(location.search).get('category');
+
+  /* Static default thumbnails — purely a frontend fallback. Never written
+     to any model field, so there's nothing for backend cleanup logic to
+     ever delete. Two sizes: wide for grid cards, square for list rows —
+     matching the same derived sizes posts get when they DO have an image. */
+  const MEDIA_URL = window.APP_CONFIG?.mediaUrl || '/media/';
+  const DEFAULT_POST_THUMBNAIL       = MEDIA_URL + 'images/default_images/blank_post_thumbnail_400x250.jpg';
+  const DEFAULT_POST_THUMBNAIL_SMALL = MEDIA_URL + 'images/default_images/blank_post_thumbnail_120x120.jpg';
+
+  let view        = 'grid';
+  let currentPage = 1;
+  let totalPages  = 1;
+  let postsData   = [];
+
+  /* ════════════════════════════════════════════
+     FETCH
+  ════════════════════════════════════════════ */
+  async function fetchPosts(page = 1) {
+    currentPage = page;
+    const url = new URL(API_URL, location.origin);
+    if (categorySlug) url.searchParams.set('category', categorySlug);
+    url.searchParams.set('page', String(page));
+
+    try {
+      const res  = await fetch(url.toString());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      postsData   = data.results || data;
+      totalPages  = data.total_pages ?? 1;
+      currentPage = data.current_page_number ?? currentPage;
+
+      renderPosts(postsData);
+      renderPagination();
+    } catch (err) {
+      console.error('[post-list] fetch error', err);
+      getContainer().innerHTML = '<p class="no-results">Failed to load posts. Please try again.</p>';
+    }
+  }
+
+  /* ════════════════════════════════════════════
+     RENDER
+  ════════════════════════════════════════════ */
+  function getContainer() { return view === 'grid' ? postGrid : postList; }
+
+  function renderPosts(posts) {
+    const container = getContainer();
+    container.innerHTML = '';
+    if (!posts?.length) {
+      container.innerHTML = '<p class="no-results">No posts found.</p>';
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    posts.forEach(p => frag.appendChild(createCard(p)));
+    container.appendChild(frag);
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function createCard(post) {
+    const el = document.createElement('div');
+    const isList = view === 'list';
+    el.className = `post-item ${isList ? 'list-item' : 'grid-item'}`;
+
+    /* Reduced-size derived image. The API returns null when the post has
+       no upload at all — in that case we fall back to a real static
+       default image (sized to match the view: wide for grid, square for
+       list), rather than an emoji placeholder div. */
+    const fallback = isList ? DEFAULT_POST_THUMBNAIL_SMALL : DEFAULT_POST_THUMBNAIL;
+    const imgSrc   = post.thumbnail || fallback;
+    const imgHtml  = `<img src="${esc(imgSrc)}" alt="${esc(post.title)}" loading="lazy">`;
+
+    const tags = (post.tag || []).map(t => `<span>${esc(t.name)}</span>`).join('');
+    const cats = (post.category || []).map(c => `<span>${esc(c.name)}</span>`).join('');
+
+    if (isList) {
+      el.innerHTML = `
+        ${imgHtml}
+        <div class="post-content">
+          <h2><a href="${esc(post.absolute_url || '#')}">${esc(post.title)}</a></h2>
+          ${post.snippet ? `<p class="post-snippet">${esc(post.snippet)}</p>` : ''}
+          <div class="post-meta">
+            ${post.display_date ? `<span>${esc(post.display_date)}</span>` : ''}
+            ${post.author       ? `<span>${esc(post.author)}</span>`       : ''}
+          </div>
+        </div>`;
+    } else {
+      el.innerHTML = `
+        ${imgHtml}
+        <div class="post-content">
+          <h2><a href="${esc(post.absolute_url || '#')}">${esc(post.title)}</a></h2>
+          <div class="post-meta">
+            ${post.author       ? `<span>✍ ${esc(post.author)}</span>`       : ''}
+            ${post.display_date ? `<span>📅 ${esc(post.display_date)}</span>` : ''}
+          </div>
+          ${post.snippet ? `<p class="post-snippet">${esc(post.snippet)}</p>` : ''}
+          ${cats ? `<div class="post-categories">${cats}</div>` : ''}
+          ${tags ? `<div class="post-tags">${tags}</div>`       : ''}
+          <div class="post-views">👁 ${post.hit_count ?? 0} views</div>
+        </div>`;
+    }
+    return el;
+  }
+
+  /* ════════════════════════════════════════════
+     PAGINATION
+  ════════════════════════════════════════════ */
+  function renderPagination() {
+    const el = document.getElementById('pagination-controls');
+    if (!el) return;
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+    const pages = buildPageList(currentPage, totalPages);
+    const prev  = currentPage > 1
+      ? `<button class="nav-btn" data-page="${currentPage - 1}">← Prev</button>` : '';
+    const next  = currentPage < totalPages
+      ? `<button class="nav-btn" data-page="${currentPage + 1}">Next →</button>` : '';
+
+    el.innerHTML = prev
+      + pages.map(x => x === '…'
+          ? `<span class="ellipsis">…</span>`
+          : `<button class="page-btn ${x === currentPage ? 'is-active' : ''}"
+               data-page="${x}" ${x === currentPage ? 'disabled' : ''}>${x}</button>`
+        ).join('')
+      + next;
+
+    el.onclick = e => {
+      const btn = e.target.closest('button[data-page]');
+      if (!btn) return;
+      const page = Number(btn.dataset.page);
+      if (!page || page === currentPage) return;
+      fetchPosts(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-
-    // --- API Endpoint ---
-    // IMPORTANT: Replace with your actual API endpoint URL
-    const API_URL = "/content/api/v1/posts/";
-    const pageParams = new URLSearchParams(window.location.search);
-    const categorySlug = pageParams.get("category"); 
-
-    // --- Functions ---
-
-    /*
-     * Fetches posts from the API based on current filters and search term.
-     */
-    let postsData = [];
-    async function fetchPosts(page = 1, { append = false } = {}) {
-        currentPage = page; // Update current page
-        // Build the URL with query parameters
-        const url = new URL(API_URL, window.location.origin);
-        if (categorySlug) url.searchParams.set("category", categorySlug);
-
-
-        url.searchParams.set("page", String(page));
-
-        // Future: Add pagination parameter: url += `&page=${currentPage}`;
-
-        try {
-            const response = await fetch(url.toString());
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-
-            const posts = data.results || data; 
-
-            totalPages = data.total_pages ?? 1;
-            currentPage = data.current_page_number ?? currentPage;
-            window.paginationLinks = data.links;
-
-            //  keep postsData in sync
-            postsData = append ? postsData.concat(posts) : posts;
-
-            displayPosts(postsData, false);
-            renderPaginationControls();
-            
-        } catch (error) {
-            console.error("Error fetching posts:", error);
-            // Display error message to the user
-            showError("Failed to load posts. Please try again later.");
-        }
-    }
-
-    /**
-     * Renders the fetched posts into the appropriate view (grid or list).
-     * @param {Array} posts - Array of post objects from the API.
-     * @param {boolean} append - If true, appends posts; otherwise, replaces existing posts.
-     */
-    // Render pagination controls
-function renderPaginationControls() {
-  const el = document.getElementById("pagination-controls");
-  if (!el) return;
-
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
   }
 
-  const makeBtn = (page) => `
-    <button
-      class="page-btn ${page === currentPage ? "is-active" : ""}"
-      data-page="${page}"
-      ${page === currentPage ? "disabled" : ""}>
-      ${page}
-    </button>
-  `;
-
-  const pages = [];
-
-  if (totalPages <= 4) {
-    for (let p = 1; p <= totalPages; p++) pages.push(p);
-  } else if (currentPage <= 3) {
-    // show 1 2 3 4 ... last
-    pages.push(1, 2, 3, 4, "…", totalPages);
-  } else if (currentPage >= totalPages - 2) {
-    // show 1 ... last-3 last-2 last-1 last
-    pages.push(1, "…", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-  } else {
-    // middle: 1 ... p-1 p p+1 ... last
-    pages.push(1, "…", currentPage - 1, currentPage, currentPage + 1, "…", totalPages);
+  function buildPageList(cur, total) {
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+    if (cur <= 3)         return [1, 2, 3, 4, '…', total];
+    if (cur >= total - 2) return [1, '…', total-3, total-2, total-1, total];
+    return [1, '…', cur-1, cur, cur+1, '…', total];
   }
 
-  // clean up: remove out-of-range pages and duplicate ellipses
-  const cleaned = [];
-  for (const x of pages) {
-    if (typeof x === "number" && (x < 1 || x > totalPages)) continue;
-    if (x === "…" && cleaned[cleaned.length - 1] === "…") continue;
-    if (typeof x === "number" && cleaned.includes(x)) continue;
-    cleaned.push(x);
+  /* ════════════════════════════════════════════
+     VIEW TOGGLE
+  ════════════════════════════════════════════ */
+  function setView(v) {
+    if (view === v) return;
+    view = v;
+    postGrid.style.display = v === 'grid' ? 'grid' : 'none';
+    postList.style.display = v === 'list' ? 'grid' : 'none';
+    gridBtn?.classList.toggle('active', v === 'grid');
+    listBtn?.classList.toggle('active', v === 'list');
+    renderPosts(postsData);
   }
 
-  const prevHtml =
-    currentPage === 1
-      ? ""
-      : `<button class="nav-btn" data-page="${currentPage - 1}">Previous</button>`;
+  gridBtn?.addEventListener('click', () => setView('grid'));
+  listBtn?.addEventListener('click', () => setView('list'));
 
-  const nextHtml =
-    currentPage === totalPages
-      ? ""
-      : `<button class="nav-btn" data-page="${currentPage + 1}">Next</button>`;
-
-  el.innerHTML = `
-    ${prevHtml}
-    ${cleaned
-      .map((x) => (x === "…" ? `<span class="ellipsis">...</span>` : makeBtn(x)))
-      .join("")}
-    ${nextHtml}
-  `;
-
-  el.onclick = (e) => {
-    const btn = e.target.closest("button[data-page]");
-    if (!btn) return;
-    const page = Number(btn.dataset.page);
-    if (!Number.isFinite(page) || page < 1 || page > totalPages || page === currentPage) return;
-    fetchPosts(page, { append: false });
-  };
-}
-    function displayPosts(posts, append = false) {
-        const postsContainer = currentView === 'grid' ? postGrid : postList;
-
-        // Clear existing posts if not appending
-        if (!append) {
-            postsContainer.innerHTML = '';
-        }
-
-        if (posts.length === 0) {
-            postsContainer.innerHTML = '<p class="no-results">No posts found matching your criteria.</p>';
-            return;
-        }
-
-        posts.forEach(post => {
-            const postElement = createPostElement(post);
-            postsContainer.appendChild(postElement);
-        });
-    }
-
-    //////////////////////////////////////////////////////////////
-    function getActiveContainer(view = currentView) {
-        return view === "grid" ? postGrid : postList;
-        }
-
-    function displayPosts(posts, append = false, view = currentView) {
-        const postsContainer = getActiveContainer(view);
-
-        if (!append) postsContainer.innerHTML = "";
-
-        if (!posts || posts.length === 0) {
-            postsContainer.innerHTML = '<p class="no-results">No posts found matching your criteria.</p>';
-            return;
-        }
-
-        const frag = document.createDocumentFragment();
-        posts.forEach((post) => frag.appendChild(createPostElement(post, view)));
-        postsContainer.appendChild(frag);
-        }
-    /**
-     * Creates a single post element (div) based on the post data.
-     * @param {Object} post - A single post object.
-     * @returns {HTMLElement} The created post element.
-     */
-    function createPostElement(post, view) {
-        const postItem = document.createElement('div');
-        postItem.classList.add("post-item", view === "grid" ? "grid-item" : "list-item");
-
-        // --- Image Handling ---
-        let imageHtml = '';
-        if (post.image) {
-            // Use placeholder if image URL is missing or invalid (optional)
-            const imageUrl = post.image;
-            imageHtml = `<img src="${imageUrl}" alt="${post.title || 'Post Image'}">`;
-        } else {
-            // Add a placeholder image or skip if no image
-            imageHtml = '<div class="post-image-placeholder">No Image</div>';
-        }
-
-        // --- Tags and Categories HTML ---
-        let tagsHtml = '';
-        if (post.tag && post.tag.length > 0) {
-            tagsHtml = `
-                <div class="post-tags">
-                    ${post.tag.map(tag => `<span>${tag.name}</span>`).join('')}
-                </div>
-            `;
-        }
-        let categoriesHtml = '';
-        if (post.category && post.category.length > 0) {
-            categoriesHtml = `
-                <div class="post-categories">
-                    ${post.category.map(cat => `<span>${cat.name}</span>`).join('')}
-                </div>
-            `;
-        }
-
-        // --- Constructing the Post Element ---
-        postItem.innerHTML = `
-            ${view  === 'grid' ? imageHtml : ''}
-            <div class="post-content">
-                ${view  === 'list' ? imageHtml : ''}
-                <h2><a href="${post.absolute_url || '#'}" target="_blank">${post.title}</a></h2>
-                <div class="post-meta">
-                    ${post.author ? `<span>Author: ${post.author}</span>` : ''}
-                    ${post.display_date ? `<span>Published: ${(post.display_date)}</span>` : ''}
-                </div>
-                ${post.snippet ? `<p class="post-snippet">${post.snippet}</p>` : ''}
-                ${categoriesHtml}
-                ${tagsHtml}
-                <p><em>Views ${post.hit_count || 0}</em></p>
-            </div>
-        `;
-        return postItem;
-    }
-
-
-    /**
-     * Applies the selected filters and reloads posts.
-     */
-    function applyFilters() {
-        const selectedCategories = Array.from(filterMenu.querySelectorAll('input[data-type="category"]:checked'))
-                                         .map(cb => cb.dataset.slug);
-
-        currentFilters.categories = selectedCategories;
-        document.removeEventListener('click', closeFilterMenuOutside);
-        fetchPosts(); // Reload posts with new filters
-    }
-
-    /**
-     * Toggles between grid and list view.
-     */
-
-    function setView(view) {
-        if (currentView === view) return;
-
-        currentView = view;
-
-        const isGrid = view === "grid";
-        postGrid.style.display = isGrid ? "grid" : "none";
-        postList.style.display = isGrid ? "none" : "grid";
-
-        displayGridButton?.classList.toggle("active", isGrid);
-        displayListButton?.classList.toggle("active", !isGrid);
-        displayPosts(postsData || [], false);
-        renderPosts(isGrid ? postGrid : postList, postsData, view);
-        }
-
-    function renderPosts(container, posts, view) {
-        container.innerHTML = "";
-        const frag = document.createDocumentFragment();
-        posts.forEach((post) => frag.appendChild(createPostElement(post, view)));
-        container.appendChild(frag);
-        }
-    
-    /**
-     * Displays an error message to the user.
-     * @param {string} message - The error message.
-     */
-    function showError(message) {
-        // You could implement a more sophisticated error display, e.g., a modal or toast
-        alert(message); // Simple alert for now
-    }
-
-    // --- Event Listeners ---
-
-    // Display toggle button
-    displayGridButton?.addEventListener("click", () => setView("grid"));
-    displayListButton?.addEventListener("click", () => setView("list"));
-    setView("grid");
-    // --- Initialization ---
-    fetchPosts(); // Load initial set of posts
+  /* ── Boot ── */
+  setView('grid');
+  fetchPosts();
 });

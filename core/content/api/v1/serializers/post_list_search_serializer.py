@@ -30,7 +30,41 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ["name", "id","slug","post_count"]
 
-class PostListSearchSerializer(serializers.ModelSerializer):
+class ThumbnailFieldsMixin:
+    """
+    Shared get_thumbnail / get_thumbnail_small logic for any serializer
+    that lists posts.
+ 
+    Returns None when there is no derived image AND no source image —
+    i.e. the post has no upload at all. Does NOT fall back to a shared
+    default path (there isn't one anymore). The frontend renders its own
+    placeholder whenever this comes back null, exactly like it already
+    does today for a falsy `post.image`.
+ 
+    If a custom image exists but the derived thumbnail hasn't been
+    generated yet (e.g. pre-migration post not yet backfilled, or Pillow
+    failed silently on save), this still falls back to the full-res
+    `image` so the post isn't left imageless — only the size-reduction
+    is deferred, not the image itself.
+    """
+ 
+    def get_thumbnail(self, obj):
+        request = self.context.get("request")
+        f = obj.thumbnail if obj.thumbnail else (obj.image if obj.image else None)
+        if not f:
+            return None
+        url = f.url
+        return request.build_absolute_uri(url) if request else url
+ 
+    def get_thumbnail_small(self, obj):
+        request = self.context.get("request")
+        f = obj.thumbnail_small if obj.thumbnail_small else (obj.image if obj.image else None)
+        if not f:
+            return None
+        url = f.url
+        return request.build_absolute_uri(url) if request else url
+    
+class PostListSearchSerializer(ThumbnailFieldsMixin, serializers.ModelSerializer):
     snippet = serializers.ReadOnlyField(source="get_snippets")
     absolute_url = serializers.SerializerMethodField()
     hit_count = serializers.SerializerMethodField()
@@ -38,13 +72,18 @@ class PostListSearchSerializer(serializers.ModelSerializer):
     category = RecursiveCategorySerializer(many=True, read_only=True)
     tag = TagSerializer(many=True, read_only=True)
     display_date = serializers.SerializerMethodField()
-
+ 
+    # CHANGED: was `image` (full-res). Now reduced-size derivatives.
+    thumbnail = serializers.SerializerMethodField()
+    thumbnail_small = serializers.SerializerMethodField()
+ 
     class Meta:
         model = Post
         fields = [
             "id",
             "title",
-            "image",
+            "thumbnail",
+            "thumbnail_small",
             "author",
             "snippet",
             "absolute_url",
@@ -55,25 +94,25 @@ class PostListSearchSerializer(serializers.ModelSerializer):
             "hit_count",
         ]
         read_only_fields = fields
-
+ 
     def get_absolute_url(self, obj):
         request = self.context.get("request")
         url = obj.get_absolute_url()
         return request.build_absolute_uri(url) if request else url
-
+ 
     def get_hit_count(self, obj):
         hit_count_obj = obj.hit_count_generic.all().first()
         return hit_count_obj.hits if hit_count_obj else 0
-    
+ 
     def get_display_date(self, obj):
         now = timezone.now()
-        published_date = obj.published_date # Access the published_date from the model instance
-
+        published_date = obj.published_date
+ 
         if not published_date:
             return None
-
+ 
         diff = now - published_date
-
+ 
         if diff.total_seconds() < 60:
             seconds = int(diff.total_seconds())
             return f"{seconds} seconds ago"
@@ -86,10 +125,10 @@ class PostListSearchSerializer(serializers.ModelSerializer):
         elif diff.total_seconds() < 604800:
             days = diff.total_seconds() / 86400
             return f"{int(days)} days ago"
-        elif diff.total_seconds() < 2592000:  # Approximately 4 weeks
+        elif diff.total_seconds() < 2592000:
             weeks = diff.total_seconds() / 604800
             return f"{int(weeks)} weeks ago"
-        elif diff.total_seconds() < 31536000: # Approximately 12 months
+        elif diff.total_seconds() < 31536000:
             months = diff.total_seconds() / 2592000
             return f"{int(months)} months ago"
         else:

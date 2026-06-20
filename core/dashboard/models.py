@@ -38,6 +38,11 @@ class HomepageSection(models.Model):
     )
     title = models.CharField(max_length=250, null=True, blank=True)
     is_active = models.BooleanField(default=False)
+    subtitle = models.CharField(max_length=500, blank=True)
+    content = models.TextField(blank=True)
+    icon = models.CharField(max_length=10, blank=True)
+    button_label = models.CharField(max_length=60, blank=True)
+    button_url = models.CharField(max_length=500, blank=True)
 
     class Meta:
         ordering = ["order"]

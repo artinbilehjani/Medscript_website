@@ -2,67 +2,50 @@ from rest_framework import serializers
 from ...models import Comment,CommentReaction
 from django.utils import timezone
 
-class CommentListSerializer(serializers.ModelSerializer):
-    author = serializers.SerializerMethodField()
-    like_count = serializers.IntegerField(read_only=True)
+
+class DisplayDateMixin:
+    """Shared relative-time helper for serializers."""
+ 
+    def get_display_date(self, dt):
+        if not dt:
+            return None
+        now  = timezone.now()
+        diff = now - dt
+        secs = diff.total_seconds()
+ 
+        if secs < 60:       return f"{int(secs)} seconds ago"
+        if secs < 3600:     return f"{int(secs / 60)} minutes ago"
+        if secs < 86400:    return f"{int(secs / 3600)} hours ago"
+        if secs < 604800:   return f"{int(secs / 86400)} days ago"
+        if secs < 2592000:  return f"{int(secs / 604800)} weeks ago"
+        if secs < 31536000: return f"{int(secs / 2592000)} months ago"
+        return f"{int(secs / 31536000)} years ago"
+    
+class CommentListSerializer(DisplayDateMixin, serializers.ModelSerializer):
+    author       = serializers.SerializerMethodField()
+    like_count   = serializers.IntegerField(read_only=True)
     dislike_count = serializers.IntegerField(read_only=True)
     user_reaction = serializers.IntegerField(read_only=True, allow_null=True)
     replies_count = serializers.IntegerField(read_only=True)
-    display_date = serializers.SerializerMethodField()
-
+    display_date  = serializers.SerializerMethodField()
+ 
     class Meta:
-        model = Comment
+        model  = Comment
         fields = [
-            "id",
-            "author",
-            "body",
-            "parent",
-            "created_date",
-            "updated_date",
-            "is_edited",
-            "like_count",
-            "dislike_count",
-            "user_reaction",
-            "replies_count",
+            "id", "author", "body", "parent",
+            "created_date", "updated_date", "is_edited",
+            "like_count", "dislike_count", "user_reaction", "replies_count",
             "display_date",
         ]
-
+ 
     def get_author(self, obj):
         return {
-            "id": obj.author.id,
+            "id":           obj.author.id,
             "display_name": getattr(obj.author, "display_name", str(obj.author)),
         }
-
+ 
     def get_display_date(self, obj):
-        now = timezone.now()
-        created_date = obj.created_date # Access the created_date from the model instance
-
-        if not created_date:
-            return None
-
-        diff = now - created_date
-
-        if diff.total_seconds() < 60:
-            seconds = int(diff.total_seconds())
-            return f"{seconds} seconds ago"
-        elif diff.total_seconds() < 3600:
-            minutes = diff.total_seconds() / 60
-            return f"{int(minutes)} minutes ago"
-        elif diff.total_seconds() < 86400:
-            hours = diff.total_seconds() / 3600
-            return f"{int(hours)} hours ago"
-        elif diff.total_seconds() < 604800:
-            days = diff.total_seconds() / 86400
-            return f"{int(days)} days ago"
-        elif diff.total_seconds() < 2592000:  # Approximately 4 weeks
-            weeks = diff.total_seconds() / 604800
-            return f"{int(weeks)} weeks ago"
-        elif diff.total_seconds() < 31536000: # Approximately 12 months
-            months = diff.total_seconds() / 2592000
-            return f"{int(months)} months ago"
-        else:
-            years = diff.total_seconds() / 31536000
-            return f"{int(years)} years ago"
+        return super().get_display_date(obj.created_date)
     
 class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:

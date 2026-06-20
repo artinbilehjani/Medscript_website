@@ -3,6 +3,25 @@ django>5.2,<5.3
 Pillow
 djangorestframework
 
+# database client
+psycopg[binary,pool]
+
+# ── Production WSGI server ───────────────────────────────────────
+gunicorn
+ 
+# ── Static files (served efficiently without Nginx needing app access) ──
+whitenoise
+
+# ── Rate limiting for download endpoints (see 10_EXPLANATIONS.md) ─
+django-ratelimit
+
+# ── Environment variable loading ──────────────────────────────────
+python-dotenv
+
+# ── Optional, only if you outgrow local disk storage ─────────────
+# django-storages[s3]==1.14.*
+# boto3==1.34.*
+
 # env controlls
 python-decouple
 
@@ -18,10 +37,7 @@ drf-yasg[validation]
 djoser
 django-hitcount
 python-slugify
-django-simple-captcha
-
-# deployment module
-gunicorn
+bleach
 
 # refactoring and tests
 black
@@ -34,5 +50,4 @@ Faker
 celery
 django-redis
 
-# database client
-psycopg[binary,pool]
+

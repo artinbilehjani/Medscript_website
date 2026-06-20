@@ -1,68 +1,155 @@
 {% extends "base.html" %}
 {% load static %}
-
-{% block title %}جزئیات پست{% endblock %}
-
+ 
+{% block title %}{{ post.title }} | MedScript{% endblock %}
+ 
 {% block content %}
-<section class="page-section">
-  <div class="container">
-    <div id="post-detail-page" class="post-detail-page">
-      <div id="post-loading" class="state-box">در حال بارگذاری...</div>
-      <div id="post-error" class="state-box error" hidden></div>
-
-      <article id="post-content" class="post-detail" hidden>
-        <div class="post-detail__image-wrap">
-          <img id="post-image" class="post-detail__image" src="" alt="">
+<div class="pd-root" id="post-detail-root" data-slug="{{ slug }}" data-authenticated="{{ request.user.is_authenticated|lower }}">
+ 
+  <!-- Hero Section -->
+  <section class="pd-hero" id="pd-hero">
+    <div class="pd-hero-img-wrap">
+      <img class="pd-hero-img" id="pd-hero-img" src="" alt="" />
+      <div class="pd-hero-overlay"></div>
+    </div>
+    <div class="pd-hero-content">
+      <div class="pd-categories" id="pd-categories"></div>
+      <h1 class="pd-title" id="pd-title"><span class="pd-title-skeleton">Loading...</span></h1>
+      <div class="pd-meta-row">
+        <div class="pd-author-chip" id="pd-author-chip">
+          <div class="pd-author-avatar-wrap">
+            <img class="pd-author-avatar" id="pd-author-avatar" src="" alt="" />
+            <span class="pd-heartbeat-ring"></span>
+          </div>
+          <div class="pd-author-info">
+            <span class="pd-author-label">Author</span>
+            <span class="pd-author-name" id="pd-author-name">—</span>
+          </div>
         </div>
-
-        <header class="post-detail__header">
-          <h1 id="post-title" class="post-detail__title"></h1>
-
-          <div class="post-detail__meta">
-            <span>نویسنده: <strong id="post-author">-</strong></span>
-            <span>تاریخ انتشار: <strong id="post-published-date">-</strong></span>
-            <span>بازدید: <strong id="post-hit-count">۰</strong></span>
-          </div>
-        </header>
-
-        <section class="post-detail__taxonomies">
-          <div>
-            <h3>دسته‌بندی‌ها</h3>
-            <div id="post-categories" class="tag-list"></div>
-          </div>
-
-          <div>
-            <h3>برچسب‌ها</h3>
-            <div id="post-tags" class="tag-list"></div>
-          </div>
-        </section>
-
-        <section class="post-detail__body">
-          <h3>محتوا</h3>
-          <div id="post-content-html" class="content-box"></div>
-        </section>
-
-        <section class="post-detail__links">
-          <h3>لینک‌ها</h3>
-          <div id="post-links" class="link-list"></div>
-        </section>
-
-        <section class="post-detail__files">
-          <h3>فایل‌ها</h3>
-          <div id="post-files" class="file-list"></div>
-        </section>
-      </article>
+        <div class="pd-meta-chips">
+          <span class="pd-chip pd-chip-date" id="pd-chip-date">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="pd-date-text">—</span>
+          </span>
+          <span class="pd-chip pd-chip-views" id="pd-chip-views">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span id="pd-views-text">—</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- Main Body -->
+  <div class="pd-body">
+ 
+    <!-- Content Card -->
+    <article class="pd-card pd-content-card glass" id="pd-content-card">
+      <div class="pd-tags-row" id="pd-tags-row"></div>
+      <div class="pd-content-body" id="pd-content-body"></div>
+    </article>
+ 
+    <!-- Files Accordion -->
+    <div class="pd-accordion glass" id="pd-files-accordion">
+      <button class="pd-accordion-trigger" id="pd-files-trigger" aria-expanded="false" aria-controls="pd-files-panel">
+        <span class="pd-accordion-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </span>
+        <span class="pd-accordion-label">Session Files</span>
+        <span class="pd-accordion-badge" id="pd-files-badge">0</span>
+        <span class="pd-accordion-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div class="pd-accordion-panel" id="pd-files-panel" role="region" hidden>
+        <div class="pd-ekg-line"><svg viewBox="0 0 400 30" preserveAspectRatio="none"><polyline class="pd-ekg-path" points="0,15 60,15 75,2 90,28 105,2 115,15 160,15 175,8 185,22 195,15 400,15"/></svg></div>
+        <div class="pd-files-grid" id="pd-files-grid">
+          <p class="pd-empty">No files available for this post.</p>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Videos Accordion -->
+    <div class="pd-accordion glass" id="pd-videos-accordion">
+      <button class="pd-accordion-trigger" id="pd-videos-trigger" aria-expanded="false" aria-controls="pd-videos-panel">
+        <span class="pd-accordion-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </span>
+        <span class="pd-accordion-label">Class Recordings</span>
+        <span class="pd-accordion-badge" id="pd-videos-badge">0</span>
+        <span class="pd-accordion-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div class="pd-accordion-panel" id="pd-videos-panel" role="region" hidden>
+        <div class="pd-ekg-line"><svg viewBox="0 0 400 30" preserveAspectRatio="none"><polyline class="pd-ekg-path" points="0,15 60,15 75,2 90,28 105,2 115,15 160,15 175,8 185,22 195,15 400,15"/></svg></div>
+        <div class="pd-videos-list" id="pd-videos-list">
+          <p class="pd-empty">No recordings available.</p>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Comments Section -->
+    <section class="pd-comments-section glass" id="pd-comments-section">
+      <h2 class="pd-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Comments
+        <span class="pd-comment-count" id="pd-comment-count">0</span>
+      </h2>
+ 
+      <!-- Comment Form -->
+      <div class="pd-comment-form-wrap" id="pd-comment-form-wrap">
+        <textarea class="pd-comment-input" id="pd-comment-input" placeholder="Share your thoughts on this session..." rows="3" maxlength="255"></textarea>
+        <div class="pd-comment-form-footer">
+          <span class="pd-char-count" id="pd-char-count">0 / 255</span>
+          <button class="pd-submit-btn" id="pd-comment-submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Post Comment
+          </button>
+        </div>
+        <div class="pd-reply-banner" id="pd-reply-banner" hidden>
+          <span id="pd-reply-to-label">Replying to a comment</span>
+          <button class="pd-cancel-reply" id="pd-cancel-reply">✕ Cancel</button>
+        </div>
+      </div>
+      <div class="pd-login-cta" id="pd-login-cta" hidden>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <p>Sign in to join the discussion</p>
+        <a href="/accounts/login/?next={{ request.path }}" class="pd-login-btn">Login to Comment</a>
+      </div>
+ 
+      <!-- Comments List -->
+      <div class="pd-comments-list" id="pd-comments-list">
+        <div class="pd-loading-spinner" id="pd-comments-loading">
+          <div class="pd-spinner"></div>
+          <span>Loading comments...</span>
+        </div>
+      </div>
+ 
+      <!-- Comment Pagination -->
+      <div class="pd-comment-pagination" id="pd-comment-pagination"></div>
+    </section>
+ 
+  </div><!-- /.pd-body -->
+</div><!-- /.pd-root -->
+ 
+<!-- Login Warning Modal -->
+<div class="pd-modal-backdrop pd-modal-hidden" id="pd-modal-backdrop">
+  <div class="pd-modal glass-strong">
+    <div class="pd-modal-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h3>Login Required</h3>
+    <p>You need to be logged in to comment and react. Would you like to go to the login page?</p>
+    <div class="pd-modal-actions">
+      <button class="pd-modal-cancel" id="pd-modal-cancel">Stay Here</button>
+      <a class="pd-modal-confirm" id="pd-modal-login-link" href="/accounts/login/">Login</a>
     </div>
   </div>
-</section>
+</div>
 {% endblock %}
-
+ 
 {% block scripts %}
-<script>
-    window.APP_CONFIG = {
-        postDetailApiBaseUrl: "/api/v1/post/",
-        currentSlug: "{{ request.resolver_match.kwargs.slug|escapejs }}"
-    };
-</script>
+<script src="{% static 'js/api.js' %}"></script>
 <script src="{% static 'js/post-detail.js' %}"></script>
 {% endblock %}

@@ -1,7 +1,15 @@
-// Adjust if your API is on another origin, e.g. "http://localhost:8000"
-const API_BASE = "/accounts/api/v1";
-const LOGIN_URL = `${API_BASE}/auth/login/`;
+const API_BASE    = "/accounts/api/v1";
+const LOGIN_URL   = `${API_BASE}/auth/login/`;
 const CAPTCHA_URL = `${API_BASE}/auth/captcha/`;
+
+/* ── Read ?next= from URL, fallback to profile ── */
+function getNextUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const next   = params.get("next") || "";
+  /* Basic safety: only allow same-origin relative paths */
+  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+  return "/accounts/profile/";
+}
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -25,7 +33,6 @@ function normalizeDrfErrors(data) {
   if (!data) return "Login failed.";
   if (typeof data === "string") return data;
   if (data.detail) return data.detail;
-
   if (typeof data === "object") {
     const lines = [];
     for (const [k, v] of Object.entries(data)) {
@@ -40,28 +47,21 @@ function normalizeDrfErrors(data) {
 
 async function loadCaptcha() {
   const captchaQuestionEl = document.getElementById("mgCaptchaQuestion");
-  const captchaKeyEl = document.getElementById("mgCaptchaKey");
-  const captchaMsg = document.getElementById("mgCaptchaMsg");
-
+  const captchaKeyEl      = document.getElementById("mgCaptchaKey");
+  const captchaMsg        = document.getElementById("mgCaptchaMsg");
   if (!captchaQuestionEl || !captchaKeyEl || !captchaMsg) return;
 
-  setMsg(captchaMsg, "Loading CAPTCHA...", null);
-
+  setMsg(captchaMsg, "Loading…", null);
   try {
-    const res = await fetch(CAPTCHA_URL, {
-      method: "GET",
-      credentials: "include",
+    const res  = await fetch(CAPTCHA_URL, {
+      method: "GET", credentials: "include",
       headers: { Accept: "application/json" },
     });
-
     const data = await res.json().catch(() => null);
-
     if (!res.ok || !data?.captcha_key || !data?.captcha_question) {
-      setMsg(captchaMsg, "Failed to load CAPTCHA.", "mg-error");
-      return;
+      setMsg(captchaMsg, "Failed to load CAPTCHA.", "mg-error"); return;
     }
-
-    captchaKeyEl.value = data.captcha_key;
+    captchaKeyEl.value          = data.captcha_key;
     captchaQuestionEl.textContent = data.captcha_question;
     setMsg(captchaMsg, "", null);
   } catch {
@@ -70,73 +70,60 @@ async function loadCaptcha() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const form = document.getElementById("mgLoginForm");
-  const msg = document.getElementById("mgMsg");
+  const form      = document.getElementById("mgLoginForm");
+  const msg       = document.getElementById("mgMsg");
   const submitBtn = form?.querySelector('button[type="submit"]');
-
   if (!form || !msg || !submitBtn) return;
 
-  // --- Show/Hide password toggle ---
-  const pwInput = form.querySelector('input[name="password"]');
-  const togglePwBtn = document.getElementById("mgTogglePassword");
+  /* ── Show/hide password ── */
+  const pwInput   = form.querySelector('input[name="password"]');
+  const toggleBtn = document.getElementById("mgTogglePassword");
   const toggleIcon = document.getElementById("togglePwIcon");
-  const showIcon = `/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
-  const hideIcon = `/media/images/system/visibility_off_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
+  const showSrc   = `/media/images/system/visibility_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
+  const hideSrc   = `/media/images/system/visibility_off_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg`;
 
-  if (pwInput && togglePwBtn) {
-    togglePwBtn.addEventListener("click", () => {
-      const show = pwInput.type === "password";
-      pwInput.type = show ? "text" : "password";
-      
-      toggleIcon.src = show ? hideIcon : showIcon;
-      
-      togglePwBtn.setAttribute("aria-pressed", String(show));
-      togglePwBtn.setAttribute("aria-label", show ? "Hide password" : "Show password");
-          });
-  }
+  toggleBtn?.addEventListener("click", () => {
+    const show     = pwInput.type === "password";
+    pwInput.type   = show ? "text" : "password";
+    if (toggleIcon) {
+      toggleIcon.src = show ? hideSrc : showSrc;
+      toggleIcon.alt = show ? "Hide password" : "Show password";
+    }
+    toggleBtn.setAttribute("aria-pressed", String(show));
+  });
 
-  const refreshBtn =
-    document.getElementById("mgCaptchaReload") ||
-    document.getElementById("refreshCaptcha");
-
-  refreshBtn?.addEventListener("click", (e) => {
-    e.preventDefault();
-    loadCaptcha();
+  /* ── Captcha reload ── */
+  document.getElementById("mgCaptchaReload")?.addEventListener("click", e => {
+    e.preventDefault(); loadCaptcha();
   });
 
   await loadCaptcha();
 
+  /* ── Submit ── */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     setMsg(msg, "", null);
 
-    const fd = new FormData(form);
-    const username = (fd.get("username") || "").toString().trim();
-    const password = (fd.get("password") || "").toString();
-    const captcha_key = (fd.get("captcha_key") || "").toString().trim();
+    const fd            = new FormData(form);
+    const username      = (fd.get("username")      || "").toString().trim();
+    const password      = (fd.get("password")      || "").toString();
+    const captcha_key   = (fd.get("captcha_key")   || "").toString().trim();
     const captcha_value = (fd.get("captcha_value") || "").toString().trim();
 
     if (!username || !password) {
-      setMsg(msg, "Username and password are required.", "mg-error");
-      return;
+      setMsg(msg, "Username and password are required.", "mg-error"); return;
     }
     if (!captcha_key || !captcha_value) {
-      setMsg(msg, "CAPTCHA is required.", "mg-error");
-      return;
+      setMsg(msg, "CAPTCHA is required.", "mg-error"); return;
     }
 
     submitBtn.disabled = true;
     try {
-      const res = await fetch(LOGIN_URL, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...csrfHeader(),
-        },
+      const res  = await fetch(LOGIN_URL, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json", ...csrfHeader() },
         body: JSON.stringify({ username, password, captcha_key, captcha_value }),
       });
-
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
@@ -146,10 +133,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      setMsg(msg, "Logged in.", "mg-ok");
-      setTimeout(() => (window.location.href = "/accounts/profile/"), 400);
+      setMsg(msg, "Logged in ✓", "mg-ok");
+      /* FIX 4 — redirect to ?next= or profile */
+      setTimeout(() => { window.location.href = getNextUrl(); }, 350);
+
     } catch {
-      setMsg(msg, "Network error. Check API_BASE / server.", "mg-error");
+      setMsg(msg, "Network error.", "mg-error");
     } finally {
       submitBtn.disabled = false;
     }

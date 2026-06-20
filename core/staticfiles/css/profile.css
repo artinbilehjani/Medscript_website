@@ -1,179 +1,256 @@
+@charset "utf-8";
+/* ═══════════════════════════════════════════════
+   profile.css — MedScript
+   Matches base.css neural / glass / purple-pink theme
+═══════════════════════════════════════════════ */
+
 :where(#mgp-profile-page) {
-  --mgp-bg: #0b1220;
-  --mgp-surface: rgba(255, 255, 255, 0.06);
-  --mgp-surface-2: rgba(255, 255, 255, 0.08);
-  --mgp-border: rgba(255, 255, 255, 0.12);
-  --mgp-text: rgba(255, 255, 255, 0.92);
-  --mgp-muted: rgba(255, 255, 255, 0.68);
-  --mgp-muted-2: rgba(255, 255, 255, 0.55);
-  --mgp-primary: #6d5efc;
-  --mgp-primary-2: #8b7bff;
-  --mgp-danger: #ef4444;
-  --mgp-ok: #22c55e;
-  --mgp-warn: #f59e0b;
+  /* Reuse the same tokens as base.css where possible */
+  --p-purple:    var(--purple, #e0a3ff);
+  --p-pink:      var(--pink, #ff69b4);
+  --p-violet:    var(--violet, #9370db);
+  --p-cyan:      var(--cyan, #00ffff);
 
-  --mgp-radius: 16px;
-  --mgp-radius-sm: 12px;
-  --mgp-shadow: 0 18px 40px rgba(0, 0, 0, 0.30);
-  --mgp-shadow-sm: 0 10px 28px rgba(0, 0, 0, 0.24);
+  --p-glass-bg:     var(--glass-bg, rgba(255,255,255,0.05));
+  --p-glass-border: var(--glass-border, rgba(255,255,255,0.10));
+  --p-glass-hover:  var(--glass-hover, rgba(255,255,255,0.08));
 
-  color: var(--mgp-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --p-text:      var(--text, #ffffff);
+  --p-text-dim:  var(--text-dim, rgba(255,255,255,0.65));
+  --p-text-muted:var(--text-muted, rgba(255,255,255,0.35));
+
+  --p-ok:        #22c55e;
+  --p-warn:      #f59e0b;
+  --p-danger:    #ef4444;
+
+  --p-ease:   var(--ease, cubic-bezier(0.16,1,0.3,1));
+  --p-t:      var(--t, 0.2s);
+  --p-t-slow: var(--t-slow, 0.4s);
+
+  color: var(--p-text-dim);
+  font-family: 'Inter','Segoe UI',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
 }
 
+/* ── Page wrapper ─────────────────────────────────────────────── */
 :where(#mgp-profile-page) .mgp-profile {
-  background: radial-gradient(900px 500px at 15% 10%, rgba(109, 94, 252, 0.25), transparent 60%),
-              radial-gradient(700px 500px at 95% 0%, rgba(34, 197, 94, 0.14), transparent 55%),
-              linear-gradient(180deg, rgba(255,255,255,0.04), transparent 30%),
-              var(--mgp-bg);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: calc(var(--mgp-radius) + 6px);
-  box-shadow: var(--mgp-shadow);
-  padding: 20px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
 }
 
-/* Header */
+@media (max-width: 760px) {
+  :where(#mgp-profile-page) .mgp-profile {
+    padding: 20px 16px 48px;
+  }
+}
+
+/* ── Page header ──────────────────────────────────────────────── */
 :where(#mgp-profile-page) .mgp-profile__header {
   display: flex;
-  gap: 14px;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
 :where(#mgp-profile-page) .mgp-profile__title {
   margin: 0;
-  font-size: 22px;
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 800;
   letter-spacing: 0.2px;
+  background: linear-gradient(45deg, var(--p-purple), var(--p-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 :where(#mgp-profile-page) .mgp-profile__subtitle {
   margin: 6px 0 0;
-  color: var(--mgp-muted);
+  color: var(--p-text-muted);
   font-size: 13.5px;
-  line-height: 1.35;
+  line-height: 1.45;
 }
 
-/* Layout grid */
+:where(#mgp-profile-page) .mgp-profile__header-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Layout grid ──────────────────────────────────────────────── */
 :where(#mgp-profile-page) .mgp-profile__grid {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: start;
 }
 
-@media (max-width: 980px) {
+@media (min-width: 860px) {
   :where(#mgp-profile-page) .mgp-profile__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
   }
 }
 
-/* Cards */
+/* ── Glass card (matches header/.glass) ──────────────────────────── */
 :where(#mgp-profile-page) .mgp-card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
-  border: 1px solid var(--mgp-border);
-  border-radius: var(--mgp-radius);
-  box-shadow: var(--mgp-shadow-sm);
+  background: var(--p-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--p-glass-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   overflow: hidden;
+  transition: background var(--p-t-slow), border-color var(--p-t-slow);
+}
+:where(#mgp-profile-page) .mgp-card:hover {
+  background: var(--p-glass-hover);
 }
 
 :where(#mgp-profile-page) .mgp-card__header {
-  padding: 16px 16px 0;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(224,163,255,0.10);
 }
 
 :where(#mgp-profile-page) .mgp-card__title {
   margin: 0;
   font-size: 16px;
+  font-weight: 700;
+  color: var(--p-text);
   letter-spacing: 0.2px;
 }
 
 :where(#mgp-profile-page) .mgp-card__desc {
-  margin: 6px 0 0;
-  color: var(--mgp-muted);
-  font-size: 13px;
+  margin: 5px 0 0;
+  color: var(--p-text-muted);
+  font-size: 12.5px;
   line-height: 1.4;
 }
 
 :where(#mgp-profile-page) .mgp-card__body {
-  padding: 16px;
+  padding: 20px;
 }
 
-:where(#mgp-profile-page) .mgp-card--sticky {
-  position: sticky;
-  top: 14px;
-}
-
-@media (max-width: 980px) {
+@media (min-width: 860px) {
   :where(#mgp-profile-page) .mgp-card--sticky {
-    position: relative;
-    top: auto;
+    position: sticky;
+    top: calc(var(--nav-h, 72px) + 22px);
   }
 }
 
-/* Identity */
+/* ── Stack ────────────────────────────────────────────────────── */
+:where(#mgp-profile-page) .mgp-stack {
+  display: grid;
+  gap: 16px;
+}
+
+/* ── Identity card ────────────────────────────────────────────── */
 :where(#mgp-profile-page) .mgp-id {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 :where(#mgp-profile-page) .mgp-id__avatar-wrap {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
+:where(#mgp-profile-page) .mgp-id__avatar-ring {
+  position: relative;
+  width: 124px;
+  height: 124px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+:where(#mgp-profile-page) .mgp-id__avatar-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--p-purple), var(--p-pink), var(--p-violet), var(--p-cyan), var(--p-purple));
+  animation: mgpRingSpin 8s linear infinite;
+  z-index: 0;
+}
+@keyframes mgpRingSpin { to { transform: rotate(360deg); } }
+
 :where(#mgp-profile-page) .mgp-id__avatar {
-  width: 132px;
-  height: 132px;
-  border-radius: 999px;
+  width: 124px;
+  height: 124px;
+  border-radius: 50%;
   object-fit: cover;
-  border: 1px solid var(--mgp-border);
+  border: 3px solid #0a0a0a;
   background: rgba(255,255,255,0.05);
+  position: relative;
+  z-index: 1;
+  display: block;
 }
 
 :where(#mgp-profile-page) .mgp-id__status {
-  font-size: 12px;
-  color: var(--mgp-muted);
-  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--p-text-muted);
+  padding: 5px 12px;
   border-radius: 999px;
-  border: 1px solid var(--mgp-border);
-  background: rgba(0,0,0,0.18);
+  border: 1px solid var(--p-glass-border);
+  background: rgba(0,0,0,0.25);
+  letter-spacing: 0.04em;
 }
+
+/* Image controls */
+:where(#mgp-profile-page) #image-edit-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+:where(#mgp-profile-page) #image-edit-controls[hidden] { display: none !important; }
+
+:where(#mgp-profile-page) #mgp-image-input { display: none; }
 
 :where(#mgp-profile-page) .mgp-id__meta {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 :where(#mgp-profile-page) .mgp-id__name {
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: 0.2px;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--p-text);
+  letter-spacing: 0.1px;
 }
 
 :where(#mgp-profile-page) .mgp-id__line {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: var(--mgp-radius-sm);
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(224,163,255,0.10);
+  background: rgba(255,255,255,0.03);
+  transition: background var(--p-t);
 }
-:where(#mgp-profile-page) .mgp-id__line[hidden] {
-  display: none !important;
+:where(#mgp-profile-page) .mgp-id__line:hover {
+  background: rgba(224,163,255,0.06);
 }
+:where(#mgp-profile-page) .mgp-id__line[hidden] { display: none !important; }
 
 :where(#mgp-profile-page) .mgp-id__label {
-  color: var(--mgp-muted-2);
-  font-size: 12px;
+  color: var(--p-text-muted);
+  font-size: 11.5px;
+  font-weight: 500;
+  flex-shrink: 0;
 }
 
 :where(#mgp-profile-page) .mgp-id__value {
-  color: var(--mgp-text);
+  color: var(--p-text);
   font-size: 12.5px;
-  max-width: 62%;
+  max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -187,32 +264,102 @@
 
 :where(#mgp-profile-page) .mgp-help {
   margin: 0;
-  color: var(--mgp-muted);
-  font-size: 12px;
-  line-height: 1.35;
+  color: var(--p-text-muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+  text-align: center;
 }
 
-/* Stack */
-:where(#mgp-profile-page) .mgp-stack {
-  display: grid;
-  gap: 16px;
+:where(#mgp-profile-page) .mgp-divider {
+  height: 1px;
+  background: rgba(224,163,255,0.10);
+  margin: 2px 0;
 }
 
-/* Form */
+/* ── Buttons (glass style matching nav) ──────────────────────────── */
+:where(#mgp-profile-page) .mgp-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.06);
+  color: var(--p-text-dim);
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.05em;
+  transition: color var(--p-t), background var(--p-t), border-color var(--p-t), box-shadow var(--p-t), transform 0.05s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+:where(#mgp-profile-page) .mgp-btn:hover {
+  color: #fff;
+  background: rgba(224,163,255,0.10);
+}
+:where(#mgp-profile-page) .mgp-btn:active { transform: translateY(1px); }
+:where(#mgp-profile-page) .mgp-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+:where(#mgp-profile-page) .mgp-btn--block { width: 100%; }
+
+:where(#mgp-profile-page) .mgp-btn--primary {
+  background: linear-gradient(135deg, rgba(224,163,255,0.22), rgba(255,105,180,0.16));
+  border-color: rgba(224,163,255,0.32);
+  color: var(--p-purple);
+  box-shadow: 0 0 18px rgba(224,163,255,0.12);
+}
+:where(#mgp-profile-page) .mgp-btn--primary:hover {
+  background: linear-gradient(135deg, rgba(224,163,255,0.32), rgba(255,105,180,0.24));
+  border-color: rgba(224,163,255,0.55);
+  box-shadow: 0 0 28px rgba(224,163,255,0.25), 0 0 50px rgba(224,163,255,0.08);
+  color: #fff;
+  text-shadow: 0 0 10px rgba(224,163,255,0.7);
+}
+
+:where(#mgp-profile-page) .mgp-btn--ghost {
+  background: rgba(255,255,255,0.04);
+  border-color: var(--p-glass-border);
+}
+:where(#mgp-profile-page) .mgp-btn--ghost:hover {
+  background: rgba(224,163,255,0.08);
+  border-color: rgba(224,163,255,0.25);
+}
+
+:where(#mgp-profile-page) .mgp-btn--danger {
+  background: rgba(239,68,68,0.10);
+  border-color: rgba(239,68,68,0.28);
+  color: var(--p-danger);
+}
+:where(#mgp-profile-page) .mgp-btn--danger:hover {
+  background: rgba(239,68,68,0.18);
+  border-color: rgba(239,68,68,0.5);
+  box-shadow: 0 0 18px rgba(239,68,68,0.18);
+  color: #f87171;
+}
+
+/* ── Form ─────────────────────────────────────────────────────── */
 :where(#mgp-profile-page) .mgp-form {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 :where(#mgp-profile-page) .mgp-form__row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
-
-@media (max-width: 640px) {
+@media (min-width: 560px) {
   :where(#mgp-profile-page) .mgp-form__row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -222,33 +369,81 @@
 }
 
 :where(#mgp-profile-page) .mgp-field__label {
-  font-size: 12px;
-  color: var(--mgp-muted);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--p-text-muted);
+  letter-spacing: 0.04em;
 }
 
 :where(#mgp-profile-page) .mgp-input,
 :where(#mgp-profile-page) .mgp-textarea {
   width: 100%;
-  color: var(--mgp-text);
-  background: rgba(0,0,0,0.18);
-  border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 12px;
-  padding: 11px 12px;
+  color: var(--p-text);
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 13px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: inherit;
   outline: none;
-  transition: border-color .15s ease, transform .05s ease, background .15s ease;
+  transition: border-color var(--p-t), background var(--p-t), box-shadow var(--p-t);
+  -webkit-text-size-adjust: 100%;
 }
-
+:where(#mgp-profile-page) .mgp-input::placeholder,
+:where(#mgp-profile-page) .mgp-textarea::placeholder {
+  color: var(--p-text-muted);
+}
+:where(#mgp-profile-page) .mgp-input:focus,
+:where(#mgp-profile-page) .mgp-textarea:focus {
+  border-color: rgba(224,163,255,0.55);
+  background: rgba(0,0,0,0.3);
+  box-shadow: 0 0 0 3px rgba(224,163,255,0.10);
+}
 :where(#mgp-profile-page) .mgp-textarea {
   resize: vertical;
   min-height: 96px;
+  line-height: 1.6;
 }
 
-:where(#mgp-profile-page) .mgp-input:focus,
-:where(#mgp-profile-page) .mgp-textarea:focus {
-  border-color: rgba(109, 94, 252, 0.75);
-  background: rgba(0,0,0,0.22);
+/* ── Password field ───────────────────────────────────────────── */
+:where(#mgp-profile-page) .mg-password {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+:where(#mgp-profile-page) .mg-password .mgp-input {
+  padding-right: 44px;
+}
+:where(#mgp-profile-page) .mgTogglePassword {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--p-text-muted);
+  transition: background var(--p-t), color var(--p-t);
+  -webkit-tap-highlight-color: transparent;
+}
+:where(#mgp-profile-page) .mgTogglePassword:hover {
+  background: rgba(224,163,255,0.08);
+  color: var(--p-purple);
+}
+:where(#mgp-profile-page) .mg-show-btn {
+  width: 20px;
+  height: 20px;
+  display: block;
+  opacity: 0.65;
+  pointer-events: none;
 }
 
+/* ── Form actions ─────────────────────────────────────────────── */
 :where(#mgp-profile-page) .mgp-form__actions {
   display: flex;
   gap: 10px;
@@ -256,79 +451,78 @@
   flex-wrap: wrap;
   margin-top: 4px;
 }
+@media (max-width: 380px) {
+  :where(#mgp-profile-page) .mgp-form__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(#mgp-profile-page) .mgp-form__actions .mgp-btn { width: 100%; }
+}
 
 :where(#mgp-profile-page) .mgp-inline-status {
   font-size: 12.5px;
-  color: var(--mgp-muted);
+  color: var(--p-text-muted);
+  transition: color var(--p-t);
 }
 
-/* Buttons */
-:where(#mgp-profile-page) .mgp-btn {
-  appearance: none;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.08);
-  color: var(--mgp-text);
-  cursor: pointer;
-  transition: transform .05s ease, background .15s ease, border-color .15s ease;
-  font-weight: 600;
-  letter-spacing: 0.15px;
-}
-
-:where(#mgp-profile-page) .mgp-btn:active {
-  transform: translateY(1px);
-}
-
-:where(#mgp-profile-page) .mgp-btn--block {
-  width: 100%;
-}
-
-:where(#mgp-profile-page) .mgp-btn--primary {
-  background: linear-gradient(180deg, var(--mgp-primary-2), var(--mgp-primary));
-  border-color: rgba(255,255,255,0.08);
-}
-
-:where(#mgp-profile-page) .mgp-btn--ghost {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.14);
-}
-
-:where(#mgp-profile-page) .mgp-btn--danger {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.35);
-}
-
-/* Toast */
+/* ── Toast ────────────────────────────────────────────────────── */
 :where(#mgp-profile-page) .mgp-toast {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
-  width: min(420px, calc(100vw - 32px));
-  border-radius: 16px;
-  border: 1px solid var(--mgp-border);
-  background: rgba(14, 21, 37, 0.92);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--mgp-shadow);
+  right: clamp(12px, 4vw, 20px);
+  bottom: clamp(12px, 4vw, 20px);
+  left: clamp(12px, 4vw, auto);
+  width: min(400px, calc(100vw - 24px));
+  border-radius: 18px;
+  border: 1px solid var(--p-glass-border);
+  background: rgba(10,5,20,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
   align-items: center;
-  padding: 12px 12px;
+  padding: 14px 12px 14px 16px;
+  z-index: 9999;
+  animation: mgpToastSlide 0.3s cubic-bezier(0.16,1,0.3,1);
 }
+@keyframes mgpToastSlide {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+:where(#mgp-profile-page) .mgp-toast[hidden] { display: none; }
 
 :where(#mgp-profile-page) .mgp-toast__content {
   font-size: 13px;
-  line-height: 1.35;
-  color: var(--mgp-text);
+  line-height: 1.4;
+  color: var(--p-text);
 }
 
 :where(#mgp-profile-page) .mgp-toast__close {
-  border: 1px solid rgba(255,255,255,0.14);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.06);
-  color: var(--mgp-text);
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
+  color: var(--p-text-muted);
+  border-radius: 11px;
   cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: background var(--p-t), color var(--p-t);
+}
+:where(#mgp-profile-page) .mgp-toast__close:hover {
+  background: rgba(224,163,255,0.12);
+  color: var(--p-purple);
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  :where(#mgp-profile-page) .mgp-id__avatar-ring,
+  :where(#mgp-profile-page) .mgp-id__avatar {
+    width: 104px;
+    height: 104px;
+  }
 }
