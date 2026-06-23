@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
 # Create your models here.
+
 
 class SiteSettings(models.Model):
     site_title = models.CharField(max_length=250, null=True, blank=True)
@@ -11,7 +13,7 @@ class SiteSettings(models.Model):
 
     def __str__(self):
         return self.site_title or "Site Settings"
-    
+
 
 class Announcement(models.Model):
     title = models.CharField(max_length=250, null=True, blank=True)
@@ -27,6 +29,7 @@ class HomepageSection(models.Model):
     class SectionType(models.TextChoices):
         HERO = "hero", _("Hero")
         FEATURES = "features", _("Features")
+        FEATURES_TITLE = "features_title", _("Features Title")
         ABOUT = "about", _("About")
         CTA = "cta", _("Call To Action")
         CONTACT = "contact", _("Contact")
@@ -49,4 +52,3 @@ class HomepageSection(models.Model):
 
     def __str__(self):
         return f"{self.get_section_type_display()} - {self.title or 'Untitled'}"
-

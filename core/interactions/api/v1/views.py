@@ -26,6 +26,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 
+
 class PostCommentListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = CommentPagination
@@ -44,35 +45,43 @@ class PostCommentListCreateAPIView(generics.ListCreateAPIView):
             return CommentCreateSerializer
         return CommentListSerializer
 
-    
     def get_queryset(self):
         post = self.get_post()
         user = self.request.user
 
-        queryset = Comment.objects.filter(
-            post=post,
-            status=Comment.CommentStatus.APPROVED,
-            parent__isnull=True,
-        ).select_related(
-            "author",
-            "author__user",
-        ).annotate(
-            like_count=Count(
-                "reactions",
-                filter=Q(reactions__reaction_type=CommentReaction.ReactionType.LIKE),
-                distinct=True,
-            ),
-            dislike_count=Count(
-                "reactions",
-                filter=Q(reactions__reaction_type=CommentReaction.ReactionType.DISLIKE),
-                distinct=True,
-            ),
-            replies_count=Count(
-                "replies",
-                filter=Q(replies__status=Comment.CommentStatus.APPROVED),
-                distinct=True,
-            ),
-        ).order_by("-created_date")
+        queryset = (
+            Comment.objects.filter(
+                post=post,
+                status=Comment.CommentStatus.APPROVED,
+                parent__isnull=True,
+            )
+            .select_related(
+                "author",
+                "author__user",
+            )
+            .annotate(
+                like_count=Count(
+                    "reactions",
+                    filter=Q(
+                        reactions__reaction_type=CommentReaction.ReactionType.LIKE
+                    ),
+                    distinct=True,
+                ),
+                dislike_count=Count(
+                    "reactions",
+                    filter=Q(
+                        reactions__reaction_type=CommentReaction.ReactionType.DISLIKE
+                    ),
+                    distinct=True,
+                ),
+                replies_count=Count(
+                    "replies",
+                    filter=Q(replies__status=Comment.CommentStatus.APPROVED),
+                    distinct=True,
+                ),
+            )
+            .order_by("-created_date")
+        )
 
         if user.is_authenticated:
             user_reaction_subquery = CommentReaction.objects.filter(
@@ -113,6 +122,7 @@ class PostCommentListCreateAPIView(generics.ListCreateAPIView):
             status=Comment.CommentStatus.PENDING,
         )
 
+
 class CommentRepliesListAPIView(ListAPIView):
     serializer_class = CommentListSerializer
     permission_classes = [AllowAny]
@@ -133,29 +143,38 @@ class CommentRepliesListAPIView(ListAPIView):
         parent_comment = self.get_parent_comment()
         user = self.request.user
 
-        queryset = Comment.objects.filter(
-            parent=parent_comment,
-            status=Comment.CommentStatus.APPROVED,
-        ).select_related(
-            "author",
-            "author__user",
-        ).annotate(
-            like_count=Count(
-                "reactions",
-                filter=Q(reactions__reaction_type=CommentReaction.ReactionType.LIKE),
-                distinct=True,
-            ),
-            dislike_count=Count(
-                "reactions",
-                filter=Q(reactions__reaction_type=CommentReaction.ReactionType.DISLIKE),
-                distinct=True,
-            ),
-            replies_count=Count(
-                "replies",
-                filter=Q(replies__status=Comment.CommentStatus.APPROVED),
-                distinct=True,
-            ),
-        ).order_by("created_date")
+        queryset = (
+            Comment.objects.filter(
+                parent=parent_comment,
+                status=Comment.CommentStatus.APPROVED,
+            )
+            .select_related(
+                "author",
+                "author__user",
+            )
+            .annotate(
+                like_count=Count(
+                    "reactions",
+                    filter=Q(
+                        reactions__reaction_type=CommentReaction.ReactionType.LIKE
+                    ),
+                    distinct=True,
+                ),
+                dislike_count=Count(
+                    "reactions",
+                    filter=Q(
+                        reactions__reaction_type=CommentReaction.ReactionType.DISLIKE
+                    ),
+                    distinct=True,
+                ),
+                replies_count=Count(
+                    "replies",
+                    filter=Q(replies__status=Comment.CommentStatus.APPROVED),
+                    distinct=True,
+                ),
+            )
+            .order_by("created_date")
+        )
 
         if user.is_authenticated:
             user_reaction_subquery = CommentReaction.objects.filter(
@@ -175,7 +194,8 @@ class CommentRepliesListAPIView(ListAPIView):
             )
 
         return queryset
-    
+
+
 class CommentReactionAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = CommentPagination
@@ -226,7 +246,8 @@ class CommentReactionAPIView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-    
+
+
 class PostLatestCommentsAPIView(ListAPIView):
     serializer_class = LatestCommentSerializer
 

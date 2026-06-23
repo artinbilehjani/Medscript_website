@@ -16,7 +16,7 @@
   overflow: hidden;
 }
 
-/* Rotating radial glow behind hero */
+/* Rotating radial glow behind hero — stays beneath the photo layer */
 .home-hero::before {
   content: '';
   position: absolute;
@@ -31,6 +31,79 @@
 @keyframes heroGlow {
   0%,100% { transform: translate(-50%,-50%) scale(1)   rotate(0deg);   opacity:.6; }
   50%      { transform: translate(-50%,-50%) scale(1.3) rotate(180deg); opacity:1;  }
+}
+
+/* ── University building photo layer ──────────────────────────────
+   Sits behind .hero-inner content. Centered, feathered on left/right
+   so the page's existing neural-background radial glows stay visible
+   at the screen edges, and dissolves at the bottom: photo → black →
+   fading dot pattern → fully transparent. */
+.hero-photo-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-photo {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: min(1400px, 92%);
+  height: 70%;
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+  opacity: 0.55;
+  filter: saturate(0.85) brightness(0.8);
+
+  /* Horizontal feathering: fades to transparent at both left/right
+     edges so the neural-background radial glows remain visible there,
+     combined with a vertical fade so the photo itself softens before
+     handing off to the black fade layer below. */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%),
+    linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  -webkit-mask-size: 100% 100%;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%),
+    linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  mask-composite: intersect;
+  mask-size: 100% 100%;
+}
+
+/* Black dissolve band — picks up where the photo's vertical fade
+   ends, blending it into solid black before the dot layer continues
+   the dissolve further down. */
+.hero-photo-fade {
+  position: absolute;
+  top: 32%;
+  left: 0; right: 0;
+  height: 38%;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.55) 35%,
+    rgba(0,0,0,0.92) 70%,
+    #000 100%);
+}
+
+/* Dot-pattern dissolve — a repeating radial-gradient "halftone" that
+   starts solid where the black fade ends and thins out / fades to
+   fully transparent as it descends, like a digital dissolve effect.
+   Pure CSS, no extra image asset needed. */
+.hero-photo-dots {
+  position: absolute;
+  top: 62%;
+  left: 0; right: 0;
+  height: 26%;
+  background-image: radial-gradient(circle, rgba(224,163,255,0.9) 1.6px, transparent 1.7px);
+  background-size: 14px 14px;
+  background-position: 0 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 25%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 25%, transparent 100%);
+  opacity: 0.5;
 }
 
 .hero-inner {
@@ -57,6 +130,7 @@
   background: rgba(224,163,255,0.08);
   border: 1px solid rgba(224,163,255,0.25);
   position: relative;
+  backdrop-filter: blur(8px);
 }
 /* lines either side of badge */
 .hero-badge::before,
@@ -86,6 +160,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradientShift 8s ease infinite;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.5); /* lift off the photo behind it */
 }
 @keyframes gradientShift {
   0%   { background-position: 0%   50%; }
@@ -95,10 +170,11 @@
 
 .hero-sub {
   font-size: clamp(15px, 2vw, 19px);
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.65);
   max-width: 580px;
   line-height: 1.75;
   font-weight: 300;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.6);
 }
 
 /* Stats row */
@@ -165,12 +241,13 @@
   box-shadow: 0 10px 32px rgba(224,163,255,0.5);
 }
 .hero-btn--ghost {
-  background: transparent;
+  background: rgba(0,0,0,0.2);
   color: #e0a3ff;
   border: 2px solid rgba(224,163,255,0.35);
+  backdrop-filter: blur(8px);
 }
 .hero-btn--ghost:hover {
-  background: rgba(224,163,255,0.08);
+  background: rgba(224,163,255,0.12);
   border-color: rgba(224,163,255,0.6);
   transform: translateY(-3px);
 }
@@ -216,9 +293,8 @@
 }
 
 .home-section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  position: relative;
+  text-align: center;
   padding: 0 40px;
   margin-bottom: 0;
 }
@@ -236,11 +312,15 @@
   content: '';
   display: block;
   width: 60px; height: 3px;
-  margin-top: 8px;
+  margin: 8px auto 0;
   background: linear-gradient(90deg, #e0a3ff, #ff69b4);
   border-radius: 2px;
 }
 .home-see-all {
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 13px;
   color: rgba(224,163,255,0.55);
   text-decoration: none;
@@ -423,12 +503,17 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ══════════════════════════════════════════
-   FEATURE ROWS  (NeuralGlass diagonal style)
+   FEATURE ROWS — zigzag ECG layout
+   Three (or more) admin-managed text blocks,
+   alternating left/right, threaded together by
+   a zigzag pulse line computed dynamically in JS
+   from each row's real rendered position.
 ══════════════════════════════════════════ */
 .home-features {
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto 100px;
   padding: 0 24px;
+  position: relative;
 }
 .home-features-title {
   text-align: center;
@@ -436,7 +521,7 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 3px;
-  margin-bottom: 72px;
+  margin-bottom: 90px;
   color: #e0a3ff;
   position: relative;
 }
@@ -449,67 +534,99 @@
   border-radius: 2px;
 }
 
-.feature-row {
-  display: flex;
-  align-items: center;
-  gap: 60px;
-  margin-bottom: 60px;
+/* ECG track — absolutely positioned behind the rows, spanning from
+   the first row's center to the last row's center. Its size is set
+   to wrap the rows via JS (home_section_renderer.js measures real
+   row positions and sets the SVG viewBox to match 1:1). */
+.feature-ecg-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
 }
-.feature-row:nth-child(even) { flex-direction: row-reverse; }
+.feature-ecg-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.feature-ecg-line {
+  stroke: url(#feature-ecg-gradient);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: url(#feature-ecg-glow);
+  opacity: 0.75;
+}
+.feature-ecg-pulse {
+  fill: #fff;
+  filter: drop-shadow(0 0 6px #e0a3ff) drop-shadow(0 0 14px rgba(224,163,255,0.8));
+}
+
+.feature-empty {
+  text-align: center;
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
+  padding: 40px 0;
+}
+
+/* ── Row ── */
+.feature-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  margin-bottom: 110px;
+}
+.feature-row:last-child { margin-bottom: 0; }
+
+.feature-row[data-side="left"]  { justify-content: flex-start; }
+.feature-row[data-side="right"] { justify-content: flex-end; }
 
 .feature-content {
-  flex: 1;
-  padding: 44px 40px;
+  max-width: 380px;
+  padding: 28px 32px;
   background: rgba(224,163,255,0.05);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(224,163,255,0.12);
-  border-radius: 22px;
+  border-radius: 20px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
-  transform: skew(-3deg);
   transition: transform .35s, box-shadow .35s, border-color .35s;
 }
+.feature-row[data-side="left"]  .feature-content { text-align: left; }
+.feature-row[data-side="right"] .feature-content { text-align: right; }
+
 .feature-content:hover {
-  transform: skew(-3deg) translateY(-8px);
+  transform: translateY(-6px);
   border-color: rgba(224,163,255,0.28);
   box-shadow: 0 24px 60px rgba(224,163,255,0.12), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 .feature-icon {
-  font-size: 48px;
-  margin-bottom: 20px;
+  font-size: 36px;
+  margin-bottom: 14px;
   display: block;
   filter: drop-shadow(0 0 12px rgba(224,163,255,0.5));
 }
 .feature-content h3 {
-  font-size: 24px; font-weight: 700;
-  color: #fff; margin-bottom: 16px;
+  font-size: 21px; font-weight: 700;
+  color: #fff; margin-bottom: 12px;
 }
 .feature-content p {
-  font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.75;
+  font-size: 14.5px; color: rgba(255,255,255,0.6); line-height: 1.7;
+  margin-bottom: 0;
 }
+.feature-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0a3ff;
+  text-decoration: none;
+  transition: color .18s;
+}
+.feature-link:hover { color: #ff69b4; }
 
-.feature-visual {
-  flex: 1;
-  height: 280px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(147,112,219,0.2), rgba(255,105,180,0.15));
-  border: 1px solid rgba(224,163,255,0.12);
-  backdrop-filter: blur(12px);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 72px;
-  transition: transform .35s, box-shadow .35s;
-  overflow: hidden;
-  position: relative;
-}
-.feature-visual::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(45deg, rgba(224,163,255,0.08), rgba(255,105,180,0.08));
-  transition: opacity .35s;
-}
-.feature-visual:hover {
-  transform: scale(1.03);
-  box-shadow: 0 20px 40px rgba(224,163,255,0.15);
-}
 
 /* ══════════════════════════════════════════
    RESPONSIVE
@@ -517,11 +634,13 @@
 @media (max-width: 900px) {
   .coverflow-container { height: clamp(320px, 48vh, 440px); }
   .coverflow-item { width: clamp(180px, 22vw, 240px); height: clamp(260px, 40vh, 360px); }
-  .feature-row, .feature-row:nth-child(even) { flex-direction: column; gap: 24px; }
-  .feature-content { transform: skew(0); }
-  .feature-content:hover { transform: translateY(-6px); }
-  .feature-visual { height: 200px; width: 100%; }
   .home-section-head { padding: 0 20px; }
+
+  .hero-photo { height: 64%; }
+  .hero-photo-fade { top: 28%; height: 40%; }
+  .hero-photo-dots { top: 58%; height: 28%; }
+
+  .feature-content { max-width: 320px; }
 }
 
 @media (max-width: 640px) {
@@ -534,4 +653,63 @@
   .home-section-head { padding: 0 14px; }
   .hero-inner { padding-top: 60px; gap: 18px; }
   .hero-badge::before, .hero-badge::after { display: none; }
+
+  /* On narrow screens the absolute-positioned "See all" link can sit
+     too close to a centered title that's wrapped to two lines —
+     move it below the title as its own centered line instead. */
+  .home-section-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .home-see-all {
+    position: static;
+    transform: none;
+  }
+
+  /* Hero photo: less horizontal feathering needed on narrow screens
+     (there's no room for visible neural-background either side
+     anyway), but keep the bottom dissolve intact. */
+  .hero-photo {
+    width: 100%;
+    height: 56%;
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+    mask-image:
+      linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+  }
+  .hero-photo-fade { top: 24%; height: 36%; }
+  .hero-photo-dots { top: 52%; height: 30%; background-size: 11px 11px; }
+
+  /* Feature rows: both sides collapse to full-width centered text —
+     left/right zigzag reads better as a single vertical thread on
+     narrow screens than a left/right ping-pong that's mostly margin. */
+  .home-features { padding: 0 16px; }
+  .home-features-title { margin-bottom: 64px; }
+  .feature-row[data-side="left"],
+  .feature-row[data-side="right"] {
+    justify-content: center;
+  }
+  .feature-content {
+    max-width: 100%;
+    text-align: center !important;
+    padding: 22px 22px;
+  }
+  .feature-row { margin-bottom: 80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero::before,
+  .hero-badge::before,
+  .hero-badge::after,
+  .hero-title {
+    animation: none;
+  }
+  /* The traveling pulse dot is an SVG SMIL <animateMotion>, which CSS
+     cannot target or disable — home_section_renderer.js checks
+     prefers-reduced-motion directly and skips starting that animation
+     when the user has it set. */
 }

@@ -105,24 +105,97 @@
     {% block content %}{% endblock %}
   </main>
 
+  <!-- ══════════════════════════════════════════════════════════
+       FOOTER
+       Four groups: University · Medical References · Follow ·
+       Credit — each its own glass pod, matching the site's
+       existing neural-glass language.
+  ══════════════════════════════════════════════════════════════ -->
   <footer>
     <div class="footer-content">
-      <div class="footer-links">
-        <a href="#">Neural Networks</a>
-        <a href="#">Matrix Protocols</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Documentation</a>
-        <a href="https://github.com/yourproject" target="_blank" rel="noopener">
-          <img src="/media/images/system/GrommetIconsGithub.svg" alt="GitHub" style="width:18px;height:18px;vertical-align:middle;opacity:.6">
-        </a>
+
+      <div class="footer-grid">
+
+        <!-- ── University / Institutional ──────────────────────── -->
+        <div class="footer-pod">
+          <h3 class="footer-pod-title">
+            <span class="footer-pod-icon">🏛️</span>
+            دانشگاه
+          </h3>
+          <div class="footer-pod-links footer-pod-links--text">
+            <a href="https://sipad.tums.ac.ir" target="_blank" rel="noopener">
+              سامانه آموزش علوم پزشکی تهران
+            </a>
+            <a href="https://navid.tums.ac.ir" target="_blank" rel="noopener">
+              سامانه نوید
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Medical References ───────────────────────────────── -->
+        <div class="footer-pod">
+          <h3 class="footer-pod-title">
+            <span class="footer-pod-icon">🩺</span>
+            Medical References
+          </h3>
+          <div class="footer-pod-links">
+            <a class="footer-icon-btn" href="https://pubmed.ncbi.nlm.nih.gov" target="_blank" rel="noopener" data-label="PubMed">
+              <span class="footer-icon-ring"></span>
+              <img src="/media/images/system/Pubmed--Streamline-Simple-Icons.svg" alt="PubMed">
+            </a>
+            <a class="footer-icon-btn" href="https://scholar.google.com" target="_blank" rel="noopener" data-label="Google Scholar">
+              <span class="footer-icon-ring"></span>
+              <img src="/media/images/system/Google-Scholar--Streamline-Font-Awesome.svg" alt="Google Scholar">
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Follow / Community ───────────────────────────────── -->
+        <div class="footer-pod">
+          <h3 class="footer-pod-title">
+            <span class="footer-pod-icon">📡</span>
+            Follow MedScript
+          </h3>
+          <div class="footer-pod-links">
+            <a class="footer-icon-btn" href="https://aparat.com/medscript" target="_blank" rel="noopener" data-label="Aparat">
+              <span class="footer-icon-ring"></span>
+              <img src="/media/images/system/aparat-svgrepo-com.svg" alt="Aparat">
+            </a>
+            <a class="footer-icon-btn" href="https://t.me/MedScript404" target="_blank" rel="noopener" data-label="Telegram">
+              <span class="footer-icon-ring"></span>
+              <img src="/media/images/system/telegram-svgrepo-com.svg" alt="Telegram">
+            </a>
+          </div>
+        </div>
+
+      </div><!-- /.footer-grid -->
+
+      <div class="footer-divider"></div>
+
+      <!-- ── Bottom bar: copyright + developer credit ─────────────── -->
+      <div class="footer-bottom">
+        <p class="footer-copyright">
+          &copy; {% now "Y" %} MedScript. All rights reserved.
+        </p>
+
+        <div class="footer-credit">
+          <span class="footer-credit-label">Designed &amp; built by</span>
+          <a class="footer-credit-name" href="#" target="_blank" rel="nofollow noopener">
+            Artin Bilehjani
+          </a>
+          <span class="footer-credit-icons">
+            <a class="footer-icon-btn footer-icon-btn--sm" href="https://github.com/artinbilehjani" target="_blank" rel="noopener" data-label="GitHub">
+              <span class="footer-icon-ring"></span>
+              <img src="/media/images/system/GrommetIconsGithub.svg" alt="GitHub">
+            </a>
+            <a class="footer-icon-btn footer-icon-btn--sm" href="https://linkedin.com/in/artin-bilehjani" target="_blank" rel="noopener" data-label="LinkedIn">
+              <span class="footer-icon-ring"></span>
+              <img src="/media/images/system/linkedin-rounded-svgrepo-com.svg" alt="LinkedIn">
+            </a>
+          </span>
+        </div>
       </div>
-      <div class="footer-copyright">
-        <p>&copy; 2025 MedScript. All rights reserved.</p>
-      </div>
-      <div class="footer-design">
-        Designed by <a href="https://artinbilehjani.ir" target="_blank" rel="nofollow noopener">Artin Bilehjani</a>
-      </div>
+
     </div>
   </footer>
 

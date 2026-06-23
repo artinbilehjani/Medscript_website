@@ -21,7 +21,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from rest_framework import permissions
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -54,15 +58,14 @@ if settings.COMINGSOON:
     )
 
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL,
-                          document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 if settings.SHOW_DEBUGGER_TOOLBAR:
-    urlpatterns += [path('__debug__/', include('debug_toolbar.urls')),
-                    ]
+    urlpatterns += [
+        path("__debug__/", include("debug_toolbar.urls")),
+    ]
 
 if settings.SHOW_SWAGGER:
     urlpatterns += [
@@ -70,9 +73,12 @@ if settings.SHOW_SWAGGER:
             "api-auth/",
             include("rest_framework.urls", namespace="rest_framework"),
         ),
-        path('schema/', SpectacularAPIView.as_view(), name='schema'),
-        path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'),
-             name='swagger-ui'),
+        path("schema/", SpectacularAPIView.as_view(), name="schema"),
+        path(
+            "swagger/",
+            SpectacularSwaggerView.as_view(url_name="schema"),
+            name="swagger-ui",
+        ),
     ]
 
 handler400 = "core.error_views.error_400"  # bad_request
@@ -81,4 +87,3 @@ handler404 = "core.error_views.error_404"  # page_not_found
 handler500 = "core.error_views.error_500"  # server_error
 handler429 = "core.error_views.error_429"  # too_many_requests
 handler503 = "core.error_views.error_503"  # service_unavailable
-

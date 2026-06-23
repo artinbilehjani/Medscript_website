@@ -20,5 +20,3 @@ class CategoryNavigationSerializer(serializers.ModelSerializer):
 
     def get_has_children(self, obj):
         return obj.children.exists()
-
-

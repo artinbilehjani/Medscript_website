@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, Position , Profile
-# Register your models here.
+from .models import User, Position, Profile
 
+# Register your models here.
 
 
 class UserInline(admin.TabularInline):
@@ -14,6 +14,7 @@ class UserInline(admin.TabularInline):
     readonly_fields = ("username", "type", "is_staff", "is_active")
     can_delete = False
     show_change_link = True
+
 
 @admin.register(Position)
 class PositionAdmin(admin.ModelAdmin):
@@ -35,26 +36,46 @@ class UserAdmin(BaseUserAdmin):
         "created_date",
     )
     list_filter = ("type", "is_staff", "is_active", "user_position", "created_date")
-    search_fields = ("username","email")
+    search_fields = ("username", "email")
     ordering = ("username",)
     readonly_fields = ("created_date", "updated_date")
 
-
-
     fieldsets = (
-        (None, {"fields": ("username","email", "password")}),
+        (None, {"fields": ("username", "email", "password")}),
         ("Personal info", {"fields": ("type", "user_position")}),
-        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
         ("Important dates", {"fields": ("last_login", "created_date", "updated_date")}),
     )
 
     add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": ("username", "email", "password1", "password2", "type", "user_position", "is_staff", "is_active"),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "email",
+                    "password1",
+                    "password2",
+                    "type",
+                    "user_position",
+                    "is_staff",
+                    "is_active",
+                ),
+            },
+        ),
     )
-
 
 
 @admin.register(Profile)

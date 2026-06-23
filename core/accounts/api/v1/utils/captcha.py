@@ -5,6 +5,7 @@ from django.core.cache import cache
 _DIGIT_MAP = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")
 CAPTCHA_TTL = 300
 
+
 def new_math_captcha():
     a = random.randint(1, 9)
     b = random.randint(1, 9)
@@ -19,6 +20,7 @@ def new_math_captcha():
     key = secrets.token_urlsafe(16)
     cache.set(f"captcha:{key}", answer, timeout=CAPTCHA_TTL)
     return key, question
+
 
 def verify_simple_captcha(captcha_key: str, captcha_value: str) -> bool:
     if not captcha_key or not captcha_value:

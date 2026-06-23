@@ -11,15 +11,9 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     search_fields = ("site_title", "homepage_hero_text", "contact_info", "footer_text")
 
     fieldsets = (
-        ("General", {
-            "fields": ("site_title",)
-        }),
-        ("Homepage", {
-            "fields": ("homepage_hero_text",)
-        }),
-        ("Contact & Footer", {
-            "fields": ("contact_info", "footer_text")
-        }),
+        ("General", {"fields": ("site_title",)}),
+        ("Homepage", {"fields": ("homepage_hero_text",)}),
+        ("Contact & Footer", {"fields": ("contact_info", "footer_text")}),
     )
 
     def has_add_permission(self, request):

@@ -1,11 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 import os
+
 # Create your models here.
+
 
 def post_file_upload_path(instance, filename):
     post_id = instance.post_id or "unknown"
     return f"files/{post_id}/{filename}"
+
 
 class PostFile(models.Model):
     class FileType(models.IntegerChoices):
@@ -17,10 +20,14 @@ class PostFile(models.Model):
         UNDEFINED = 6, _("undefined")
 
     file = models.FileField(upload_to=post_file_upload_path, blank=True, null=True)
-    post = models.ForeignKey("content.Post", on_delete=models.CASCADE, related_name="files")
+    post = models.ForeignKey(
+        "content.Post", on_delete=models.CASCADE, related_name="files"
+    )
     title = models.CharField(max_length=250)
-    description = models.CharField(max_length=255,null=True,blank=True)
-    file_type = models.IntegerField(choices=FileType.choices,default=FileType.UNDEFINED)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    file_type = models.IntegerField(
+        choices=FileType.choices, default=FileType.UNDEFINED
+    )
     created_date = models.DateTimeField(auto_now_add=True)
     is_downloadable = models.BooleanField(default=True)
 
@@ -47,10 +54,11 @@ class PostFile(models.Model):
         }
 
         return extension_map.get(ext, self.FileType.UNDEFINED)
+
     @property
     def file_url(self):
         return self.file.url if self.file else None
-    
+
     def save(self, *args, **kwargs):
         self.file_type = self.detect_file_type()
         super().save(*args, **kwargs)

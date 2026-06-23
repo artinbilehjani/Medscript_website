@@ -69,9 +69,21 @@ function clearGrid() {
     skillsGrid.innerHTML = '';
 }
 
+/**
+ * Builds a non-clickable "message" tile (loading / empty / error state).
+ * Tagged with `is-message` (+ `is-loading` / `is-error`) so archive.css
+ * can style it distinctly from real, clickable category tiles —
+ * no pointer cursor, no hover-lift, dimmed appearance, and a pulsing
+ * icon while loading.
+ */
 function createMessageHexagon(message, icon = '•') {
+    const variant =
+        icon === '…' ? 'is-loading' :
+        icon === '!' ? 'is-error'   :
+        '';
+
     return createElement('div', {
-        className: 'skill-hexagon',
+        className: `skill-hexagon is-message${variant ? ' ' + variant : ''}`,
         children: [
             createElement('div', {
                 className: 'hexagon-inner',
@@ -109,12 +121,23 @@ function createCategoryHexagon(category, index) {
 
     return createElement('div', {
         className: 'skill-hexagon',
+        attrs: {
+            tabindex: '0',
+            role: 'button',
+            'aria-label': category.name
+        },
         style: {
             animationDelay: `${index * 0.1}s`,
             cursor: hasChildren ? 'pointer' : 'default'
         },
         on: {
-            click: () => handleCategoryClick(category)
+            click: () => handleCategoryClick(category),
+            keydown: (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleCategoryClick(category);
+                }
+            }
         },
         children: [
             createElement('div', {
@@ -151,8 +174,19 @@ function createCategoryHexagon(category, index) {
 function createBackHexagon() {
     return createElement('div', {
         className: 'skill-hexagon back-hexagon',
+        attrs: {
+            tabindex: '0',
+            role: 'button',
+            'aria-label': 'Go back'
+        },
         on: {
-            click: goBack
+            click: goBack,
+            keydown: (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    goBack();
+                }
+            }
         },
         children: [
             createElement('div', {

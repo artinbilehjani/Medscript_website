@@ -58,29 +58,38 @@ class CommentAdmin(admin.ModelAdmin):
     inlines = [CommentReactionInline]
 
     fieldsets = (
-        ("Comment info", {
-            "fields": (
-                "id",
-                "post",
-                "author",
-                "body",
-                "status",
-                "parent",
-                "is_edited",
-            )
-        }),
-        ("Reactions", {
-            "fields": (
-                "likes_count",
-                "dislikes_count",
-            )
-        }),
-        ("Dates", {
-            "fields": (
-                "created_date",
-                "updated_date",
-            )
-        }),
+        (
+            "Comment info",
+            {
+                "fields": (
+                    "id",
+                    "post",
+                    "author",
+                    "body",
+                    "status",
+                    "parent",
+                    "is_edited",
+                )
+            },
+        ),
+        (
+            "Reactions",
+            {
+                "fields": (
+                    "likes_count",
+                    "dislikes_count",
+                )
+            },
+        ),
+        (
+            "Dates",
+            {
+                "fields": (
+                    "created_date",
+                    "updated_date",
+                )
+            },
+        ),
     )
 
     def get_queryset(self, request):
@@ -121,9 +130,7 @@ class CommentReactionAdmin(admin.ModelAdmin):
         "user",
         "reaction_type",
     )
-    list_filter = (
-        "reaction_type",
-    )
+    list_filter = ("reaction_type",)
     search_fields = (
         "comment__body",
         "comment__post__title",

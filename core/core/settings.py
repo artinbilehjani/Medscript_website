@@ -9,13 +9,12 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
 from decouple import config
 from datetime import timedelta
-from captcha.helpers import math_challenge
-
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,19 +25,24 @@ AUTH_USER_MODEL = "accounts.User"
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY", default="test")
+# SECRET_KEY = config("SECRET_KEY", default="test")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", cast=bool, default=True)
+# DEBUG = config("DEBUG", cast=bool, default=True)
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 SHOW_DEBUGGER_TOOLBAR = config("SHOW_DEBUGGER_TOOLBAR", cast=bool, default=False)
 
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    cast=lambda v: [s.strip() for s in v.split(",")],
-    default="*",
-)
+# ALLOWED_HOSTS = config(
+#     "ALLOWED_HOSTS",
+#     cast=lambda v: [s.strip() for s in v.split(",")],
+#     default="*",
+# )
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+# In prod .env: DJANGO_ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+# In dev compose: DJANGO_ALLOWED_HOSTS=*
 
-COMINGSOON = config("COMINGSOON", cast=bool, default=False)
+# COMINGSOON = config("COMINGSOON", cast=bool, default=False)
 
 # Application definition
 
@@ -56,28 +60,26 @@ INSTALLED_APPS = [
     "mediafiles",
     "rest_framework",
     "django_filters",
-    'drf_spectacular',
+    "drf_spectacular",
     "corsheaders",
     "djoser",
-    'hitcount',
+    "hitcount",
     "drf_yasg",
     "rest_framework_simplejwt",
     # "bleach",
 ]
 
 
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -113,8 +115,14 @@ CACHES = {
     }
 }
 
-# Database 
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# ═══════════════════════════════════════════════════════════════════
+# 2. Database — Postgres via DATABASE_URL, not SQLite
+# ═══════════════════════════════════════════════════════════════════
+# Parse the DATABASE_URL env var both compose files now set. You can
+# use dj-database-url for this (pip install dj-database-url) or do it
+# manually — manual version shown so you don't need another dependency:
+ 
+_db_url = urlparse(os.environ.get("DATABASE_URL", ""))
 
 DATABASES = {
     "default": {
@@ -123,16 +131,20 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": config("PGDB_ENGINE", default="django.db.backends.postgresql"),
-#         "NAME": config("DB_NAME", default="postgres"),
-#         "USER": config("PGDB_USER", default="postgres"),
-#         "PASSWORD": config("PGDB_PASS", default="postgres"),
-#         "HOST": config("PGDB_HOST", default="db"),
-#         "PORT": config("PGDB_PORT", cast=int, default=5432),
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": _db_url.path.lstrip("/"),
+        "USER": _db_url.username,
+        "PASSWORD": _db_url.password,
+        "HOST": _db_url.hostname,
+        "PORT": _db_url.port or 5432,
+        # Keeps a small pool of DB connections alive between requests
+        # instead of reconnecting every time — meaningful win under
+        # concurrent load on a weak box.
+        "CONN_MAX_AGE": 60,
+    }
+}
 
 
 # Password validation
@@ -180,10 +192,55 @@ STATICFILES_DIRS = [
     BASE_DIR / "staticfiles",
 ]
 
+# STATIC_URL = "/static/"
+# STATIC_ROOT = "/app/staticfiles"   # must match the volume mount in docker-compose.prod.yml
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# MEDIA_URL = "/media/"
+# MEDIA_ROOT = "/app/media"   # must match the volume mount in docker-compose.prod.yml
+
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ═══════════════════════════════════════════════════════════════════
+# 4. X-Accel-Redirect support for protected file downloads
+# ═══════════════════════════════════════════════════════════════════
+# See 08_file_download_views.py for the full pattern. This setting
+# just defines the internal path prefix nginx is configured to
+# recognize (matches the `location /protected-media/` block in
+# 05_nginx.conf).
+ 
+PROTECTED_MEDIA_URL = "/protected-media/"
+
+# ═══════════════════════════════════════════════════════════════════
+# 5. Rate limiting (django-ratelimit) — belt-and-suspenders with nginx
+# ═══════════════════════════════════════════════════════════════════
+# nginx rate limiting (05_nginx.conf) is your PRIMARY defense — it
+# rejects excess requests before they even reach Django/Gunicorn,
+# which is what actually protects a weak VPS. django-ratelimit adds a
+# second, Django-level check that's useful for per-USER (not just
+# per-IP) limits — e.g. stopping one logged-in student from hammering
+# downloads even if they're behind a shared IP (university wifi/NAT,
+# very plausible for a med school). See 08_file_download_views.py for
+# usage. No settings changes needed beyond having it in
+# 01_requirements.txt and INSTALLED_APPS is NOT required for it to work.
+
+# ═══════════════════════════════════════════════════════════════════
+# 6. Security headers — cheap, do these regardless of host strength
+# ═══════════════════════════════════════════════════════════════════
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # The X-Forwarded-Proto header above only works correctly because
+    # nginx sets it in 05_nginx.conf's `proxy_set_header` — without
+    # that, Django would think every request is insecure HTTP forever
+    # and you'd get infinite redirect loops.
 
 # messages configuration for notification handeling in pages
 MESSAGE_TAGS = {
@@ -205,12 +262,13 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 if config("DISABLE_BROWSEABLE_API", cast=bool, default=False):
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = (
-        "rest_framework.renderers.JSONRenderer",)
+        "rest_framework.renderers.JSONRenderer",
+    )
 
 
 # cors headers config
@@ -224,20 +282,18 @@ CORS_ALLOW_ALL_ORIGINS = True
 # swagger configs
 SHOW_SWAGGER = config("SHOW_SWAGGER", cast=bool, default=True)
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
-    'VERSION': '1.0.0',
-    'CONTACT': {},
-    'LICENSE': {},
-    'SERVERS': [],
-    
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "Your Project API",
+    "DESCRIPTION": "Your project description",
+    "VERSION": "1.0.0",
+    "CONTACT": {},
+    "LICENSE": {},
+    "SERVERS": [],
+    "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
         "persistAuthorization": True,
         "displayOperationId": True,
-    
     },
 }
 
@@ -250,7 +306,7 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": False,
 }
 
-if config("FILE_DEBUGGER",cast=bool, default=False):
+if config("FILE_DEBUGGER", cast=bool, default=False):
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -288,6 +344,9 @@ if SHOW_DEBUGGER_TOOLBAR:
         "debug_toolbar.middleware.DebugToolbarMiddleware",
     ]
     import socket  # only if you haven't already imported this
+
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
-    
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
+        "127.0.0.1",
+        "10.0.2.2",
+    ]

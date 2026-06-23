@@ -26,6 +26,7 @@ from django.utils import timezone
 
 try:
     from PIL import Image as PilImage
+
     HAS_PILLOW = True
 except ImportError:
     HAS_PILLOW = False
@@ -37,6 +38,7 @@ except ImportError:
 # FileField default max_length is 100, which is too short once you add a
 # directory prefix + original filename + extension. This was the cause of
 # "Ensure this filename has at most 100 characters" on post uploads.
+
 
 def _post_image_path(instance, filename):
     """images/post_thumbnails/<post_id_or_new>-<uuid8>.<ext>"""
@@ -66,6 +68,7 @@ class Post(models.Model):
     """
     this is a class to define posts for blog app
     """
+
     class Status(models.IntegerChoices):
         DRAFT = 1, _("draft")
         PUBLISHED = 2, _("published")
@@ -124,10 +127,12 @@ class Post(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     published_date = models.DateTimeField(default=timezone.now)
-    slug = models.SlugField(editable=False, unique=True, max_length=255, allow_unicode=True)
+    slug = models.SlugField(
+        editable=False, unique=True, max_length=255, allow_unicode=True
+    )
 
     class Meta:
-        ordering = ['-published_date']
+        ordering = ["-published_date"]
 
     def __str__(self):
         return self.title
@@ -222,7 +227,9 @@ class Post(models.Model):
             return
 
         self._generate_derived_image((400, 250), "thumbnail", _post_thumb_path)
-        self._generate_derived_image((120, 120), "thumbnail_small", _post_thumb_small_path)
+        self._generate_derived_image(
+            (120, 120), "thumbnail_small", _post_thumb_small_path
+        )
 
     def get_snippet(self):
         words = self.content.split()
@@ -232,7 +239,9 @@ class Post(models.Model):
         return snippet
 
     def get_absolute_api_url(self):
-        return reverse("content:content_api:public-post-detail", kwargs={"slug": self.slug})
+        return reverse(
+            "content:content_api:public-post-detail", kwargs={"slug": self.slug}
+        )
 
     def get_absolute_url(self):
         return reverse("content:post-detail-page", kwargs={"slug": self.slug})
@@ -252,7 +261,9 @@ class Post(models.Model):
                 old = Post.objects.get(pk=self.pk)
                 old_image_name = old.image.name if old.image else None
                 old_thumb_name = old.thumbnail.name if old.thumbnail else None
-                old_thumb_small_name = old.thumbnail_small.name if old.thumbnail_small else None
+                old_thumb_small_name = (
+                    old.thumbnail_small.name if old.thumbnail_small else None
+                )
             except Post.DoesNotExist:
                 pass
 
@@ -278,7 +289,9 @@ class Post(models.Model):
 
             Post.objects.filter(pk=self.pk).update(
                 thumbnail=self.thumbnail.name if self.thumbnail else None,
-                thumbnail_small=self.thumbnail_small.name if self.thumbnail_small else None,
+                thumbnail_small=(
+                    self.thumbnail_small.name if self.thumbnail_small else None
+                ),
             )
 
         elif is_first_save or (self.image and not self.thumbnail):
@@ -287,7 +300,9 @@ class Post(models.Model):
             self._generate_all_derived_images()
             Post.objects.filter(pk=self.pk).update(
                 thumbnail=self.thumbnail.name if self.thumbnail else None,
-                thumbnail_small=self.thumbnail_small.name if self.thumbnail_small else None,
+                thumbnail_small=(
+                    self.thumbnail_small.name if self.thumbnail_small else None
+                ),
             )
 
     def delete(self, *args, **kwargs):
@@ -305,13 +320,15 @@ class Category(models.Model):
     """Category Hierarchy — unchanged"""
 
     name = models.CharField(max_length=50, unique=True)
-    slug = models.SlugField(unique=True, max_length=60, editable=False, allow_unicode=True)
+    slug = models.SlugField(
+        unique=True, max_length=60, editable=False, allow_unicode=True
+    )
     parent = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="children"
+        related_name="children",
     )
     level = models.PositiveIntegerField(editable=False, default=1)
     path = models.CharField(max_length=500, unique=True, blank=True)

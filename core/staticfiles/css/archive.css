@@ -1,29 +1,10 @@
 
 :root {
-    --primary-black: #0a0a0a;
 	--carbon-dark: #121212;
-	--carbon-medium: #1a1a1a;
-	--carbon-light: #2a2a2a;
-	--metal-dark: #3a3a3a;
-	--metal-light: #4a4a4a;
-	--accent-red: #ff3333;
 	--accent-blue: #00a8ff;
-	--accent-green: #00ff88;
 	--accent-purple: #9945ff;
-	--accent-cyan: #00ffff;
 	--text-primary: #ffffff;
 	--text-secondary: #b0b0b0;
-	--text-dim: #808080;
-    /* Primary Colors - Emerald & Gold Luxury */
-    --emerald: #059669;
-    --emerald-light: #34d399;
-    --gold: #d4a574;
-    --gold-light: #e8c9a0;
-    --amber: #b45309;
-    --cream: #fef3e2;
-    
-    /* Accent Colors */
-    --coral: #e07a5f;
     --slate: #475569;
     
     /* Glass Colors */
@@ -42,12 +23,6 @@
     --text-primary: #f5f5f4;
     --text-secondary: rgba(245, 245, 244, 0.7);
     --text-muted: rgba(245, 245, 244, 0.4);
-    
-    /* Status Colors */
-    --success: #22c55e;
-    --warning: #eab308;
-    --danger: #dc2626;
-    --info: #0ea5e9;
     
     /* Spacing */
     --sidebar-width: 280px;
@@ -80,20 +55,23 @@
     --text-secondary: rgba(26, 26, 26, 0.7);
     --text-muted: rgba(26, 26, 26, 0.5);
 }
-/*///////////////////////////////////////////////*/
+/* ══════════════════════════════════════════════
+   SECTION HEADER
+══════════════════════════════════════════════ */
 .skills-section {
 	padding-top: 140px;
 }
-
+ 
 .skills-container {
 	position: relative;
 	z-index: 1;
 }
-
+ 
 .section-header {
 	text-align: center;
 	margin-bottom: 40px;
 }
+ 
 .section-title {
 	font-size: 48px;
 	font-weight: 900;
@@ -105,14 +83,17 @@
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
 }
-
+ 
 .section-subtitle {
 	color: var(--text-secondary);
 	font-size: 18px;
 	max-width: 600px;
 	margin: 0 auto;
 }
-/* Hexagonal Grid */
+ 
+/* ══════════════════════════════════════════════
+   HEXAGONAL GRID
+══════════════════════════════════════════════ */
 .skills-hexagon-grid {
 	display: flex;
 	flex-wrap: wrap;
@@ -120,21 +101,38 @@
 	gap: 20px;
 	margin-top: 60px;
 }
-
-/* Hex Item */
+ 
+/* Hex tile */
 .skill-hexagon {
 	width: 200px;
 	height: 230px;
 	position: relative;
 	margin: 30px 10px;
 	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	touch-action: manipulation; /* removes ~300ms tap delay on older mobile browsers */
 	transition: transform 0.3s ease, filter 0.3s ease;
 }
-
+ 
 .skill-hexagon:hover {
 	transform: translateY(-10px);
 }
-
+ 
+.skill-hexagon:focus-visible {
+	outline: none;
+}
+.skill-hexagon:focus-visible .hexagon-inner {
+	border-color: var(--accent-purple);
+	box-shadow: 0 0 0 3px rgba(153,69,255,0.4), 0 0 30px rgba(153,69,255,0.5);
+}
+ 
+/* NOTE on the rotate(30deg)/rotate(-30deg) pair below: this is the
+   classic CSS hexagon illusion — the outer box is rotated and clipped
+   via overflow:hidden, then the inner content is rotated back so text/
+   icons render upright. It can show faint 1px corner artifacts on some
+   browsers at certain zoom levels due to subpixel rounding; this is a
+   known limitation of the technique, not a bug to "fix" without a full
+   clip-path rewrite. */
 .hexagon-inner {
 	width: 100%;
 	height: 100%;
@@ -143,15 +141,15 @@
 	overflow: hidden;
 	border-radius: 20px;
 	background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-	border: 2px solid rgba(255, 255, 255, 0.1);
-	transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+	border: 5px double rgba(58, 233, 203, 0.3);
+	transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.15s ease;
 }
-
+ 
 .skill-hexagon:hover .hexagon-inner {
 	border-color: var(--accent-purple);
 	box-shadow: 0 0 30px rgba(153, 69, 255, 0.5);
 }
-
+ 
 .hexagon-content {
 	position: absolute;
 	width: 100%;
@@ -166,33 +164,30 @@
 	padding: 20px;
 	text-align: center;
 }
-
+ 
 .skill-icon-hex {
 	font-size: 48px;
 	margin-bottom: 15px;
 	color: var(--accent-purple);
 	animation: float 3s ease-in-out infinite;
 }
-
+ 
 @keyframes float {
-	0%, 100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-10px);
-	}
+	0%, 100% { transform: translateY(0); }
+	50%      { transform: translateY(-10px); }
 }
-
+ 
 .skill-name-hex {
-	font-size: 16px;
-	font-weight: 700;
+	font-size: 20px;
+	font-weight: 800;
 	text-transform: uppercase;
 	letter-spacing: 1px;
-	color: var(--text-primary);
+	color: #dfa9fa;
 	margin-bottom: 10px;
 	text-align: center;
+	text-shadow: 0 7px 20px rgba(0,0,0,0.6);
 }
-
+ 
 .skill-level {
 	width: 100%;
 	height: 4px;
@@ -201,7 +196,7 @@
 	overflow: hidden;
 	position: relative;
 }
-
+ 
 .skill-level-fill {
 	height: 100%;
 	background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
@@ -209,89 +204,152 @@
 	position: relative;
 	animation: fillLevel 0.8s ease-out;
 }
-
+ 
 @keyframes fillLevel {
-	0% {
-		width: 0;
+	0% { width: 0; }
+}
+ 
+/* ══════════════════════════════════════════════
+   BACK TILE — visually distinct from category tiles
+   (navigation control, not a category, should read
+   differently at a glance)
+══════════════════════════════════════════════ */
+.back-hexagon .hexagon-inner {
+	background: linear-gradient(135deg, rgba(224,163,255,0.18), rgba(255,255,255,0.04));
+	border-color: rgba(224,163,255,0.3);
+}
+.back-hexagon .skill-icon-hex {
+	color: var(--accent-purple);
+	animation: none; /* back arrow shouldn't float like a category icon */
+}
+.back-hexagon:hover .hexagon-inner {
+	border-color: rgba(224,163,255,0.6);
+	box-shadow: 0 0 24px rgba(224,163,255,0.35);
+}
+.back-hexagon .skill-level-fill {
+	background: linear-gradient(90deg, #e0a3ff, #ff69b4);
+}
+ 
+/* ══════════════════════════════════════════════
+   MESSAGE TILES — loading / empty / error states
+   (createMessageHexagon output in archive.js).
+   Distinguished via .is-message (+ .is-loading /
+   .is-error) classes — see archive.js for the small
+   tagging logic that adds these.
+══════════════════════════════════════════════ */
+.skill-hexagon.is-message {
+	cursor: default;
+}
+.skill-hexagon.is-message:hover {
+	transform: none;
+}
+.skill-hexagon.is-message .hexagon-inner {
+	background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+	opacity: 0.75;
+}
+.skill-hexagon.is-message .skill-icon-hex {
+	animation: none;
+}
+.skill-hexagon.is-message.is-loading .skill-icon-hex {
+	animation: pulse-loading 1.2s ease-in-out infinite;
+}
+@keyframes pulse-loading {
+	0%, 100% { opacity: 0.5; }
+	50%      { opacity: 1;   }
+}
+.skill-hexagon.is-message.is-error .hexagon-inner {
+	border-color: rgba(220,38,38,0.4);
+}
+.skill-hexagon.is-message.is-error .skill-icon-hex {
+	color: var(--danger);
+}
+ 
+/* ══════════════════════════════════════════════
+   TOUCH FEEDBACK — :hover/translateY don't fire
+   reliably on touch screens, so give an explicit
+   :active press state instead
+══════════════════════════════════════════════ */
+@media (hover: none) {
+	.skill-hexagon:active .hexagon-inner {
+		border-color: var(--accent-purple);
+		transform: scale(0.96);
 	}
 }
-
-
-
-/* تبلت: 3 ستون */
+ 
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+   Three tiers, all on the SAME flex layout system
+   as desktop (no flex→grid switch between
+   breakpoints — keeps one consistent model).
+══════════════════════════════════════════════ */
+ 
+/* Tablet */
 @media (max-width: 768px) {
 	.skills-hexagon-grid {
-		grid-template-columns: repeat(3, 1fr);
-		gap: 12px;
-		padding: 0 12px;
+		gap: 14px;
+		padding: 0 16px;
 	}
-
 	.skill-hexagon {
-		width: 100%;
-		height: 170px;
+		width: 160px;
+		height: 184px;
+		margin: 20px 6px;
 	}
-
-	.skill-hexagon-icon {
-		width: 40px;
-		height: 40px;
-		margin-bottom: 10px;
-	}
-
-	.skill-hexagon-title {
-		font-size: 14px;
-	}
-
-	.skill-hexagon-subtitle {
-		font-size: 12px;
-	}
+	.skill-icon-hex { font-size: 38px; margin-bottom: 10px; }
+	.skill-name-hex { font-size: 14px; }
 }
-
-/* موبایل: 2 ستون */
+ 
+/* Phone */
 @media only screen and (max-width: 560px) {
-	
-    .skills-hexagon-grid {
-	display: grid;
-    grid-template-columns: repeat(2, 1fr);
-	flex-wrap: wrap;
-	justify-content: center;
-	gap: 20px;
-    padding: 0 8px;
-	margin-top: 60px;
-    }
-
+	.skills-hexagon-grid {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 14px;
+		padding: 0 12px;
+		margin-top: 36px;
+	}
+ 
 	.skill-hexagon {
-	width: 130px;
-	height: 130px;
-	position: relative;
-	margin: 30px 10px;
-	cursor: pointer;
-	transition: transform 0.3s ease, filter 0.3s ease;
-}
-
+		width: calc(50% - 7px);   /* 2-up, respects the gap precisely */
+		max-width: 165px;
+		height: 150px;            /* taller than square — reads as a hexagon, not a blob */
+		margin: 8px 0;
+	}
+ 
 	.hexagon-inner {
-	width: 100%;
-	height: 100%;
-	position: relative;
-	transform: rotate(30deg);
-	overflow: hidden;
-	border-radius: 20px;
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-	border: 2px solid rgba(255, 255, 255, 0.1);
-	transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+		background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+		box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+	}
+ 
+	.hexagon-content { padding: 14px 10px; }
+	.skill-icon-hex   { font-size: 32px; margin-bottom: 8px; }
+	.skill-name-hex   { font-size: 12px; letter-spacing: 0.5px; margin-bottom: 6px; }
+	.skill-level      { height: 3px; }
 }
-
-	.skill-hexagon-icon {
-		width: 34px;
-		height: 34px;
-		margin-bottom: 8px;
+ 
+/* Small / older phones */
+@media only screen and (max-width: 380px) {
+	.skills-hexagon-grid { gap: 10px; padding: 0 8px; }
+	.skill-hexagon {
+		width: calc(50% - 5px);
+		height: 132px;
+		margin: 6px 0;
 	}
-
-	.skill-hexagon-title {
-		font-size: 13px;
-	}
-
-	.skill-hexagon-subtitle {
-		font-size: 8px;
-		margin-top: 4px;
+	.hexagon-content { padding: 10px 6px; }
+	.skill-icon-hex   { font-size: 26px; margin-bottom: 6px; }
+	.skill-name-hex   { font-size: 10.5px; }
+}
+ 
+/* ══════════════════════════════════════════════
+   ACCESSIBILITY
+══════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+	.skill-icon-hex,
+	.skill-level-fill,
+	.skill-hexagon,
+	.skill-hexagon:hover {
+		animation: none;
+		transition: none;
+		transform: none;
 	}
 }

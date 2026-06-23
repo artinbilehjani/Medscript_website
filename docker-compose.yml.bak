@@ -1,0 +1,45 @@
+
+services:
+  db:
+    container_name: db
+    image: postgres:18-alpine
+    volumes:
+      - ./postgre/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend_medscript
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./core:/app
+    ports:
+      - "8000:8000"
+      - "5678:5678"
+    
+    environment:
+      - SECRET_KEY=dev-only-not-secret
+      - DEBUG=True
+      - COMINGSOON=False
+      - SHOW_DEBUGGER_TOOLBAR=False
+      - ENABLE_DEBUGPY=False
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/medscript
+      - DJANGO_ALLOWED_HOSTS=*
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+

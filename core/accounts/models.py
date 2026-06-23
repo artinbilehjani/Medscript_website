@@ -2,7 +2,11 @@ import io
 import os
 import uuid
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models
@@ -12,12 +16,14 @@ from django.utils.translation import gettext_lazy as _
 
 try:
     from PIL import Image as PilImage
+
     HAS_PILLOW = True
 except ImportError:
     HAS_PILLOW = False
 
 
 # ── upload path helpers ─────────────────────────────────────────────────────
+
 
 def _profile_image_path(instance, filename):
     """
@@ -45,6 +51,7 @@ def _profile_thumb_path(instance, filename):
 
 
 # ── managers / user ──────────────────────────────────────────────────────────
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
@@ -114,6 +121,7 @@ class Position(models.Model):
 
 # ── Profile ───────────────────────────────────────────────────────────────────
 
+
 class Profile(models.Model):
     user = models.OneToOneField(
         "accounts.User", on_delete=models.CASCADE, related_name="profile"
@@ -124,7 +132,7 @@ class Profile(models.Model):
         null=True,
         blank=True,
         max_length=255,  # default is 100 — raised so long original filenames
-                          # never fail DRF's pre-upload_to length check
+        # never fail DRF's pre-upload_to length check
     )
     # Small 80x80 JPEG used anywhere a tiny avatar is needed (post cards,
     # comment author rows, etc.) — auto-generated, never edited directly.
@@ -251,5 +259,3 @@ class Profile(models.Model):
         super().delete(*args, **kwargs)
         self._delete_file_by_name(image_name)
         self._delete_file_by_name(thumb_name)
-
-

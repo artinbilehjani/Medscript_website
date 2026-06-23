@@ -1,127 +1,219 @@
 /* ═══════════════════════════════════════════════
-   home_section_renderer.js
-   Load AFTER home.js on the public home page.
-
-   Reads sections[] from the home API response
-   (already fetched by home.js — zero extra calls)
-   and applies DB-driven content to the page:
-     • Feature rows replaced from DB
-     • Hero title/subtitle overridden if set in DB
-     • CTA button injected if section has button_url
-     • Sections hidden via is_active flag
+   home_section_renderer.js — MedScript Home
+   Renders the admin-configurable "features" rows
+   (HomepageSection, section_type='features') inside
+   #home-features-block, connected by a zigzag
+   ECG-style pulse line. Works for any row count —
+   left/right alternates by index automatically.
 ═══════════════════════════════════════════════ */
 (() => {
   'use strict';
 
-  const API_URL = window.APP_CONFIG?.homeApiUrl || '/home/api/v1/home/';
+  const BLOCK    = document.getElementById('home-features-block');
+  const TITLE_EL = document.getElementById('home-features-title');
+  const TRACK    = document.getElementById('feature-ecg-track');
+  const PATH     = document.getElementById('feature-ecg-path');
+  const PULSE    = document.getElementById('feature-ecg-pulse');
+  const SVG_EL   = document.getElementById('feature-ecg-svg');
 
-  /* Patch window.fetch to intercept the home API response */
-  const _origFetch = window.fetch;
-  window.fetch = async function (...args) {
-    const res = await _origFetch.apply(this, args);
+  if (!BLOCK) return;
 
-    const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
-    /* Only intercept the home API call */
-    if (!url.includes('home')) return res;
-    const isHome = (() => {
-      try { return new URL(url, location.origin).pathname === new URL(API_URL, location.origin).pathname; }
-      catch { return url.includes(API_URL.replace(/^\//,'')); }
-    })();
-    if (!isHome) return res;
+  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* Clone so home.js can still consume the original */
-    res.clone().json().then(data => {
-      if (data?.sections) applyDynamicSections(data.sections);
-    }).catch(() => {});
-
-    return res;
-  };
+  let currentSections = [];
+  let resizeTimer = null;
 
   /* ════════════════════════════════════════════
-     APPLY SECTIONS
+     RENDER ROWS
+     Each HomepageSection (section_type='features')
+     becomes one .feature-row. Side alternates
+     left/right automatically by index — matches the
+     zigzag's natural shape, no DB field needed for it.
   ════════════════════════════════════════════ */
-  function applyDynamicSections(sections) {
+  function renderRows(sections) {
+    /* Remove any existing fallback/previous rows, keep the ECG track. */
+    BLOCK.querySelectorAll('.feature-row').forEach(el => el.remove());
 
-    /* ── 1. Feature rows ─────────────────────── */
-    const featBlock  = document.getElementById('home-features-block');
-    const featureSecs = sections.filter(s => s.section_type === 'features' && s.is_active);
-
-    if (featBlock && featureSecs.length) {
-      /* Remove fallback rows */
-      featBlock.querySelectorAll('.feature-row[data-fallback]').forEach(r => r.remove());
-
-      /* Inject DB rows */
-      featureSecs.forEach((sec, i) => {
-        const icon    = sec.icon    || ['🧠','⚡','💬'][i % 3];
-        const title   = sec.title   || '';
-        const body    = sec.content || (sec.subtitle ? `<p>${esc(sec.subtitle)}</p>` : '');
-        const btnHtml = sec.button_label && sec.button_url
-          ? `<a href="${esc(sec.button_url)}" class="hero-btn hero-btn--ghost"
-               style="margin-top:18px;display:inline-flex;align-items:center;gap:8px">
-               ${esc(sec.button_label)}
-             </a>` : '';
-
-        const row = document.createElement('div');
-        row.className = 'feature-row';
-        row.innerHTML = `
-          <div class="feature-content">
-            <span class="feature-icon">${esc(icon)}</span>
-            ${title ? `<h3>${esc(title)}</h3>` : ''}
-            ${body}
-            ${btnHtml}
-          </div>
-          <div class="feature-visual">${esc(icon)}</div>`;
-        featBlock.appendChild(row);
-      });
+    if (!sections || !sections.length) {
+      const empty = document.createElement('p');
+      empty.className = 'feature-empty';
+      empty.textContent = 'No feature sections published yet.';
+      BLOCK.appendChild(empty);
+      currentSections = [];
+      updateZigzag();
+      return;
     }
 
-    /* ── 2. Hero section overrides ───────────── */
-    const heroSec = sections.find(s => s.section_type === 'hero' && s.is_active);
-    if (heroSec) {
-      /* title / subtitle only override if non-empty (DB wins over SiteSettings) */
-      if (heroSec.title) {
-        const el = document.getElementById('heroTitle');
-        if (el) el.textContent = heroSec.title;
-      }
-      if (heroSec.subtitle) {
-        const el = document.getElementById('heroSub');
-        if (el) el.textContent = heroSec.subtitle;
-      }
-      /* CTA button */
-      if (heroSec.button_label && heroSec.button_url) {
-        const actions = document.getElementById('hero-actions');
-        if (actions && !actions.querySelector('.hero-btn--db')) {
-          const btn = document.createElement('a');
-          btn.href      = heroSec.button_url;
-          btn.className = 'hero-btn hero-btn--primary hero-btn--db';
-          btn.textContent = heroSec.button_label;
-          actions.prepend(btn);
-        }
-      }
-    }
+    currentSections = sections;
 
-    /* ── 3. Show / hide whole sections by is_active ─── */
-    const TYPE_TO_ID = { hero:'hero', latest:'latest', popular:'popular' };
-    sections.forEach(sec => {
-      const id = TYPE_TO_ID[sec.section_type];
-      if (!id) return;
-      const el = document.getElementById(id);
-      if (el) el.style.display = sec.is_active ? '' : 'none';
+    sections.forEach((section, i) => {
+      const row = document.createElement('div');
+      row.className = 'feature-row';
+      row.dataset.side = i % 2 === 0 ? 'left' : 'right';
+
+      const icon  = section.icon || '◆';
+      const title = section.title || '';
+      const body  = section.content || section.subtitle || '';
+
+      row.innerHTML = `
+        <div class="feature-content">
+          <span class="feature-icon">${esc(icon)}</span>
+          ${title ? `<h3>${esc(title)}</h3>` : ''}
+          ${body  ? `<p>${esc(body)}</p>` : ''}
+          ${section.button_label && section.button_url
+            ? `<a class="feature-link" href="${esc(section.button_url)}">${esc(section.button_label)} →</a>`
+            : ''}
+        </div>
+      `;
+
+      BLOCK.appendChild(row);
     });
 
-    /* Hide the whole features block if no active feature section */
-    if (featBlock) {
-      const hasActive = sections.some(s => s.section_type === 'features' && s.is_active);
-      /* Only hide if there is at least one feature section in DB
-         (if none exist at all, keep the fallback rows visible) */
-      const hasFeatSec = sections.some(s => s.section_type === 'features');
-      if (hasFeatSec && !hasActive) featBlock.style.display = 'none';
+    /* Wait one frame so layout is committed before measuring positions. */
+    requestAnimationFrame(() => requestAnimationFrame(updateZigzag));
+  }
+
+  /* ════════════════════════════════════════════
+     ZIGZAG PATH
+     Computed from the ACTUAL rendered position of
+     each row's connection anchor (a 1px marker at
+     the inner edge of .feature-content), rather than
+     hardcoded coordinates — stays correct regardless
+     of how tall each row renders (variable content
+     length from the DB) or how many rows exist.
+  ════════════════════════════════════════════ */
+  function updateZigzag() {
+    if (!TRACK || !PATH || !SVG_EL) return;
+
+    const rows = Array.from(BLOCK.querySelectorAll('.feature-row'));
+    if (rows.length < 2) {
+      PATH.setAttribute('d', '');
+      if (PULSE) PULSE.style.display = 'none';
+      return;
+    }
+    if (PULSE) PULSE.style.display = '';
+
+    const trackRect = TRACK.getBoundingClientRect();
+    if (trackRect.width === 0 || trackRect.height === 0) return;
+
+    /* For each row, find the x position of its connection point
+       (inner edge of the text content, alternating left/right) and
+       its vertical center — both relative to the track's own box,
+       so the SVG's viewBox can be 1:1 with real pixels. */
+    const points = rows.map(row => {
+      const side    = row.dataset.side;
+      const content = row.querySelector('.feature-content');
+      const cRect   = content.getBoundingClientRect();
+
+      const x = side === 'left'
+        ? (cRect.right - trackRect.left)   /* connects from the right edge of left-aligned text */
+        : (cRect.left  - trackRect.left);  /* connects from the left edge of right-aligned text  */
+      const y = (cRect.top + cRect.height / 2) - trackRect.top;
+
+      return { x, y };
+    });
+
+    /* Build a true zigzag: straight line segments between each row's
+       anchor point, via a midpoint at the vertical center between
+       consecutive rows so the line has a clear diagonal "spike"
+       between rows rather than a single straight line cutting
+       through row content. */
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const midY = (a.y + b.y) / 2;
+      d += ` L ${a.x} ${midY} L ${b.x} ${midY} L ${b.x} ${b.y}`;
+    }
+
+    PATH.setAttribute('d', d);
+
+    /* Match the viewBox to the track's real pixel size so the path's
+       computed coordinates render 1:1, no scaling distortion. */
+    SVG_EL.setAttribute('viewBox', `0 0 ${trackRect.width} ${trackRect.height}`);
+
+    if (REDUCED_MOTION) {
+      /* Show the finished line immediately, no draw-in, and don't
+         animate the traveling pulse — keep it static and hidden
+         rather than a constantly-moving dot. */
+      PATH.style.transition = 'none';
+      PATH.style.strokeDasharray = 'none';
+      PATH.style.strokeDashoffset = '0';
+      if (PULSE) PULSE.style.display = 'none';
+      return;
+    }
+
+    /* Restart the draw-in animation so it replays whenever content
+       (and therefore path length) changes — e.g. after a resize. */
+    const length = PATH.getTotalLength();
+    PATH.style.strokeDasharray = `${length}`;
+    PATH.style.strokeDashoffset = `${length}`;
+    PATH.getBoundingClientRect(); /* force reflow before re-enabling the transition */
+    PATH.style.transition = 'none';
+    requestAnimationFrame(() => {
+      PATH.style.transition = 'stroke-dashoffset 1.4s ease';
+      PATH.style.strokeDashoffset = '0';
+    });
+
+    /* Re-point the <animateMotion> at the freshly computed path so the
+       traveling pulse dot follows the new shape exactly. */
+    if (PULSE) {
+      const motion = PULSE.querySelector('animateMotion');
+      if (motion) {
+        motion.setAttribute('path', d);
+        /* Restart the SMIL animation so it picks up the new path immediately. */
+        if (typeof motion.beginElement === 'function') {
+          try { motion.beginElement(); } catch (e) { /* ignore if unsupported */ }
+        }
+      }
     }
   }
 
   function esc(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
-                          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  /* ════════════════════════════════════════════
+     FEATURES BLOCK TITLE
+     Admin-managed via a HomepageSection row with
+     section_type='features_title'. Uses its `title`
+     field as the heading text above the zigzag rows.
+     Falls back to "News" if no active row of this
+     type exists, so the heading never goes blank.
+  ════════════════════════════════════════════ */
+  function applyFeaturesTitle(allSections) {
+    if (!TITLE_EL) return;
+    const titleSection = allSections.find(s => s.section_type === 'features_title');
+    TITLE_EL.textContent = (titleSection && titleSection.title) || 'News';
+  }
+
+  /* ════════════════════════════════════════════
+     DATA SOURCE
+     Reuses the payload already fetched by home.js
+     (dispatched as a custom event) instead of making
+     a second request to the same endpoint.
+  ════════════════════════════════════════════ */
+  document.addEventListener('medscript:home-data', (e) => {
+    const data = e.detail;
+    /* Backend currently returns one mixed 'sections' list (hero, features,
+       features_title, about, cta, contact all together) rather than
+       separate per-type keys — filter client-side instead, so a future
+       'about'/'cta' row never silently renders inside the zigzag block. */
+    const allSections = data?.sections || [];
+
+    applyFeaturesTitle(allSections);
+
+    const sections = allSections
+      .filter(s => s.section_type === 'features')
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    renderRows(sections);
+  });
+
+  /* Recompute the zigzag on resize (debounced) since row heights and
+     left/right positions shift at different breakpoints. */
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(updateZigzag, 150);
+  });
 
 })();

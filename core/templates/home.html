@@ -6,18 +6,31 @@
 
 <!-- ── Hero ── -->
 <section class="home-hero" id="hero">
+
+  <!-- University building photo: centered, fixed behind content.
+       Feathered on left/right so the neural-background radial
+       glows stay visible at the edges, and dissolves at the
+       bottom into a black fade, then a fading dot pattern,
+       before disappearing entirely into the page background. -->
+  <div class="hero-photo-layer" aria-hidden="true">
+    <div class="hero-photo"
+         style="background-image: url('/media/images/university_building.jpg');"></div>
+    <div class="hero-photo-fade"></div>
+    <div class="hero-photo-dots"></div>
+  </div>
+
   <div class="hero-inner">
     <span class="hero-badge">Medical University Notes</span>
 
-    <h1 class="hero-title" id="heroTitle">MEDSCRIPT</h1>
+    <h1 class="hero-title" id="heroTitle">MedScript</h1>
 
     <p class="hero-sub" id="heroSub">
-      Your complete medical university note archive — organized, searchable, and always accessible.
+      Welcome to MedScript, your ultimate resource for medical university notes. Explore a vast collection of study materials, stay updated with the latest news, and enhance your learning experience with our comprehensive archive.
     </p>
 
     <div class="hero-stats">
       <div class="hero-stat">
-        <span class="hero-stat-number" id="statNotes">—</span>
+        <span class="hero-stat-number" id="statNotes"></span>
         <span class="hero-stat-label">Notes</span>
       </div>
       <div class="hero-stat">
@@ -67,37 +80,6 @@
   </div>
 </section>
 
-<!-- ── Feature rows ── rendered from DB by home_section_renderer.js ── -->
-<div class="home-features" id="home-features-block">
-  <h2 class="home-features-title" id="home-features-title">Why MedScript?</h2>
-  <!-- rows injected by JS from sections API; fallback rows below
-       are replaced if DB has active feature sections -->
-  <div class="feature-row" data-fallback>
-    <div class="feature-content">
-      <span class="feature-icon">🧠</span>
-      <h3>Organized by Subject</h3>
-      <p>Every note is categorized into a deep subject tree — find exactly what you need in seconds, from basic anatomy to advanced pathology.</p>
-    </div>
-    <div class="feature-visual">🗂️</div>
-  </div>
-  <div class="feature-row" data-fallback>
-    <div class="feature-content">
-      <span class="feature-icon">⚡</span>
-      <h3>Session Files & Recordings</h3>
-      <p>Download PDFs, PowerPoints, and lecture recordings directly from each note — everything from a single session in one place.</p>
-    </div>
-    <div class="feature-visual">📥</div>
-  </div>
-  <div class="feature-row" data-fallback>
-    <div class="feature-content">
-      <span class="feature-icon">💬</span>
-      <h3>Community Comments</h3>
-      <p>Ask questions, share insights, and discuss session content with your peers directly on each note page.</p>
-    </div>
-    <div class="feature-visual">🌐</div>
-  </div>
-</div>
-
 <!-- ── Most Viewed ── -->
 <section class="home-section" id="popular">
   <div class="home-section-head">
@@ -116,6 +98,46 @@
     <div class="cf-indicators" id="popularDots"></div>
   </div>
 </section>
+
+<!-- ── Feature rows — connected by a zigzag ECG pulse line.
+     Sections are fully admin-managed (HomepageSection model,
+     section_type='features'); rows + the connector path are
+     rendered entirely by home_section_renderer.js once the
+     home API responds. Nothing static lives here on purpose —
+     row count, text, and icons are 100% DB-driven.
+
+     The heading text itself ("News") is ALSO admin-managed, via
+     a HomepageSection row with section_type='features_title' —
+     home_section_renderer.js sets #home-features-title's text
+     from that row, falling back to "News" if none is active. ── -->
+<div class="home-features" id="home-features-block">
+  <h2 class="home-features-title" id="home-features-title">News</h2>
+
+  <div class="feature-ecg-track" id="feature-ecg-track">
+    <svg class="feature-ecg-svg" id="feature-ecg-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="feature-ecg-gradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#e0a3ff" />
+          <stop offset="50%"  stop-color="#ff69b4" />
+          <stop offset="100%" stop-color="#9370db" />
+        </linearGradient>
+        <filter id="feature-ecg-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <path id="feature-ecg-path" class="feature-ecg-line" d="" fill="none" />
+      <circle id="feature-ecg-pulse" class="feature-ecg-pulse" r="4">
+        <animateMotion dur="2.6s" repeatCount="indefinite" path="" />
+      </circle>
+    </svg>
+  </div>
+
+  <!-- Rows injected here by home_section_renderer.js -->
+</div>
 
 {% endblock %}
 

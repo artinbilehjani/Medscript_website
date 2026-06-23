@@ -1,11 +1,13 @@
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
+
 # Create your models here.
 
 
 class Comment(models.Model):
     """class for comments of each post"""
+
     class CommentStatus(models.IntegerChoices):
         PENDING = 1, _("pending")
         APPROVED = 2, _("approved")
@@ -49,7 +51,7 @@ class Comment(models.Model):
         if len(words) > 5:
             snippet += "..."
         return snippet
-    
+
     # @property
     # def like_count(self):
     #     return self.reactions.filter(reaction_type=CommentReaction.ReactionType.LIKE).count()
@@ -57,7 +59,8 @@ class Comment(models.Model):
     # @property
     # def dislike_count(self):
     #     return self.reactions.filter(reaction_type=CommentReaction.ReactionType.DISLIKE).count()
-    
+
+
 class CommentReaction(models.Model):
     class ReactionType(models.IntegerChoices):
         LIKE = 1, ("Like")
@@ -76,7 +79,6 @@ class CommentReaction(models.Model):
     reaction_type = models.IntegerField(
         choices=ReactionType.choices,
     )
-
 
     class Meta:
         constraints = [

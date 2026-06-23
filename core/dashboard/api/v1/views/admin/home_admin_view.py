@@ -14,11 +14,12 @@ from ...serializers import (
     PostAdminSerializer,
 )
 
-
 # ─── Site Settings ───────────────────────────────────────────────────────────
+
 
 class SiteSettingsAdminView(APIView):
     """GET + PATCH the single SiteSettings row."""
+
     permission_classes = [IsAdminUser]
 
     def _get_obj(self):
@@ -40,8 +41,10 @@ class SiteSettingsAdminView(APIView):
 
 # ─── Announcements ───────────────────────────────────────────────────────────
 
+
 class AnnouncementListCreateView(APIView):
     """GET all announcements / POST a new one."""
+
     permission_classes = [IsAdminUser]
 
     def get(self, request):
@@ -57,6 +60,7 @@ class AnnouncementListCreateView(APIView):
 
 class AnnouncementDetailView(APIView):
     """GET / PATCH / DELETE a single announcement."""
+
     permission_classes = [IsAdminUser]
 
     def _get_obj(self, pk):
@@ -80,6 +84,7 @@ class AnnouncementDetailView(APIView):
 
 class AnnouncementToggleActiveView(APIView):
     """PATCH /announcements/<pk>/toggle-active/ — flips is_active."""
+
     permission_classes = [IsAdminUser]
 
     def patch(self, request, pk):
@@ -91,17 +96,40 @@ class AnnouncementToggleActiveView(APIView):
 
 # ─── Homepage Sections ────────────────────────────────────────────────────────
 
+
 class HomepageSectionListView(APIView):
-    """GET all sections."""
-    permission_classes = [IsAdminUser]
+    """GET all sections / POST a new one."""
+
+    permission_classes = [IsAdminUser]  # match your existing permission class import
 
     def get(self, request):
         qs = HomepageSection.objects.order_by("order")
         return Response(HomepageSectionAdminSerializer(qs, many=True).data)
 
+    def post(self, request):
+        data = request.data.copy()
+
+        # New sections default to the END of the current order, so they
+        # don't silently jump ahead of existing ones. The admin can still
+        # drag-reorder afterward via the existing reorder endpoint.
+        if "order" not in data or not data.get("order"):
+            max_order = (
+                HomepageSection.objects.order_by("-order")
+                .values_list("order", flat=True)
+                .first()
+                or 0
+            )
+            data["order"] = max_order + 1
+
+        serializer = HomepageSectionAdminSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class HomepageSectionDetailView(APIView):
     """PATCH / activate a single section."""
+
     permission_classes = [IsAdminUser]
 
     def get(self, request, pk):
@@ -110,7 +138,9 @@ class HomepageSectionDetailView(APIView):
 
     def patch(self, request, pk):
         obj = get_object_or_404(HomepageSection, pk=pk)
-        serializer = HomepageSectionAdminSerializer(obj, data=request.data, partial=True)
+        serializer = HomepageSectionAdminSerializer(
+            obj, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -121,6 +151,7 @@ class HomepageSectionReorderView(APIView):
     POST /homepage-sections/reorder/
     Body: {"order": [3, 1, 4, 2]}   ← list of PKs in desired order
     """
+
     permission_classes = [IsAdminUser]
 
     def post(self, request):
@@ -143,6 +174,7 @@ class HomepageSectionReorderView(APIView):
 
 class HomepageSectionToggleActiveView(APIView):
     """PATCH /homepage-sections/<pk>/toggle-active/"""
+
     permission_classes = [IsAdminUser]
 
     def patch(self, request, pk):
@@ -154,8 +186,10 @@ class HomepageSectionToggleActiveView(APIView):
 
 # ─── Posts ────────────────────────────────────────────────────────────────────
 
+
 class PostListCreateView(APIView):
     """GET all posts (any status) / POST a new draft."""
+
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -176,6 +210,7 @@ class PostListCreateView(APIView):
 
 class PostDetailView(APIView):
     """GET / PATCH / DELETE a single post."""
+
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -200,6 +235,7 @@ class PostDetailView(APIView):
 
 class PostPublishView(APIView):
     """PATCH /posts/<pk>/publish/ — sets status to PUBLISHED."""
+
     permission_classes = [IsAdminUser]
 
     def patch(self, request, pk):
@@ -211,6 +247,7 @@ class PostPublishView(APIView):
 
 class PostUnpublishView(APIView):
     """PATCH /posts/<pk>/unpublish/ — reverts to DRAFT."""
+
     permission_classes = [IsAdminUser]
 
     def patch(self, request, pk):

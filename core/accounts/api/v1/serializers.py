@@ -10,6 +10,7 @@ from ...models import Profile, Position
 
 User = get_user_model()
 
+
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -18,19 +19,23 @@ class RegisterSerializer(serializers.Serializer):
     captcha_value = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        if not verify_simple_captcha(attrs.get("captcha_key"), attrs.get("captcha_value")):
+        if not verify_simple_captcha(
+            attrs.get("captcha_key"), attrs.get("captcha_value")
+        ):
             raise serializers.ValidationError({"captcha": "Invalid captcha."})
 
         username = attrs["username"].strip()
 
         if User.objects.filter(username__iexact=username).exists():
-            raise serializers.ValidationError({"username": _("This username is already taken.")})
+            raise serializers.ValidationError(
+                {"username": _("This username is already taken.")}
+            )
 
         try:
             validate_password(attrs["password"], user=User(username=username))
         except DjangoValidationError as e:
             raise serializers.ValidationError({"password": list(e.messages)})
-        
+
         attrs["username"] = username
         return attrs
 
@@ -51,7 +56,9 @@ class LoginSerializer(serializers.Serializer):
     captcha_value = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        if not verify_simple_captcha(attrs.get("captcha_key"), attrs.get("captcha_value")):
+        if not verify_simple_captcha(
+            attrs.get("captcha_key"), attrs.get("captcha_value")
+        ):
             raise serializers.ValidationError({"captcha": "Invalid captcha."})
 
         request = self.context.get("request")
@@ -67,7 +74,6 @@ class LoginSerializer(serializers.Serializer):
 
         attrs["user"] = user
         return attrs
-    
 
 
 class PositionSerializer(serializers.ModelSerializer):
@@ -82,7 +88,9 @@ class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="user.email", read_only=True)
     user_position = PositionSerializer(source="user.user_position", read_only=True)
     can_edit_image = serializers.SerializerMethodField()
-    remove_image = serializers.BooleanField(write_only=True, required=False, default=False)
+    remove_image = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
 
     class Meta:
         model = Profile
@@ -102,7 +110,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             "created_date",
             "updated_date",
         ]
-        read_only_fields = ["user_type","user_position","id", "created_date", "updated_date"]
+        read_only_fields = [
+            "user_type",
+            "user_position",
+            "id",
+            "created_date",
+            "updated_date",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -110,7 +124,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         if request and request.user and not request.user.is_staff:
             self.fields["image"].read_only = True
             self.fields["remove_image"].read_only = True
-    
+
     def get_can_edit_image(self, obj):
         request = self.context.get("request")
         return bool(request and request.user and request.user.is_staff)
@@ -128,7 +142,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         if remove_image:
             if instance.image:
                 instance.image.delete(save=False)  # remove file from storage
-            instance.image = None                # set DB to NULL
+            instance.image = None  # set DB to NULL
             instance.save(update_fields=["image"])
 
         return super().update(instance, validated_data)
@@ -147,7 +161,9 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs["new_password1"] != attrs["new_password2"]:
-            raise serializers.ValidationError({"new_password2": "Passwords do not match."})
+            raise serializers.ValidationError(
+                {"new_password2": "Passwords do not match."}
+            )
 
         try:
             validate_password(attrs["new_password1"], self.context["request"].user)

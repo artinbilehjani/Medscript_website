@@ -4,7 +4,7 @@
 (() => {
   'use strict';
 
-  const API_URL = window.APP_CONFIG?.homeApiUrl || '/home/api/v1/home/';
+  const API_URL = window.APP_CONFIG?.homeApiUrl || '/dashboard/api/v1/home/';
 
   /* Static default thumbnail — purely a frontend fallback. Never written
      to any model field, so there's nothing for backend cleanup logic to
@@ -24,10 +24,24 @@
       applyAnnouncement(data.announcement);
       buildCoverflow('latest',  data.latest_posts      || []);
       buildCoverflow('popular', data.most_viewed_posts || []);
+
+      /* Hand the full payload off to home_section_renderer.js via a
+         custom event, instead of that file making its own duplicate
+         fetch to the same endpoint. Dispatched on `document` so load
+         order between the two <script> tags doesn't matter — the
+         renderer can attach its listener either before or after this
+         fires, and CustomEvent + addEventListener both work fine
+         regardless of which file finishes loading first, AS LONG AS the
+         listener is registered before this line runs. Since both
+         scripts run synchronously top-to-bottom and home.js's
+         DOMContentLoaded handler always fires after both files have
+         finished parsing and registering their listeners, this is safe. */
+      document.dispatchEvent(new CustomEvent('medscript:home-data', { detail: data }));
     } catch (err) {
       console.error('[home]', err);
       buildCoverflow('latest',  []);
       buildCoverflow('popular', []);
+      document.dispatchEvent(new CustomEvent('medscript:home-data', { detail: null }));
     }
   }
 
@@ -178,7 +192,7 @@
       positionCards();
     }
 
-    function start() { clearInterval(timer); timer = setInterval(() => goTo(current+1), 3600); }
+    function start() { clearInterval(timer); timer = setInterval(() => goTo(current+1), 2000); }
     function stop()  { clearInterval(timer); }
 
     prevBtn?.addEventListener('click', () => { goTo(current-1); if (playing) start(); });

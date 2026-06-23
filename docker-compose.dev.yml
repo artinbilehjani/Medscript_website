@@ -1,0 +1,37 @@
+services:
+  db:
+    container_name: db
+    image: postgres:18-alpine
+    volumes:
+      - ./postgre/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: medscript
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: dockerfiles/prod/Dockerfile   # reuse prod image in dev too —
+                                                 # keeps your local env honest.
+                                                 # A separate dev Dockerfile is
+                                                 # optional, add it later if needed.
+    container_name: backend_medscript
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./core:/app        # bind-mount: edit locally, see changes instantly
+    ports:
+      - "8000:8000"
+      - "5678:5678"        # debugpy
+    env_file:
+      - envs/dev/.env
+    depends_on:
+      db:
+        condition: service_healthy

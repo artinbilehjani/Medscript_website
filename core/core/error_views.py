@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+
 # function for error 400
 def error_400(request, exception):
     context = {"exception": exception}

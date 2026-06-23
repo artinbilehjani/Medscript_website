@@ -6,8 +6,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from content.models import Category,Post
+from content.models import Category, Post
 from ..serializers.archive_serializers import CategoryNavigationSerializer
+
 
 class CategoryNavigationView(APIView):
     def get(self, request, *args, **kwargs):
@@ -15,10 +16,16 @@ class CategoryNavigationView(APIView):
 
         if parent_path:
             parent = get_object_or_404(Category, path=parent_path)
-            categories = Category.objects.filter(parent=parent).prefetch_related("children")
-            current_category = CategoryNavigationSerializer(parent, context={"request": request}).data
+            categories = Category.objects.filter(parent=parent).prefetch_related(
+                "children"
+            )
+            current_category = CategoryNavigationSerializer(
+                parent, context={"request": request}
+            ).data
         else:
-            categories = Category.objects.filter(level=1, parent__isnull=True).prefetch_related("children")
+            categories = Category.objects.filter(
+                level=1, parent__isnull=True
+            ).prefetch_related("children")
             current_category = None
 
         serializer = CategoryNavigationSerializer(
@@ -27,7 +34,9 @@ class CategoryNavigationView(APIView):
             context={"request": request},
         )
 
-        return Response({
-            "current_category": current_category,
-            "results": serializer.data,
-        })
+        return Response(
+            {
+                "current_category": current_category,
+                "results": serializer.data,
+            }
+        )

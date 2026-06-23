@@ -1,9 +1,10 @@
 from django.contrib import admin
 from mediafiles.models import PostFile
-from interactions.models import Comment,CommentReaction
+from interactions.models import Comment, CommentReaction
 from django.db.models import Count, Q
 from django.utils.html import format_html
 from django.urls import reverse
+
 # Register your models here.
 
 
@@ -64,7 +65,8 @@ class CommentInline(admin.TabularInline):
             return "-"
         url = reverse("admin:interactions_comment_change", args=[obj.pk])
         return format_html('<a href="{}">Open</a>', url)
-    
+
+
 class PostFileInline(admin.TabularInline):
     model = PostFile
     extra = 1

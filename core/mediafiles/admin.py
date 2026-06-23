@@ -39,15 +39,14 @@ class PostFileAdmin(admin.ModelAdmin):
     date_hierarchy = "created_date"
 
     fieldsets = (
-        ("Main", {
-            "fields": ("post", "title", "description", "file")
-        }),
-        ("Status", {
-            "fields": ("file_type", "is_downloadable", "created_date")
-        }),
-        ("Preview", {
-            "fields": ("file_preview",),
-        }),
+        ("Main", {"fields": ("post", "title", "description", "file")}),
+        ("Status", {"fields": ("file_type", "is_downloadable", "created_date")}),
+        (
+            "Preview",
+            {
+                "fields": ("file_preview",),
+            },
+        ),
     )
 
     @admin.display(boolean=True, description="Has file")

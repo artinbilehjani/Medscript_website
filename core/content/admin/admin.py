@@ -1,6 +1,6 @@
 from django.contrib import admin
-from ..models import Post,Category,Tag
-from .admin_inline import CommentInline,PostFileInline
+from ..models import Post, Category, Tag
+from .admin_inline import CommentInline, PostFileInline
 from django.urls import reverse
 from django.utils.html import format_html
 
@@ -37,29 +37,35 @@ class PostAdmin(admin.ModelAdmin):
     ordering = ("-published_date",)
     autocomplete_fields = ("author",)
     filter_horizontal = ("category", "tag")
-    inlines = [PostFileInline,CommentInline]
+    inlines = [PostFileInline, CommentInline]
     fieldsets = (
-        ("Post info", {
-            "fields": (
-                "id",
-                "author",
-                "title",
-                "slug",
-                "image",
-                "content",
-                "links",
-                "status",
-                "published_date",
-                "category",
-                "tag",
-            )
-        }),
-        ("Dates", {
-            "fields": (
-                "created_date",
-                "updated_date",
-            )
-        }),
+        (
+            "Post info",
+            {
+                "fields": (
+                    "id",
+                    "author",
+                    "title",
+                    "slug",
+                    "image",
+                    "content",
+                    "links",
+                    "status",
+                    "published_date",
+                    "category",
+                    "tag",
+                )
+            },
+        ),
+        (
+            "Dates",
+            {
+                "fields": (
+                    "created_date",
+                    "updated_date",
+                )
+            },
+        ),
     )
 
 
@@ -80,12 +86,8 @@ class CategoryAdmin(admin.ModelAdmin):
     autocomplete_fields = ("parent",)
 
     fieldsets = (
-        ("Category info", {
-            "fields": ("name", "parent", "full_name")
-        }),
-        ("System fields", {
-            "fields": ("slug", "level", "path")
-        }),
+        ("Category info", {"fields": ("name", "parent", "full_name")}),
+        ("System fields", {"fields": ("slug", "level", "path")}),
     )
 
     @admin.display(description="Posts count")
@@ -94,9 +96,12 @@ class CategoryAdmin(admin.ModelAdmin):
 
     @admin.display(description="Posts")
     def view_posts(self, obj):
-        url = reverse("admin:content_post_changelist") + f"?category__id__exact={obj.id}"
+        url = (
+            reverse("admin:content_post_changelist") + f"?category__id__exact={obj.id}"
+        )
         return format_html('<a href="{}">View posts</a>', url)
-    
+
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
@@ -110,12 +115,8 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ("name",)
 
     fieldsets = (
-        ("Tag info", {
-            "fields": ("name",)
-        }),
-        ("System fields", {
-            "fields": ("slug",)
-        }),
+        ("Tag info", {"fields": ("name",)}),
+        ("System fields", {"fields": ("slug",)}),
     )
 
     @admin.display(description="Posts count")
