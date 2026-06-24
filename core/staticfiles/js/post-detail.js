@@ -90,18 +90,19 @@ backdrop?.addEventListener("click", (e) => {
 });
 
   // ── File type helpers ─────────────────────────────────────
-  const FILE_TYPE_MAP = { 1: "pdf", 2: "word", 3: "pptx", 4: "image", 5: "excel" };
+  const FILE_TYPE_MAP = { 1: "pdf", 2: "word", 3: "pptx", 4: "image", 5: "excel", 7: "archive" };
   const FILE_ICONS = {
     pdf:   { cls: "icon-pdf",   icon: "📄" },
     word:  { cls: "icon-word",  icon: "📝" },
     pptx:  { cls: "icon-pptx",  icon: "📊" },
     image: { cls: "icon-image", icon: "🖼️" },
     excel: { cls: "icon-excel", icon: "📈" },
+    archive: { cls: "icon-archive", icon: "📦" },
     other: { cls: "icon-other", icon: "📎" },
   };
 
   function fileTypeLabel(typeInt) {
-    const map = { 1: "PDF", 2: "Word", 3: "PowerPoint", 4: "Image", 5: "Excel", 6: "File" };
+    const map = { 1: "PDF", 2: "Word", 3: "PowerPoint", 4: "Image", 5: "Excel", 6: "File", 7: "Archive" };
     return map[typeInt] || "File";
   }
 

@@ -108,16 +108,16 @@ urlpatterns = [
         views.CommentRejectView.as_view(),
         name="admin-comment-reject",
     ),
-    # Positions
-    path(
-        "positions/", views.PositionListCreateView.as_view(), name="admin-position-list"
-    ),
-    path(
-        "positions/<int:pk>/",
-        views.PositionDetailView.as_view(),
-        name="admin-position-detail",
-    ),
-    # Users
-    path("users/", views.UserListView.as_view(), name="admin-user-list"),
-    path("users/<int:pk>/", views.UserDetailView.as_view(), name="admin-user-detail"),
+    # # Positions
+    # path(
+    #     "positions/", views.PositionListCreateView.as_view(), name="admin-position-list"
+    # ),
+    # path(
+    #     "positions/<int:pk>/",
+    #     views.PositionDetailView.as_view(),
+    #     name="admin-position-detail",
+    # ),
+    # # Users
+    # path("users/", views.UserListView.as_view(), name="admin-user-list"),
+    # path("users/<int:pk>/", views.UserDetailView.as_view(), name="admin-user-detail"),
 ]

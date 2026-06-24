@@ -18,6 +18,7 @@ class PostFile(models.Model):
         IMAGE = 4, _("image")
         EXCEL = 5, _("excel")
         UNDEFINED = 6, _("undefined")
+        ARCHIVE = 7, _("archive")
 
     file = models.FileField(upload_to=post_file_upload_path, blank=True, null=True)
     post = models.ForeignKey(
@@ -51,6 +52,11 @@ class PostFile(models.Model):
             ".xls": self.FileType.EXCEL,
             ".xlsx": self.FileType.EXCEL,
             ".csv": self.FileType.EXCEL,
+            ".zip": self.FileType.ARCHIVE,
+            ".rar": self.FileType.ARCHIVE,
+            ".7z": self.FileType.ARCHIVE,
+            ".tar": self.FileType.ARCHIVE,
+            ".gz": self.FileType.ARCHIVE,
         }
 
         return extension_map.get(ext, self.FileType.UNDEFINED)

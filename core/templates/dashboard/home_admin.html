@@ -122,25 +122,6 @@
           </a>
         </div>
 
-        <!-- People -->
-        <div class="nav-group">
-          <span class="nav-group-label">People</span>
-          <a href="#" class="nav-link" data-section="users">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            Users
-            <span class="nav-count" id="nav-users-count">—</span>
-          </a>
-          <a href="#" class="nav-link" data-section="positions">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-              <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
-            </svg>
-            Positions
-          </a>
-        </div>
 
         <!-- Site -->
         <div class="nav-group">
@@ -491,37 +472,7 @@
         </div>
       </section>
 
-      <!-- ── SECTION: Users ── -->
-      <section class="section" id="section-users">
-        <div class="section-toolbar">
-          <div class="toolbar-left">
-            <input type="text" class="search-input" id="users-search" placeholder="Search users…" />
-            <select class="filter-select" id="users-type-filter">
-              <option value="">All types</option><option value="1">Customer</option><option value="2">Admin</option>
-            </select>
-          </div>
-        </div>
-        <div class="glass table-wrap">
-          <table class="data-table">
-            <thead><tr><th>Username</th><th>Display Name</th><th>Position</th><th>Type</th><th>Staff</th><th>Active</th><th>Joined</th><th>Actions</th></tr></thead>
-            <tbody id="users-tbody"><tr><td colspan="8" class="loading-row"><div class="spinner"></div></td></tr></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ── SECTION: Positions ── -->
-      <section class="section" id="section-positions">
-        <div class="section-toolbar">
-          <h2 class="section-sub">Staff Positions</h2>
-          <button class="btn btn-primary" id="new-pos-btn">+ New Position</button>
-        </div>
-        <div class="glass table-wrap">
-          <table class="data-table">
-            <thead><tr><th>Position</th><th>Description</th><th>Members</th><th>Actions</th></tr></thead>
-            <tbody id="positions-tbody"><tr><td colspan="4" class="loading-row"><div class="spinner"></div></td></tr></tbody>
-          </table>
-        </div>
-      </section>
+     
 
     </main>
   </div>
