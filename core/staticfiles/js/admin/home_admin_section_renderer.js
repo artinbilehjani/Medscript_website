@@ -1,40 +1,9 @@
-/* ═══════════════════════════════════════════════
-   home_admin_section_editor.js
-   Inline section editor panel for the Home Page
-   section in the admin dashboard.
-
-   LOAD AFTER: home_admin.js, admin_home_page.js
-
-   FIXES APPLIED THIS REVISION:
-   1. section_type is now a real, editable <select> —
-      was a read-only <div class="sec-type-badge">
-      with no input element at all.
-   2. New "+ New Section" button + create flow — the
-      editor only ever supported editing an existing
-      row before (save handler always PATCHed, never
-      POSTed). Requires the matching backend POST
-      support — see dashboard_views_section_patch.py.
-   3. Emoji picker click handler fixed — it was reading
-      e.target.textContent on the picker's OUTER div,
-      which returns ALL emoji concatenated as one string
-      (since the emoji were bare text nodes, not
-      individually wrapped), so the length check always
-      failed and nothing happened. Each emoji is now
-      wrapped in its own <button>, so e.target reliably
-      refers to the single emoji clicked. Also removed
-      maxlength from the text input — it counts UTF-16
-      code units, not visual characters, so several
-      multi-codepoint emoji were getting silently
-      truncated/corrupted on paste.
-   4. Added a text-direction control (LTR / RTL / Auto)
-      for the content editor, for Persian/Arabic content.
-═══════════════════════════════════════════════ */
 (function () {
   'use strict';
-
+ 
   const BASE = '/dashboard/api/v1';
   const CSRF = (document.cookie.match(/csrftoken=([^;]*)/) || [])[1] || '';
-
+ 
   async function api(method, path, body = null, isFormData = false) {
     const opts = { method, headers: { 'X-CSRFToken': CSRF }, credentials: 'same-origin' };
     if (body) {
@@ -55,7 +24,7 @@
     if (res.status === 204) return null;
     return res.json();
   }
-
+ 
   function toast(msg, type = 'success') {
     const el = document.getElementById('toast');
     if (!el) return;
@@ -64,7 +33,7 @@
     clearTimeout(el._t);
     el._t = setTimeout(() => { el.className = 'toast'; }, 3200);
   }
-
+ 
   const SECTION_TYPE_OPTIONS = [
     { value: 'hero',           label: 'Hero Banner' },
     { value: 'features',       label: 'Features (zigzag row)' },
@@ -73,13 +42,13 @@
     { value: 'cta',            label: 'Call to Action' },
     { value: 'contact',        label: 'Contact' },
   ];
-
+ 
   /* ════════════════════════════════════════════
      BUILD THE EDITOR PANEL (injected once)
   ════════════════════════════════════════════ */
   function buildEditorPanel() {
     if (document.getElementById('sec-editor-panel')) return;
-
+ 
     const panel = document.createElement('div');
     panel.id = 'sec-editor-panel';
     panel.className = 'sec-editor-panel';
@@ -90,9 +59,9 @@
           <h3 class="sec-editor-title" id="sec-editor-title">Edit Section</h3>
           <button class="modal-close" id="sec-editor-close">✕</button>
         </div>
-
+ 
         <div class="sec-editor-body">
-
+ 
           <!-- Section type — FIX 1: real <select>, not a read-only div -->
           <div class="sec-field-group">
             <label class="sec-field-label">Section Type</label>
@@ -100,7 +69,7 @@
               ${SECTION_TYPE_OPTIONS.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
             </select>
           </div>
-
+ 
           <!-- Icon -->
           <div class="sec-field-group">
             <label class="sec-field-label">Icon (emoji)</label>
@@ -114,21 +83,21 @@
                 .map(e => `<button type="button" class="sec-emoji-btn">${e}</button>`).join('')}
             </div>
           </div>
-
+ 
           <!-- Title -->
           <div class="sec-field-group">
             <label class="sec-field-label">Title</label>
             <input type="text" class="field-input" id="sec-title-inp"
               placeholder="Section title…" maxlength="200" />
           </div>
-
+ 
           <!-- Subtitle -->
           <div class="sec-field-group">
             <label class="sec-field-label">Subtitle</label>
             <input type="text" class="field-input" id="sec-subtitle-inp"
               placeholder="Short subtitle or tagline…" maxlength="500" />
           </div>
-
+ 
           <!-- Rich content -->
           <div class="sec-field-group">
             <label class="sec-field-label">Content</label>
@@ -157,9 +126,9 @@
               <button type="button" class="sec-rt-btn" data-cmd="removeFormat" title="Clear formatting">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
               </button>
-
+ 
               <div class="sec-rt-sep"></div>
-
+ 
               <!-- FIX 4: text direction controls (Persian/Arabic support) -->
               <button type="button" class="sec-rt-btn" data-dir="ltr" title="Left to right">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 5h18M3 12h12M3 19h15"/><polyline points="17 16 21 12 17 8"/></svg>
@@ -177,7 +146,7 @@
             <div class="sec-rt-editor" id="sec-content-editor" contenteditable="true"
               data-placeholder="Section content (optional)…"></div>
           </div>
-
+ 
           <!-- Button -->
           <div class="sec-field-group">
             <label class="sec-field-label">Button</label>
@@ -188,7 +157,7 @@
                 placeholder="URL or /path" style="flex:2;min-width:180px" />
             </div>
           </div>
-
+ 
           <!-- Active toggle (visible for new sections too) -->
           <div class="sec-field-group" style="flex-direction:row;align-items:center;justify-content:space-between">
             <label class="sec-field-label" style="margin:0">Active</label>
@@ -197,34 +166,34 @@
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
           </div>
-
+ 
           <!-- Actions -->
           <div class="sec-editor-actions">
             <button class="btn btn-ghost" id="sec-editor-cancel">Cancel</button>
             <button class="btn btn-primary" id="sec-editor-save">Save Section</button>
           </div>
-
+ 
         </div>
       </div>
     `;
-
+ 
     document.body.appendChild(panel);
     wireEditorPanel(panel);
   }
-
+ 
   /* ════════════════════════════════════════════
      WIRE INTERACTIONS
   ════════════════════════════════════════════ */
   let _currentSectionId = null; // null = creating a new section
-
+ 
   function wireEditorPanel(panel) {
     const editor = panel.querySelector('#sec-content-editor');
-
+ 
     /* Close */
     panel.querySelector('#sec-editor-close')?.addEventListener('click', closePanel);
     panel.querySelector('#sec-editor-cancel')?.addEventListener('click', closePanel);
     panel.addEventListener('click', e => { if (e.target === panel) closePanel(); });
-
+ 
     /* Toolbar: formatting commands */
     panel.querySelectorAll('.sec-rt-btn[data-cmd]').forEach(btn => {
       btn.addEventListener('mousedown', e => {
@@ -234,7 +203,7 @@
         updateToolbarState(panel);
       });
     });
-
+ 
     /* FIX 4: direction buttons — set dir on the editor itself (affects
        the whole block's reading direction, which is what's needed for
        Persian/Arabic paragraphs) rather than execCommand, which only
@@ -247,14 +216,14 @@
         updateToolbarState(panel);
       });
     });
-
+ 
     /* Alignment select */
     panel.querySelector('#sec-align-select')?.addEventListener('change', function () {
       if (this.value) document.execCommand(this.value, false, null);
       editor?.focus();
       this.value = '';
     });
-
+ 
     /* Link button */
     panel.querySelector('#sec-rt-link')?.addEventListener('click', () => {
       const sel = window.getSelection();
@@ -267,16 +236,16 @@
         if (a.href.startsWith('http')) a.target = '_blank';
       });
     });
-
+ 
     editor?.addEventListener('keyup',   () => updateToolbarState(panel));
     editor?.addEventListener('mouseup', () => updateToolbarState(panel));
-
+ 
     /* Icon live preview from typing/pasting */
     panel.querySelector('#sec-icon-inp')?.addEventListener('input', function () {
       const p = panel.querySelector('#sec-icon-preview');
       if (p) p.textContent = this.value || '🏠';
     });
-
+ 
     /* FIX 3: emoji picker — each emoji is now its own <button>, so
        e.currentTarget reliably refers to exactly the one clicked. */
     panel.querySelectorAll('.sec-emoji-btn').forEach(btn => {
@@ -288,7 +257,7 @@
         }
       });
     });
-
+ 
     /* Save (create or update depending on _currentSectionId) */
     panel.querySelector('#sec-editor-save')?.addEventListener('click', async () => {
       const saveBtn = panel.querySelector('#sec-editor-save');
@@ -305,7 +274,7 @@
         const content = rawHtml.trim()
           ? `<div dir="${dir}">${rawHtml}</div>`
           : '';
-
+ 
         const payload = {
           section_type: panel.querySelector('#sec-type-select')?.value || 'about',
           title:        panel.querySelector('#sec-title-inp')?.value    || '',
@@ -336,7 +305,7 @@
       }
     });
   }
-
+ 
   function updateToolbarState(panel) {
     panel.querySelectorAll('.sec-rt-btn[data-cmd]').forEach(btn => {
       try { btn.classList.toggle('active', document.queryCommandState(btn.dataset.cmd)); }
@@ -347,7 +316,7 @@
       btn.classList.toggle('active', editor?.getAttribute('dir') === btn.dataset.dir);
     });
   }
-
+ 
   function closePanel() {
     const panel = document.getElementById('sec-editor-panel');
     if (panel) {
@@ -356,7 +325,7 @@
     }
     _currentSectionId = null;
   }
-
+ 
   /* ════════════════════════════════════════════
      OPEN EDITOR — for an existing section, or a
      brand-new one when sectionId is null.
@@ -365,13 +334,13 @@
     buildEditorPanel();
     const panel = document.getElementById('sec-editor-panel');
     if (!panel) return;
-
+ 
     _currentSectionId = sectionId || null;
     const isNew = !sectionId;
-
+ 
     panel.querySelector('#sec-editor-title').textContent =
       isNew ? 'New Section' : 'Edit Section';
-
+ 
     panel.querySelector('#sec-type-select').value = sectionData?.section_type || 'about';
     panel.querySelector('#sec-icon-inp').value     = sectionData?.icon         || '';
     panel.querySelector('#sec-icon-preview').textContent = sectionData?.icon  || '🏠';
@@ -380,7 +349,7 @@
     panel.querySelector('#sec-btn-label-inp').value = sectionData?.button_label || '';
     panel.querySelector('#sec-btn-url-inp').value   = sectionData?.button_url   || '';
     panel.querySelector('#sec-active-inp').checked  = isNew ? true : !!sectionData?.is_active;
-
+ 
     const editor = panel.querySelector('#sec-content-editor');
     if (editor) {
       editor.innerHTML = sectionData?.content || '';
@@ -390,15 +359,15 @@
       const savedDir = editor.querySelector('[dir]')?.getAttribute('dir');
       editor.setAttribute('dir', savedDir || 'auto');
     }
-
+ 
     panel.hidden = false;
     requestAnimationFrame(() => panel.classList.add('open'));
     panel.querySelector('#sec-title-inp')?.focus();
   }
-
+ 
   /* Expose so renderHpSections / the new-section button can use it */
   window._openSectionEditor = openSectionEditor;
-
+ 
   /* ════════════════════════════════════════════
      "+ New Section" button — injected next to the
      Page Sections panel header, since none existed.
@@ -422,7 +391,7 @@
       btn.addEventListener('click', () => openSectionEditor(null, null));
       hpPanelHead.parentElement.appendChild(btn);
     }
-
+ 
     // Standalone "Homepage Sections" tab, if separately visited
     const secToolbar = document.querySelector('#section-sections .section-toolbar');
     if (secToolbar && !document.getElementById('sections-new-section-btn')) {
@@ -435,7 +404,7 @@
       secToolbar.appendChild(btn);
     }
   }
-
+ 
   // This script loads LAST (after home_admin.js, admin_post.js,
   // admin_home_page.js, ...), so by the time it runs, DOMContentLoaded
   // has almost always ALREADY fired — an event listener added after an
@@ -452,11 +421,11 @@
     ?.addEventListener('click', () => setTimeout(injectNewSectionButton, 50));
   document.querySelector('.nav-link[data-section="sections"]')
     ?.addEventListener('click', () => setTimeout(injectNewSectionButton, 50));
-
+ 
   /* ════════════════════════════════════════════
-     PATCH section row rendering to add edit buttons
-     (via MutationObserver, since the render functions
-     are private closures in other files)
+     PATCH section row rendering to add edit + delete
+     buttons (via MutationObserver, since the render
+     functions are private closures in other files)
   ════════════════════════════════════════════ */
   function wireEditButtonsFor(listElId) {
     const listEl = document.getElementById(listElId);
@@ -465,7 +434,10 @@
       listEl.querySelectorAll('.section-row').forEach(row => {
         if (row.dataset.editWired) return;
         row.dataset.editWired = '1';
-
+ 
+        const sectionId = parseInt(row.dataset.id);
+ 
+        // ── Edit button ──
         const editBtn = document.createElement('button');
         editBtn.className = 'action-btn sec-edit-btn';
         editBtn.title = 'Edit section';
@@ -474,8 +446,6 @@
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
         </svg>`;
-
-        const sectionId = parseInt(row.dataset.id);
         editBtn.addEventListener('click', async e => {
           e.stopPropagation();
           try {
@@ -483,17 +453,48 @@
             openSectionEditor(sectionId, data);
           } catch {}
         });
-
+ 
+        // ── Delete button ──
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'action-btn sec-delete-btn';
+        deleteBtn.title = 'Delete section';
+        deleteBtn.type = 'button';
+        deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>`;
+        deleteBtn.addEventListener('click', async e => {
+          e.stopPropagation();
+          if (!confirm('Delete this section? This cannot be undone.')) return;
+          deleteBtn.disabled = true;
+          try {
+            await api('DELETE', `/homepage-sections/${sectionId}/`);
+            row.remove();
+            toast('Section deleted');
+          } catch (err) {
+            toast(err.message || 'Delete failed', 'error');
+            deleteBtn.disabled = false;
+          }
+        });
+ 
+        // Insert both before the active toggle (if present)
         const toggle = row.querySelector('.toggle');
-        if (toggle) row.insertBefore(editBtn, toggle);
-        else row.appendChild(editBtn);
+        if (toggle) {
+          row.insertBefore(editBtn, toggle);
+          row.insertBefore(deleteBtn, toggle);
+        } else {
+          row.appendChild(editBtn);
+          row.appendChild(deleteBtn);
+        }
       });
     }).observe(listEl, { childList: true, subtree: false });
   }
-
+ 
   wireEditButtonsFor('hp-sections-list');
   wireEditButtonsFor('sections-list');
-
+ 
   /* ════════════════════════════════════════════
      CSS — injected into <head>
   ════════════════════════════════════════════ */
@@ -538,7 +539,7 @@
       .sec-editor-inner { max-width: 100%; height: 90vh; border-left: none; border-top: 1px solid var(--glass-bd); border-radius: 16px 16px 0 0; transform: translateY(100%); }
       .sec-editor-panel.open .sec-editor-inner { transform: translateY(0); }
     }
-
+ 
     .sec-editor-head {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 20px; border-bottom: 1px solid var(--glass-bd); flex-shrink: 0;
@@ -550,13 +551,13 @@
     }
     .sec-editor-body::-webkit-scrollbar { width: 4px; }
     .sec-editor-body::-webkit-scrollbar-thumb { background: var(--glass-bd); border-radius: 2px; }
-
+ 
     .sec-field-group { display: flex; flex-direction: column; gap: 6px; }
     .sec-field-label {
       font-size: 10px; font-weight: 700; text-transform: uppercase;
       letter-spacing: .5px; color: var(--text-3);
     }
-
+ 
     /* Icon row */
     .sec-icon-row { display: flex; align-items: center; gap: 10px; }
     .sec-icon-preview {
@@ -565,7 +566,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 24px; flex-shrink: 0;
     }
-
+ 
     /* Emoji picker — each emoji is its own clickable button now */
     .sec-emoji-picker {
       display: flex; flex-wrap: wrap; gap: 4px;
@@ -588,7 +589,7 @@
       transform: scale(1.12);
     }
     .sec-emoji-btn:active { transform: scale(0.95); }
-
+ 
     /* Rich text toolbar */
     .sec-rt-toolbar {
       display: flex; align-items: center; gap: 2px;
@@ -612,7 +613,7 @@
       background: transparent; border: 1px solid var(--glass-bd); border-radius: 5px;
       color: var(--text-2); font-size: 11px; padding: 3px 4px; outline: none; cursor: pointer;
     }
-
+ 
     /* Rich text editor */
     .sec-rt-editor {
       min-height: 120px;
@@ -636,17 +637,23 @@
     .sec-rt-editor ul, .sec-rt-editor ol { padding-left: 1.4em; }
     .sec-rt-editor[dir="rtl"] ul,
     .sec-rt-editor[dir="rtl"] ol { padding-left: 0; padding-right: 1.4em; }
-
+ 
     .sec-editor-actions {
       display: flex; gap: 10px; justify-content: flex-end;
       padding-top: 4px; border-top: 1px solid var(--glass-bd); margin-top: 4px;
     }
-
+ 
     /* Edit button on section rows */
     .sec-edit-btn { flex-shrink: 0; }
     .sec-edit-btn:hover { border-color: var(--teal) !important; }
     .sec-edit-btn:hover svg { stroke: var(--teal) !important; }
+ 
+    /* Delete button on section rows */
+    .sec-delete-btn { flex-shrink: 0; }
+    .sec-delete-btn:hover { border-color: #f87171 !important; }
+    .sec-delete-btn:hover svg { stroke: #f87171 !important; }
+    .sec-delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   `;
   document.head.appendChild(style);
-
+ 
 })();

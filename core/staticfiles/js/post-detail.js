@@ -214,8 +214,8 @@ backdrop?.addEventListener("click", (e) => {
       const label   = fileTypeLabel(f.file_type);
       const title   = f.title || `Session ${idx + 1}`;
 
-      const openBtn = f.file_url
-        ? `<a class="pd-file-btn" href="${f.file_url}" target="_blank" rel="noopener" title="Open file">
+      const openBtn = (f.open_url || f.file_url)
+        ? `<a class="pd-file-btn" href="${f.open_url || f.file_url}" target="_blank" rel="noopener" title="Open file">
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
            </a>`
         : "";

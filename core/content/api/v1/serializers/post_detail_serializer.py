@@ -11,6 +11,7 @@ class PostFileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
     download_url = serializers.SerializerMethodField()
     extension    = serializers.SerializerMethodField()
+    open_url = serializers.SerializerMethodField()
 
     class Meta:
         model = PostFile
@@ -22,6 +23,7 @@ class PostFileSerializer(serializers.ModelSerializer):
             "is_downloadable",
             "file_url",
             "download_url",   # None when is_downloadable=False
+            "open_url",
             "extension",
             "created_date",
         ]
@@ -50,6 +52,13 @@ class PostFileSerializer(serializers.ModelSerializer):
         # FIXED: was reverse("post-file-download", ...) — needs the
         # mediafiles_api namespace prefix since urls.py sets app_name.
         url = reverse("mediafiles_api:post-file-download", kwargs={"pk": obj.pk})
+        return request.build_absolute_uri(url) if request else url
+    
+    def get_open_url(self, obj):
+        if not obj.file:
+            return None
+        request = self.context.get("request")
+        url = reverse("mediafiles_api:post-file-open", kwargs={"pk": obj.pk})
         return request.build_absolute_uri(url) if request else url
  
     def get_extension(self, obj):

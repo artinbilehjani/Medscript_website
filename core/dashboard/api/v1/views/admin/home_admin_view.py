@@ -105,6 +105,7 @@ class HomepageSectionListView(APIView):
     def get(self, request):
         qs = HomepageSection.objects.order_by("order")
         return Response(HomepageSectionAdminSerializer(qs, many=True).data)
+        
 
     def post(self, request):
         data = request.data.copy()
@@ -135,6 +136,11 @@ class HomepageSectionDetailView(APIView):
     def get(self, request, pk):
         obj = get_object_or_404(HomepageSection, pk=pk)
         return Response(HomepageSectionAdminSerializer(obj).data)
+    
+    def delete(self, request, pk):
+        obj = get_object_or_404(HomepageSection, pk=pk)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk):
         obj = get_object_or_404(HomepageSection, pk=pk)

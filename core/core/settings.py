@@ -155,7 +155,7 @@ if DEBUG:
 else:
     # Prod: collectstatic writes into STATIC_ROOT (/app/staticfiles),
     # nginx serves from there. STATICFILES_DIRS are the source folders.
-    STATIC_ROOT = "/app/staticfiles"
+    STATIC_ROOT = "/app/collected_static"
     STATICFILES_DIRS = [
         d for d in [BASE_DIR / "staticfiles"] if d.exists()
     ]
