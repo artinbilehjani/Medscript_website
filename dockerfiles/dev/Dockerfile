@@ -15,7 +15,7 @@ LABEL maintainer="artinbilehjani@gmail.com"
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PIP_INDEX_URL=https://mirror-pypi.runflare.com/simple
+# ENV PIP_INDEX_URL=https://mirror-pypi.runflare.com/simple
 
 WORKDIR /app
 
